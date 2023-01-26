@@ -30,9 +30,9 @@
 			<app:item name="menu.main.insert.page" caption="menu.main.insert.page" tooltip="menu.main.insert.page.tt" action="insertPage"/>
 			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
 			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
-			<app:separator/>
 		</app:submenu>
 		<app:submenu name="menu.main.tools" caption="menu.main.tools" tooltip="menu.main.tools.tt">
+			<app:item name="menu.main.tools.validate" caption="menu.main.tools.validate" tooltip="menu.main.tools.validate.tt" action="validateProject"/>
 			<app:item name="menu.main.tools.preview" caption="menu.main.tools.preview" tooltip="menu.main.tools.preview.tt" action="previewProject"/>
 			<app:item name="menu.main.tools.buildIndex" caption="menu.main.tools.buildIndex" tooltip="menu.main.tools.buildIndex.tt" action="buildIndex"/>
 			<app:separator/>
@@ -40,7 +40,7 @@
 			<app:builtinSubmenu name="builtin.languages" caption="menu.main.tools.languages" tooltip="menu.main.tools.languages.tt"/>
 		</app:submenu>
 		<app:submenu name="menu.main.help" caption="menu.main.help" tooltip="menu.main.help.tt">
-			<app:item name="menu.main.help.manual" caption="menu.main.help.manual" tooltip="menu.main.help.about.tt" action="manual"/>
+			<app:item name="menu.main.help.manual" caption="menu.main.help.manual" tooltip="menu.main.help.manual.tt" action="manual"/>
 			<app:separator/>
 			<app:item name="menu.main.help.about" caption="menu.main.help.about" tooltip="menu.main.help.about.tt" action="about"/>
 		</app:submenu>

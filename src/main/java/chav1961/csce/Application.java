@@ -1,5 +1,6 @@
 package chav1961.csce;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +12,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.border.EtchedBorder;
 
 import chav1961.csce.project.ProjectContainer;
 import chav1961.purelib.basic.ArgParser;
@@ -106,7 +109,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			}
 		});
 
+		state.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		setJMenuBar(menuBar);		
+        getContentPane().add(state, BorderLayout.SOUTH);
+        
+        SwingUtils.findComponentByName(menuBar, "menu.main.file.lru").setEnabled(false);
         SwingUtils.assignActionListeners(menuBar, this);
 		SwingUtils.assignExitMethod4MainWindow(this,()->exit());
 		
@@ -126,7 +133,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 	@Override
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
-		// TODO Auto-generated method stub
+		SwingUtils.refreshLocale(menuBar, oldLocale, newLocale);
 		fillLocalizationStrings();
 	}
 
