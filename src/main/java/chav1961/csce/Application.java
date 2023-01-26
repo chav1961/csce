@@ -218,6 +218,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	@OnAction("action:/insertUri")
 	public void insertUri() {
 	}
+
+	@OnAction("action:/validateProject")
+	public void validateProject() {
+	}
 	
 	@OnAction("action:/previewProject")
 	public void previewProject() {
