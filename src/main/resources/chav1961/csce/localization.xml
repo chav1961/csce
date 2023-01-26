@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localization xmlns="http://www.i18n.purelib.chav1961.ru/">
+	<lang name="en">
+<!-- Localization for application --> 
+		<key name="chav1961.qc.standalone.Application.frame.title">(c) 2023, L.E.Smushkevich, A.V.Chernomyrdin. Quantum scheme editor V.R.=1.00</key>		
+		<key name="chav1961.qc.standalone.Application.help.title">About...</key>
+		<key name="chav1961.qc.standalone.Application.help.content">uri(about.cre)</key>
+		<key name="chav1961.qc.standalone.Application.message.ready">Ready...</key>
+		<key name="chav1961.qc.standalone.Application.message.scheme.not.exists">Scheme file [%1$s] is not exists. File name fill removed from recently used files list</key>
+		<key name="chav1961.qc.standalone.Application.message.scheme.already.exists">Scheme file [%1$s] already exists in the directory [%2$s]. Type another name</key>
+		<key name="chav1961.qc.standalone.Application.message.rename.suffix.missing">Scheme file [%1$s] must have [%2$s] extension.</key>		
+		<key name="chav1961.qc.standalone.Application.message.confirm.delete">Scheme file [%1$s] will be removed. Are you sure to delete it?</key>
+		<key name="chav1961.qc.standalone.Application.message.confirm.delete.title">Confirm deletion</key>
+		<key name="chav1961.qc.standalone.Application.message.not.implemented.yet">NOT IMPLEMENTED YET!</key>
+
+<!-- Localization for application menu --> 
+		<key name="menu.main.file">О программе...</key>
+		<key name="menu.main.file.tt">О программе...</key>
+		<key name="menu.main.file.new">О программе...</key>
+		<key name="menu.main.file.new.tt">О программе...</key>
+		<key name="menu.main.file.open">О программе...</key>
+		<key name="menu.main.file.open.tt">О программе...</key>
+		<key name="menu.main.file.lru">О программе...</key>
+		<key name="menu.main.file.lru.tt">О программе...</key>
+		<key name="menu.main.file.save">О программе...</key>
+		<key name="menu.main.file.save.tt">О программе...</key>
+		<key name="menu.main.file.saveAs">О программе...</key>
+		<key name="menu.main.file.saveAs.tt">О программе...</key>
+		<key name="menu.main.file.export">О программе...</key>
+		<key name="menu.main.file.export.tt">О программе...</key>
+		<key name="menu.main.file.exit">О программе...</key>
+		<key name="menu.main.file.exit.tt">О программе...</key>
+		<key name="menu.main.edit">О программе...</key>
+		<key name="menu.main.edit.tt">О программе...</key>
+		<key name="menu.main.edit.undo">О программе...</key>
+		<key name="menu.main.edit.undo.tt">О программе...</key>
+		<key name="menu.main.edit.redo">О программе...</key>
+		<key name="menu.main.edit.redo.tt">О программе...</key>
+		<key name="menu.main.edit.find">О программе...</key>
+		<key name="menu.main.edit.find.tt">О программе...</key>
+		<key name="menu.main.edit.findAndGo">О программе...</key>
+		<key name="menu.main.edit.findAndGo.tt">О программе...</key>
+		<key name="menu.main.edit.properties">О программе...</key>
+		<key name="menu.main.edit.properties.tt">О программе...</key>
+		<key name="menu.main.insert">О программе...</key>
+		<key name="menu.main.insert.tt">О программе...</key>
+		<key name="menu.main.insert.part">О программе...</key>
+		<key name="menu.main.insert.part.tt">О программе...</key>
+		<key name="menu.main.insert.page">О программе...</key>
+		<key name="menu.main.insert.page.tt">О программе...</key>
+		<key name="menu.main.insert.image">О программе...</key>
+		<key name="menu.main.insert.image.tt">О программе...</key>
+		<key name="menu.main.insert.uri">О программе...</key>
+		<key name="menu.main.insert.uri.tt">О программе...</key>
+		<key name="menu.main.tools">О программе...</key>
+		<key name="menu.main.tools.tt">О программе...</key>
+		<key name="menu.main.tools.preview">О программе...</key>
+		<key name="menu.main.tools.preview.tt">О программе...</key>
+		<key name="menu.main.tools.buildIndex">О программе...</key>
+		<key name="menu.main.tools.buildIndex.tt">О программе...</key>
+		<key name="menu.main.tools.settings">О программе...</key>
+		<key name="menu.main.tools.settings.tt">О программе...</key>
+		<key name="menu.main.tools.languages">О программе...</key>
+		<key name="menu.main.tools.languages.tt">О программе...</key>
+		<key name="menu.main.help">О программе...</key>
+		<key name="menu.main.help.tt">О программе...</key>
+		<key name="menu.main.help.manual">О программе...</key>
+		<key name="menu.main.help.about.tt">О программе...</key>
+		<key name="menu.main.help.about">О программе...</key>
+		<key name="menu.main.help.about.tt">О программе...</key>
+ 
+ 	</lang>
+	<lang name="ru">
+<!-- Локализация приложения --> 
+		<key name="chav1961.qc.standalone.Application.frame.title">(c) 2023, Л.Е.Смушкевич, А.В.Черномырдин. Редактор квантовых схем V.R.=1.00</key>		
+		<key name="chav1961.qc.standalone.Application.help.title">О программе...</key>
+		<key name="chav1961.qc.standalone.Application.help.content">uri(about.cre)</key>
+		<key name="chav1961.qc.standalone.Application.message.ready">Готово...</key>
+		<key name="chav1961.qc.standalone.Application.message.scheme.not.exists">Файл схемы [%1$s] не существует. Его имя будет удалено из списка последних файлов</key>
+		<key name="chav1961.qc.standalone.Application.message.scheme.already.exists">Файл схемы [%1$s] уже существует в папке [%2$s]. Задайте другое имя</key>
+		<key name="chav1961.qc.standalone.Application.message.rename.suffix.missing">Файл схемы [%1$s] должен иметь расширение [%2$s]</key>		
+		<key name="chav1961.qc.standalone.Application.message.confirm.delete">Файл схемы [%1$s] будкт удален. Вы действительно хотите его удалить?</key>
+		<key name="chav1961.qc.standalone.Application.message.confirm.delete.title">Подтвердите удаление</key>
+		<key name="chav1961.qc.standalone.Application.message.not.implemented.yet">ПОКА НЕ РЕАЛИЗОВАНО!</key>
+
+<!-- Локализация меню приложения -->
+		<key name="menu.main.file">О программе...</key>
+		<key name="menu.main.file.tt">О программе...</key>
+		<key name="menu.main.file.new">О программе...</key>
+		<key name="menu.main.file.new.tt">О программе...</key>
+		<key name="menu.main.file.open">О программе...</key>
+		<key name="menu.main.file.open.tt">О программе...</key>
+		<key name="menu.main.file.lru">О программе...</key>
+		<key name="menu.main.file.lru.tt">О программе...</key>
+		<key name="menu.main.file.save">О программе...</key>
+		<key name="menu.main.file.save.tt">О программе...</key>
+		<key name="menu.main.file.saveAs">О программе...</key>
+		<key name="menu.main.file.saveAs.tt">О программе...</key>
+		<key name="menu.main.file.export">О программе...</key>
+		<key name="menu.main.file.export.tt">О программе...</key>
+		<key name="menu.main.file.exit">О программе...</key>
+		<key name="menu.main.file.exit.tt">О программе...</key>
+		<key name="menu.main.edit">О программе...</key>
+		<key name="menu.main.edit.tt">О программе...</key>
+		<key name="menu.main.edit.undo">О программе...</key>
+		<key name="menu.main.edit.undo.tt">О программе...</key>
+		<key name="menu.main.edit.redo">О программе...</key>
+		<key name="menu.main.edit.redo.tt">О программе...</key>
+		<key name="menu.main.edit.find">О программе...</key>
+		<key name="menu.main.edit.find.tt">О программе...</key>
+		<key name="menu.main.edit.findAndGo">О программе...</key>
+		<key name="menu.main.edit.findAndGo.tt">О программе...</key>
+		<key name="menu.main.edit.properties">О программе...</key>
+		<key name="menu.main.edit.properties.tt">О программе...</key>
+		<key name="menu.main.insert">О программе...</key>
+		<key name="menu.main.insert.tt">О программе...</key>
+		<key name="menu.main.insert.part">О программе...</key>
+		<key name="menu.main.insert.part.tt">О программе...</key>
+		<key name="menu.main.insert.page">О программе...</key>
+		<key name="menu.main.insert.page.tt">О программе...</key>
+		<key name="menu.main.insert.image">О программе...</key>
+		<key name="menu.main.insert.image.tt">О программе...</key>
+		<key name="menu.main.insert.uri">О программе...</key>
+		<key name="menu.main.insert.uri.tt">О программе...</key>
+		<key name="menu.main.tools">О программе...</key>
+		<key name="menu.main.tools.tt">О программе...</key>
+		<key name="menu.main.tools.preview">О программе...</key>
+		<key name="menu.main.tools.preview.tt">О программе...</key>
+		<key name="menu.main.tools.buildIndex">О программе...</key>
+		<key name="menu.main.tools.buildIndex.tt">О программе...</key>
+		<key name="menu.main.tools.settings">О программе...</key>
+		<key name="menu.main.tools.settings.tt">О программе...</key>
+		<key name="menu.main.tools.languages">О программе...</key>
+		<key name="menu.main.tools.languages.tt">О программе...</key>
+		<key name="menu.main.help">О программе...</key>
+		<key name="menu.main.help.tt">О программе...</key>
+		<key name="menu.main.help.manual">О программе...</key>
+		<key name="menu.main.help.about.tt">О программе...</key>
+		<key name="menu.main.help.about">О программе...</key>
+		<key name="menu.main.help.about.tt">О программе...</key>
+ 
+	</lang>	
+</localization>

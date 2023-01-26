@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app:root xmlns:app="http://ui.purelib.chav1961/">
+	<app:i18n location="i18n:xml:root://chav1961.csce.Application/chav1961/csce/localization.xml"/>
+ 	<app:menu id="mainmenu">
+		<app:submenu name="menu.main.file" caption="menu.main.file" tooltip="menu.main.file.tt">
+			<app:item name="menu.main.file.new" caption="menu.main.file.new" tooltip="menu.main.file.new.tt" action="newProject"/>
+			<app:item name="menu.main.file.open" caption="menu.main.file.open" tooltip="menu.main.file.open.tt" action="openProject"/>
+			<app:submenu name="menu.main.file.lru" caption="menu.main.file.lru" tooltip="menu.main.file.lru.tt">
+				<app:separator/>
+			</app:submenu>
+			<app:separator/>
+			<app:item name="menu.main.file.save" caption="menu.main.file.save" tooltip="menu.main.file.save.tt" action="saveProject"/>
+			<app:item name="menu.main.file.saveAs" caption="menu.main.file.saveAs" tooltip="menu.main.file.saveAs.tt" action="saveProjectAs"/>
+			<app:item name="menu.main.file.export" caption="menu.main.file.export" tooltip="menu.main.file.export.tt" action="exportProject"/>
+			<app:separator/>
+			<app:item name="menu.main.file.exit" caption="menu.main.file.exit" tooltip="menu.main.file.exit.tt" action="exit"/>
+		</app:submenu>
+		<app:submenu name="menu.main.edit" caption="menu.main.edit" tooltip="menu.main.edit.tt">
+			<app:item name="menu.main.edit.undo" caption="menu.main.edit.undo" tooltip="menu.main.edit.undo.tt" action="undo"/>
+			<app:item name="menu.main.edit.redo" caption="menu.main.edit.redo" tooltip="menu.main.edit.redo.tt" action="redo"/>
+			<app:separator/>
+			<app:item name="menu.main.edit.find" caption="menu.main.edit.find" tooltip="menu.main.edit.find.tt" action="find"/>
+			<app:item name="menu.main.edit.findAndGo" caption="menu.main.edit.findAndGo" tooltip="menu.main.edit.findAndGo.tt" action="findAndGo"/>
+			<app:separator/>
+			<app:item name="menu.main.edit.properties" caption="menu.main.edit.properties" tooltip="menu.main.edit.properties.tt" action="properties"/>
+		</app:submenu>
+		<app:submenu name="menu.main.insert" caption="menu.main.insert" tooltip="menu.main.insert.tt">
+			<app:item name="menu.main.insert.part" caption="menu.main.insert.part" tooltip="menu.main.insert.part.tt" action="insertPart"/>
+			<app:separator/>
+			<app:item name="menu.main.insert.page" caption="menu.main.insert.page" tooltip="menu.main.insert.page.tt" action="insertPage"/>
+			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
+			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
+			<app:separator/>
+		</app:submenu>
+		<app:submenu name="menu.main.tools" caption="menu.main.tools" tooltip="menu.main.tools.tt">
+			<app:item name="menu.main.tools.preview" caption="menu.main.tools.preview" tooltip="menu.main.tools.preview.tt" action="previewProject"/>
+			<app:item name="menu.main.tools.buildIndex" caption="menu.main.tools.buildIndex" tooltip="menu.main.tools.buildIndex.tt" action="buildIndex"/>
+			<app:separator/>
+			<app:item name="menu.main.tools.settings" caption="menu.main.tools.settings" tooltip="menu.main.tools.settings.tt" action="settings"/>
+			<app:builtinSubmenu name="builtin.languages" caption="menu.main.tools.languages" tooltip="menu.main.tools.languages.tt"/>
+		</app:submenu>
+		<app:submenu name="menu.main.help" caption="menu.main.help" tooltip="menu.main.help.tt">
+			<app:item name="menu.main.help.manual" caption="menu.main.help.manual" tooltip="menu.main.help.about.tt" action="manual"/>
+			<app:separator/>
+			<app:item name="menu.main.help.about" caption="menu.main.help.about" tooltip="menu.main.help.about.tt" action="about"/>
+		</app:submenu>
+	</app:menu>
+	<app:keyset id="mainmenu.keyset">
+		<app:key code="N" ctrl="true" action="newProject"/>
+		<app:key code="O" ctrl="true" action="openProject"/>
+		<app:key code="S" ctrl="true" action="saveProject"/>
+		<app:key code="Q" ctrl="true" action="exit"/>
+		<app:key code="P" ctrl="true" action="previewProject"/>
+		<app:key code="F1" action="manual"/>
+	</app:keyset>
+</app:root>
