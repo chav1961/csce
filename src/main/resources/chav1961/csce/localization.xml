@@ -2,11 +2,11 @@
 <localization xmlns="http://www.i18n.purelib.chav1961.ru/">
 	<lang name="en">
 <!-- Localization for application --> 
-		<key name="chav1961.csce.Application.frame.title">(c) 2023, A.V.Chernomyrdin. Static content editor V.R.=1.00</key>		
+		<key name="chav1961.csce.Application.frame.title">(c) 2023, A.V.Chernomyrdin. Static content editor V.R.=1.00 %1$s%2$s</key>		
 		<key name="chav1961.csce.Application.help.title">About...</key>
 		<key name="chav1961.csce.Application.help.content">uri(about.cre)</key>
 		<key name="chav1961.csce.Application.message.ready">Ready...</key>
-		<key name="chav1961.csce.Application.message.scheme.not.exists">Scheme file [%1$s] is not exists. File name fill removed from recently used files list</key>
+		<key name="chav1961.csce.Application.message.file.not.exists">File [%1$s] is not exists. File name fill removed from recently used files list</key>
 		<key name="chav1961.csce.Application.message.scheme.already.exists">Scheme file [%1$s] already exists in the directory [%2$s]. Type another name</key>
 		<key name="chav1961.csce.Application.message.rename.suffix.missing">Scheme file [%1$s] must have [%2$s] extension.</key>		
 		<key name="chav1961.csce.Application.message.confirm.delete">Scheme file [%1$s] will be removed. Are you sure to delete it?</key>
@@ -74,11 +74,11 @@
  	</lang>
 	<lang name="ru">
 <!-- Локализация приложения --> 
-		<key name="chav1961.csce.Application.frame.title">(c) 2023, А.В.Черномырдин. Редактор статического контента V.R.=1.00</key>		
+		<key name="chav1961.csce.Application.frame.title">(c) 2023, А.В.Черномырдин. Редактор статического контента V.R.=1.00 %1$s%2$s</key>		
 		<key name="chav1961.csce.Application.help.title">О программе...</key>
 		<key name="chav1961.csce.Application.help.content">uri(about.cre)</key>
 		<key name="chav1961.csce.Application.message.ready">Готово...</key>
-		<key name="chav1961.csce.Application.message.scheme.not.exists">Файл схемы [%1$s] не существует. Его имя будет удалено из списка последних файлов</key>
+		<key name="chav1961.csce.Application.message.file.not.exists">Файл [%1$s] не существует. Его имя будет удалено из списка последних файлов</key>
 		<key name="chav1961.csce.Application.message.scheme.already.exists">Файл схемы [%1$s] уже существует в папке [%2$s]. Задайте другое имя</key>
 		<key name="chav1961.csce.Application.message.rename.suffix.missing">Файл схемы [%1$s] должен иметь расширение [%2$s]</key>		
 		<key name="chav1961.csce.Application.message.confirm.delete">Файл схемы [%1$s] будкт удален. Вы действительно хотите его удалить?</key>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xfs:root xmlns:xfs="http://www.fsys.purelib.chav1961.ru/">
+	<xfs:link name="css" ref="fsys:file:${tempDir}/csce.helpContent/static/css/" />
+	<xfs:link name="images" ref="fsys:file:${tempDir}/csce.helpContent/static/images/" />
+	<xfs:link name="static" ref="fsys:file:${tempDir}/csce.helpContent/static/" />
+	<xfs:link name="creole" ref="fsys:file:${tempDir}/csce.helpContent/static/creole" />
+</xfs:root>
