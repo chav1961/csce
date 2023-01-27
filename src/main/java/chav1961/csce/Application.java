@@ -14,13 +14,16 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.border.EtchedBorder;
 
 import chav1961.csce.project.ProjectContainer;
+import chav1961.csce.swing.ProjectViewer;
 import chav1961.purelib.basic.ArgParser;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -48,6 +51,7 @@ import chav1961.purelib.ui.interfaces.LRUPersistence;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
 import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
+import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JStateString;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangeListener;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
@@ -56,9 +60,11 @@ import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 public class Application  extends JFrame implements AutoCloseable, NodeMetadataOwner, LocaleChangeListener, LoggerFacadeOwner, LocalizerOwner  {
 	private static final long 		serialVersionUID = 8855923580582029585L;
 	
+	private static final String		PROJECT_SUFFIX = "csc";
 	public static final String		ARG_HELP_PORT = "helpPort";
 	public static final String		ARG_PROPFILE_LOCATION = "prop";
 	private static final String		LRU_PREFIX = "lru";
+	private static final FilterCallback	FILE_FILTER = FilterCallback.of("CSC project", "*."+PROJECT_SUFFIX);
 	
 	public static final String		KEY_APPLICATION_FRAME_TITLE = "chav1961.csce.Application.frame.title";
 	public static final String		KEY_APPLICATION_HELP_TITLE = "chav1961.csce.Application.help.title";
@@ -113,10 +119,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final JStateString				state;
 	private final LRUPersistence			lru;
 	private final JFileContentManipulator	fcm;
+	private final ProjectContainer			project = new ProjectContainer(this);;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 
 	private long[]							enableMask = new long[] {0};
-	private ProjectContainer				project = null;
+	private ProjectViewer					viewer = null;
 	
 	public Application(final File propFile, final URI helpServerURI) throws ContentException, IOException {
 		try(final InputStream		is = this.getClass().getResourceAsStream("application.xml");) {
@@ -136,6 +143,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				()->project.toIntputStream(), 
 				()->project.fromOutputStream(), 
 				lru);
+		this.fcm.setFilters(FILE_FILTER);
 		this.fcm.addFileContentChangeListener(new FileContentChangeListener<Application>() {
 			@Override
 			public void actionPerformed(FileContentChangedEvent<Application> event) {
@@ -147,6 +155,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 					case FILE_LOADED 				:
 						project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
 						fillTitle();
+						if (viewer == null) {
+							placeViewer();
+						}
+						viewer.refreshProject();
 						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					case FILE_STORED 				:
@@ -163,6 +175,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						break;
 					case NEW_FILE_CREATED 			:
 						fillTitle();
+						if (viewer == null) {
+							placeViewer();
+						}
+						viewer.refreshProject();
 						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					default :
@@ -173,6 +189,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		
 		state.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		setJMenuBar(menuBar);		
+        getContentPane().add(new JLabel("sdsds"), BorderLayout.CENTER);
         getContentPane().add(state, BorderLayout.SOUTH);
         
         SwingUtils.assignActionListeners(menuBar, this);
@@ -227,8 +244,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/newProject")
 	public void newProject() {
-		try{project = new ProjectContainer(this);
-			fcm.newFile();
+		try{fcm.newFile();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -236,8 +252,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/openProject")
 	public void openProject() {
-		try{project = new ProjectContainer(this);
-			fcm.openFile();
+		try{fcm.openFile();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -400,9 +415,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		final File	f = new File(path);
 		
 		if (f.exists() && f.isFile() && f.canRead()) {
-			try{project = new ProjectContainer(this);
-			
-				fcm.openFile(path);
+			try{fcm.openFile(path);
 			} catch (IOException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());
 			}
@@ -419,6 +432,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 	private void fillTitle() {
 		setTitle(localizer.getValue(KEY_APPLICATION_FRAME_TITLE, (fcm.wasChanged() ? "* " : ""), fcm.getCurrentNameOfTheFile()));
+	}
+	
+	private void placeViewer() {
+		viewer = new ProjectViewer(Application.this, project);
+        getContentPane().add(viewer, BorderLayout.CENTER);
+        ((JComponent)getContentPane()).revalidate();
 	}
 	
 	private void refreshMenuState(long enableMask) {
