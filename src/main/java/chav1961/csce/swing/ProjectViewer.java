@@ -1,5 +1,6 @@
 package chav1961.csce.swing;
 
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import chav1961.csce.Application;
@@ -10,10 +11,21 @@ public class ProjectViewer extends JSplitPane {
 
 	private final Application		parent;
 	private final ProjectContainer 	project;
+	private final ProjectTabbedPane	tabs = new ProjectTabbedPane();
+	private final ProjectTree		tree = new ProjectTree();
+	private final ScreenLogger		screenLogger = new ScreenLogger();
 	
 	public ProjectViewer(final Application parent, final ProjectContainer project) {
+		super(JSplitPane.HORIZONTAL_SPLIT);
 		this.parent = parent;
 		this.project = project;
+
+		final JSplitPane	rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tabs, new JScrollPane(screenLogger));
+
+		rightSplit.setDividerLocation(600);
+		
+		setLeftComponent(new JScrollPane(tree));
+		setRightComponent(rightSplit);
 		
 		setDividerLocation(300);
 	}

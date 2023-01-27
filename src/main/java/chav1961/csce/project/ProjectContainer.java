@@ -47,6 +47,8 @@ import chav1961.purelib.streams.JsonStaxPrinter;
  * 		All the license names must be presented in the *.zip content
  * - project.tree: Navigator tree of the project. Mandatory. Must points to one of the *.zip content parts
  * - project.root: Root page of the project. Mandatory. Must be a some name inside the project.tree content part 
+ * - project.lang: List of languages supported. Optional. Must be chav1961.purelib.i18n.interfaces.SupportedLanguages names was split by comma.
+ * 		If missing, ru defaults
  * - project.externals: External references of the project. Optional. Must points to one of the *.zip content parts
  * Content of *.zip also must contain:
  * - exactly one part with structure project description. Name of the part must be references by 'project.tree' key from '.project.properties' part. 
@@ -70,6 +72,7 @@ public class ProjectContainer {
 	public static final String		PROJECT_LICENSES = "project.licenses";
 	public static final String		PROJECT_TREE = "project.tree";
 	public static final String		PROJECT_ROOT = "project.root"; 
+	public static final String		PROJECT_LANG = "project.lang";
 	public static final String		PROJECT_EXTERNALS = "project.externals";
 	
 	private static final String		PART_DESCRIPTION = ".project.properties";	
@@ -79,8 +82,8 @@ public class ProjectContainer {
 	private static final String[]	PARTS = {
 											"project.tree.json",
 											"favicon16x16.png",
-											"project.license.cre"
-									};
+											"project.default.license.cre"
+										};
 	
 	private final Application				app;
 	private final SubstitutableProperties	props = new SubstitutableProperties();

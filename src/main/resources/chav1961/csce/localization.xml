@@ -28,6 +28,12 @@
 		<key name="menu.main.file.saveAs.tt">Сохранить проект как...</key>
 		<key name="menu.main.file.export">Экспорт проекта</key>
 		<key name="menu.main.file.export.tt">Экспорт проекта</key>
+		<key name="menu.main.file.export.war">В формат сервлета</key>
+		<key name="menu.main.file.export.war.tt">В формат сервлета</key>
+		<key name="menu.main.file.export.scorm2004">В формат SCORM 2004</key>
+		<key name="menu.main.file.export.scorm2004.tt">В формат SCORM 2004</key>
+		<key name="menu.main.file.export.subdir">В папку</key>
+		<key name="menu.main.file.export.subdir.tt">В папку</key>
 		<key name="menu.main.file.exit">Выход</key>
 		<key name="menu.main.file.exit.tt">Завершить работу программы</key>
 		<key name="menu.main.edit">Редактор</key>
@@ -70,6 +76,9 @@
 		<key name="menu.main.help.manual.tt">Описание</key>
 		<key name="menu.main.help.about">О программе...</key>
 		<key name="menu.main.help.about.tt">О программе...</key>
+
+<!-- Локализация класса FirstSceen -->
+		<key name="chav1961.csce.FirstScreen.title">Drag project file *.csc here to start editing it</key>
  
  	</lang>
 	<lang name="ru">
@@ -99,7 +108,13 @@
 		<key name="menu.main.file.saveAs">Сохранить проект как...</key>
 		<key name="menu.main.file.saveAs.tt">Сохранить проект как...</key>
 		<key name="menu.main.file.export">Экспорт проекта</key>
-		<key name="menu.main.file.export.tt">Экспорт проекта</key>
+		<key name="menu.main.file.export.tt">Экспорт проекта...</key>
+		<key name="menu.main.file.export.war">В формат сервлета</key>
+		<key name="menu.main.file.export.war.tt">В формат сервлета</key>
+		<key name="menu.main.file.export.scorm2004">В формат SCORM 2004</key>
+		<key name="menu.main.file.export.scorm2004.tt">В формат SCORM 2004</key>
+		<key name="menu.main.file.export.subdir">В папку</key>
+		<key name="menu.main.file.export.subdir.tt">В папку</key>
 		<key name="menu.main.file.exit">Выход</key>
 		<key name="menu.main.file.exit.tt">Завершить работу программы</key>
 		<key name="menu.main.edit">Редактор</key>
@@ -142,6 +157,9 @@
 		<key name="menu.main.help.manual.tt">Описание</key>
 		<key name="menu.main.help.about">О программе...</key>
 		<key name="menu.main.help.about.tt">О программе...</key>
+
+<!-- Локализация класса FirstSceen -->
+		<key name="chav1961.csce.FirstScreen.title">Перетащите сюда файл проекта *.csc чтобы начать работу с ним</key>
  
 	</lang>	
 </localization>

@@ -60,9 +60,11 @@ import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 public class Application  extends JFrame implements AutoCloseable, NodeMetadataOwner, LocaleChangeListener, LoggerFacadeOwner, LocalizerOwner  {
 	private static final long 		serialVersionUID = 8855923580582029585L;
 	
-	private static final String		PROJECT_SUFFIX = "csc";
 	public static final String		ARG_HELP_PORT = "helpPort";
 	public static final String		ARG_PROPFILE_LOCATION = "prop";
+	
+	static final String				PROJECT_SUFFIX = "csc";
+
 	private static final String		LRU_PREFIX = "lru";
 	private static final FilterCallback	FILE_FILTER = FilterCallback.of("CSC project", "*."+PROJECT_SUFFIX);
 	
@@ -119,10 +121,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final JStateString				state;
 	private final LRUPersistence			lru;
 	private final JFileContentManipulator	fcm;
-	private final ProjectContainer			project = new ProjectContainer(this);;
+	private final ProjectContainer			project = new ProjectContainer(this);
 	private final CountDownLatch			latch = new CountDownLatch(1);
 
 	private long[]							enableMask = new long[] {0};
+	private FirstScreen						firstScreen = null; 
 	private ProjectViewer					viewer = null;
 	
 	public Application(final File propFile, final URI helpServerURI) throws ContentException, IOException {
@@ -189,7 +192,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		
 		state.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		setJMenuBar(menuBar);		
-        getContentPane().add(new JLabel("sdsds"), BorderLayout.CENTER);
+        getContentPane().add(firstScreen = new FirstScreen(this), BorderLayout.CENTER);
         getContentPane().add(state, BorderLayout.SOUTH);
         
         SwingUtils.assignActionListeners(menuBar, this);
@@ -216,6 +219,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@Override
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
+		SwingUtils.refreshLocale(getContentPane(), oldLocale, newLocale);
 		SwingUtils.refreshLocale(menuBar, oldLocale, newLocale);
 		fillLocalizationStrings();
 	}
@@ -274,8 +278,16 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 	
-	@OnAction("action:/exportProject")
-	public void exportProject() {
+	@OnAction("action:/exportProjectAsWar")
+	public void exportProjectAsWar() {
+	}
+	
+	@OnAction("action:/exportProjectAsScorm2004")
+	public void exportProjectAsScorm2004() {
+	}
+	
+	@OnAction("action:/exportProjectAsSubdir")
+	public void exportProjectAsSubdir() {
 	}
 	
 	@OnAction("action:/exit")
@@ -392,6 +404,21 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			return result;
 		}
 	}
+
+	void loadLRU(final String path) {
+		final File	f = new File(path);
+		
+		if (f.exists() && f.isFile() && f.canRead()) {
+			try{fcm.openFile(path);
+			} catch (IOException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+		else {
+			fcm.removeFileNameFromLRU(path);
+			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
+		}
+	}
 	
 	private void fillLRU(final List<String> lastUsed) {
 		if (lastUsed.isEmpty()) {
@@ -411,20 +438,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 
-	private void loadLRU(final String path) {
-		final File	f = new File(path);
-		
-		if (f.exists() && f.isFile() && f.canRead()) {
-			try{fcm.openFile(path);
-			} catch (IOException e) {
-				getLogger().message(Severity.error, e, e.getLocalizedMessage());
-			}
-		}
-		else {
-			fcm.removeFileNameFromLRU(path);
-			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
-		}
-	}
 	
 	private void fillLocalizationStrings() {
 		fillTitle();
@@ -436,6 +449,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	private void placeViewer() {
 		viewer = new ProjectViewer(Application.this, project);
+		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();
 	}
