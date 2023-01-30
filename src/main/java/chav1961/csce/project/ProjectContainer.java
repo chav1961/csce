@@ -49,6 +49,7 @@ import chav1961.purelib.streams.JsonStaxPrinter;
  * - project.root: Root page of the project. Mandatory. Must be a some name inside the project.tree content part 
  * - project.lang: List of languages supported. Optional. Must be chav1961.purelib.i18n.interfaces.SupportedLanguages names was split by comma.
  * 		If missing, ru defaults
+ * - project.localization: part name with localized strings. Mandatory. Must points to one of the *.zip content parts
  * - project.externals: External references of the project. Optional. Must points to one of the *.zip content parts
  * Content of *.zip also must contain:
  * - exactly one part with structure project description. Name of the part must be references by 'project.tree' key from '.project.properties' part. 
@@ -73,6 +74,7 @@ public class ProjectContainer {
 	public static final String		PROJECT_TREE = "project.tree";
 	public static final String		PROJECT_ROOT = "project.root"; 
 	public static final String		PROJECT_LANG = "project.lang";
+	public static final String		PROJECT_LOCALIZATION = "project.localization";
 	public static final String		PROJECT_EXTERNALS = "project.externals";
 	
 	private static final String		PART_DESCRIPTION = ".project.properties";	
@@ -81,7 +83,8 @@ public class ProjectContainer {
 	private static final String		JSON_EXT = ".json";
 	private static final String[]	PARTS = {
 											"project.tree.json",
-											"favicon16x16.png",
+											"localization.xml",
+											"project.tree.json",
 											"project.default.license.cre"
 										};
 	

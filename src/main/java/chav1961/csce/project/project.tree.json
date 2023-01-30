@@ -1,2 +1,12 @@
-{
+{"version" : "1.00",
+ "items" : [
+ 	{"id" : 0,
+ 	 "parent" : -1,
+ 	 "name" : "root",
+ 	 "type" : "Subtree",
+ 	 "descriptor" : "Root of the project",
+ 	 "titleId" : "Root",
+ 	 "reference" : null
+ 	}
+ ]
 }
