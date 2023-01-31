@@ -5,7 +5,7 @@
  	 "name" : "root",
  	 "type" : "Subtree",
  	 "descriptor" : "Root of the project",
- 	 "titleId" : "Root",
+ 	 "titleId" : "project.root",
  	 "reference" : null
  	}
  ]

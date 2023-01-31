@@ -1,9 +1,31 @@
 package chav1961.csce.project;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
+import chav1961.purelib.basic.Utils;
+import chav1961.purelib.basic.exceptions.ContentException;
+import chav1961.purelib.basic.exceptions.PreparationException;
+import chav1961.purelib.enumerations.ContinueMode;
+import chav1961.purelib.enumerations.NodeEnterMode;
 import chav1961.purelib.json.JsonNode;
-import chav1961.purelib.json.interfaces.JsonSerializable;
+import chav1961.purelib.json.JsonUtils;
+import chav1961.purelib.json.interfaces.JsonNodeType;
+import chav1961.purelib.json.interfaces.JsonTreeWalkerCallback;
+import chav1961.purelib.model.ContentMetadataFilter;
+import chav1961.purelib.model.FieldFormat;
+import chav1961.purelib.model.MutableContentNodeMetadata;
+import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
+import chav1961.purelib.model.interfaces.ContentMetadataInterface;
+import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 
 /*
  * Project description is a *.json containing:
@@ -15,7 +37,7 @@ import chav1961.purelib.json.interfaces.JsonSerializable;
  * -- type : string - item type (enum)
  * -- descriptor : string - item descriptor
  * -- titleId : string - title id
- * -- reference : string - reference to content (part name inside th project) or subtree ('#long' reference to subtree item id)
+ * -- reference : string - reference to content (part name inside the project) or long - reference to subtree item id
  */
 public class ProjectNavigator {
 	public static final String	F_VERSION = "version";
@@ -28,44 +50,282 @@ public class ProjectNavigator {
 	public static final String	F_DESCRIPTOR = "descriptor";
 	public static final String	F_TITLE_ID = "titleId";
 	public static final String	F_REFERENCE = "reference";
+
+	public static enum ItemType {
+		CreoleRef("favicon16x16.png"),
+		Subtree("favicon16x16.png");
+		
+		private final URI	icon;
+		
+		private ItemType(final String icon) {
+			try {
+				this.icon = getClass().getResource(icon).toURI();
+			} catch (URISyntaxException e) {
+				throw new PreparationException(e);
+			}
+		}
+		
+		private URI getIconURI() {
+			return icon;
+		}
+	}
+	
+	private static final ProjectNavigatorItem[]	EMPTY_ARRAY = new ProjectNavigatorItem[0];
 	
 	private final String					version;
-	private final ProjectNavigatorItem[]	items;
+	private final String					rootName;
+	private ProjectNavigatorItem[]			items;
+	private long							uniqueId;
 	
-	public ProjectNavigator(final ProjectContainer container, final JsonNode root, final String rootName) {
-		
+	public ProjectNavigator(final ProjectContainer container, final JsonNode root, final String rootName) throws ContentException {
+		if (container == null) {
+			throw new NullPointerException("Container can't be null"); 
+		}
+		else if (root == null) {
+			throw new NullPointerException("Json root can't be null"); 
+		}
+		else if (Utils.checkEmptyOrNullString(rootName)) {
+			throw new IllegalArgumentException("Root name can't be null or empty"); 
+		}
+		else if (!root.hasName(F_VERSION)) {
+			throw new IllegalArgumentException("Json root mandatory field ["+F_VERSION+"] is missing"); 
+		}
+		else if (!F_VERSION_DEFAULT.equals(root.getChild(F_VERSION).getStringValue())) {
+			throw new IllegalArgumentException("Json root unsupported version ["+root.getChild(F_VERSION).getStringValue()+"]"); 
+		}
+		else {
+			final List<ProjectNavigatorItem>	temp = new ArrayList<>();
+			final JsonTreeWalkerCallback		itemFilter = JsonUtils.filterOf("/items/[]", (mode, node, parm)->appendItem(temp,mode,node));
+	
+			JsonUtils.walkDownJson(root, itemFilter);
+			this.version = root.getChild(F_VERSION).getStringValue();
+			this.rootName = rootName;
+			this.items = temp.toArray(new ProjectNavigatorItem[temp.size()]);
+			
+			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			int	found = -1;
+			
+			for(int index = 0; index < items.length; index++) {
+				if (items[index].name.equals(rootName)) {
+					found = index;
+					break;
+				}
+			}
+			if (found == -1) {
+				throw new IllegalArgumentException("Root name ["+rootName+"] is missing in the items list");
+			}
+			
+			uniqueId = items[0].id;
+			for(int index = 1; index < items.length; index++) {
+				uniqueId = Math.max(uniqueId, items[index].id); 
+			}
+		}
 	}
 	
 	public ProjectNavigatorItem getRoot() {
-		return null;
+		for (ProjectNavigatorItem item : items) {
+			if (item.name.equals(rootName)) {
+				return item;
+			}
+		}
+		throw new IllegalStateException("Root name is missing in the items");
+	}
+	
+	public long getUniqueId() {
+		return ++uniqueId;
+	}
+	
+	public int getItemCount() {
+		return items.length;
+	}
+
+	public boolean hasItemId(final long id) {
+		return id2index(id) >= 0;
+	}
+	
+	public ProjectNavigatorItem getItemByIndex(final int index) {
+		if (index < 0 || index >= items.length) {
+			throw new IllegalArgumentException("Index [] out of range 0.."+(items.length - 1));
+		}
+		else {
+			return items[index];
+		}
 	}
 	
 	public ProjectNavigatorItem getItem(final long id) {
-		return null;
+		final int 	index = id2index(id);
+		
+		if (index == -1) {
+			throw new IllegalArgumentException("Item id ["+id+"] is missing in the list"); 
+		}
+		else {
+			return getItemByIndex(index);
+		}
 	}
 
+	public ProjectNavigatorItem[] getChildren(final long id) {
+		return getChildren(id,(o1,o2)->o1.name.compareTo(o2.name));
+	}	
+	
 	public ProjectNavigatorItem[] getChildren(final long id, final Comparator<ProjectNavigatorItem> c) {
-		return null;
+		if (c == null) {
+			throw new NullPointerException("Comparator can't be null");
+		}
+		else {
+			int count = 0;
+			
+			for (ProjectNavigatorItem item : items) {
+				if (item.parent == id) {
+					count++;
+				}
+			}
+			if (count == 0) {
+				return EMPTY_ARRAY;
+			}
+			else {
+				final ProjectNavigatorItem[]	result = new ProjectNavigatorItem[count];
+				
+				count = 0;
+				for (ProjectNavigatorItem item : items) {
+					if (item.parent == id) {
+						result[count++] = item;
+					}
+				}
+				Arrays.sort(result, c);
+				return result;
+			}
+		}
+	}
+	
+	public void addItem(final ProjectNavigatorItem item) {
+		if (item == null) {
+			throw new NullPointerException("Item to add can't be null"); 
+		}
+		else {
+			items = Arrays.copyOf(items, items.length + 1);
+			items[items.length - 1] = item;
+			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+		}
+	}
+
+	public ProjectNavigatorItem setItem(final long id, final ProjectNavigatorItem item) {
+		if (item == null) {
+			throw new NullPointerException("Item to set can't be null"); 
+		}
+		else {
+			final int 	index = id2index(id);
+			
+			if (index == -1) {
+				throw new IllegalArgumentException("Item id ["+id+"] is missing in the list"); 
+			}
+			else {
+				return getItemByIndex(index);
+			}
+		}
+	}
+
+	public ProjectNavigatorItem setItemByIndex(final int index, final ProjectNavigatorItem item) {
+		if (index < 0 || index >= items.length) {
+			throw new IllegalArgumentException("Index [] out of range 0.."+(items.length - 1));
+		}
+		else {
+			final ProjectNavigatorItem	result = items[index];
+			
+			items[index] = item;
+			if (item.id != result.id) {
+				Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			}
+			return result;
+		}
+	}
+	
+	public ProjectNavigatorItem removeItem(final long id) {
+		final int 	index = id2index(id);
+		
+		if (index == -1) {
+			throw new IllegalArgumentException("Item id ["+id+"] is missing in the list"); 
+		}
+		else {
+			return removeItemByIndex(index);
+		}
+	}
+
+	public ProjectNavigatorItem removeItemByIndex(final int index) {
+		if (index < 0 || index >= items.length) {
+			throw new IllegalArgumentException("Index [] out of range 0.."+(items.length - 1));
+		}
+		else {
+			final ProjectNavigatorItem	result = items[index];
+
+			System.arraycopy(items, index+1, items, index, items.length-index-1);
+			items = Arrays.copyOf(items, items.length - 1); 
+			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			return result;
+		}
 	}
 	
 	public JsonNode buildJsonNode() {
 		return null;
 	}
+
+	private int id2index(final long id) {
+        int low = 0, high = items.length - 1;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            long midVal = items[mid].id;
+
+            if (midVal < id) {
+                low = mid + 1;
+            }
+            else if (midVal > id) {
+                high = mid - 1;
+            }
+            else {
+                return mid;
+            }
+        }
+        return -1;
+	}
 	
-	public static class ProjectNavigatorItem {
-		public static enum ItemType {
-			CreoleRef,
-			Subtree,
+	private ContinueMode appendItem(final List<ProjectNavigatorItem> list, final NodeEnterMode mode, final JsonNode node) {
+		if (mode == NodeEnterMode.ENTER && node.getType() == JsonNodeType.JsonObject) {
+			final long		id = node.getChild(F_ID).getLongValue();
+			final long		parent = node.getChild(F_PARENT).getLongValue();
+			final String	name = node.getChild(F_NAME).getStringValue();
+			final ItemType	type = ItemType.valueOf(node.getChild(F_TYPE).getStringValue());
+			final String	descriptor = node.getChild(F_DESCRIPTOR).getStringValue();
+			final String	titleId = node.getChild(F_TITLE_ID).getStringValue();
+			
+			switch (type) {
+				case CreoleRef	:
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					break;
+				case Subtree	:
+					if (node.getChild(F_REFERENCE).getType() == JsonNodeType.JsonInteger) {
+						list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getLongValue()));
+					}
+					else {
+						list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, -1));
+					}
+					break;
+				default	:
+					throw new UnsupportedOperationException("Node type ["+type+"] is not supported yet");
+			}
 		}
-		
-		final long		id;
-		final long		parent;
-		final String	name;
-		final ItemType	type;
-		final String	desc;
-		final String	titleId;
-		final long		subtreeRef;
-		final String	partRef;
+		return ContinueMode.CONTINUE;
+	}
+
+	public static class ProjectNavigatorItem implements NodeMetadataOwner {
+		public final long		id;
+		public final long		parent;
+		public final String		name;
+		public final ItemType	type;
+		public final String		desc;
+		public final String		titleId;
+		public final long		subtreeRef;
+		public final String		partRef;
+		private final ContentNodeMetadata	meta;
 
 		public ProjectNavigatorItem(long id, long parent, String name, ItemType type, String desc, String titleId, long subtreeRef) {
 			this(id, parent, name, type, desc, titleId, subtreeRef, "");
@@ -84,8 +344,16 @@ public class ProjectNavigator {
 			this.titleId = titleId;
 			this.subtreeRef = subtreeRef;
 			this.partRef = partRef;
+			
+			this.meta = new MutableContentNodeMetadata(name, getClass(), "./"+name, URI.create("i18n:xml:root://chav1961.csce.Application/chav1961/csce/localization.xml")
+							, titleId, null, null, new FieldFormat(getClass()), URI.create(ContentMetadataInterface.APPLICATION_SCHEME+":item:/"+name), type.getIconURI());
 		}
 
+		@Override
+		public ContentNodeMetadata getNodeMetadata() {
+			return meta;
+		}
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -132,5 +400,6 @@ public class ProjectNavigator {
 					+ ", desc=" + desc + ", titleId=" + titleId + ", subtreeRef=" + subtreeRef + ", partRef=" + partRef
 					+ "]";
 		}
+
 	}
 }

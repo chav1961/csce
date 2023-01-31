@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,10 +25,16 @@ import chav1961.csce.Application;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.StringLoggerFacade;
 import chav1961.purelib.basic.SubstitutableProperties;
+import chav1961.purelib.basic.URIUtils;
 import chav1961.purelib.basic.Utils;
+import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.PrintingException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
+import chav1961.purelib.i18n.LocalizerFactory;
+import chav1961.purelib.i18n.XMLLocalizer;
+import chav1961.purelib.i18n.interfaces.Localizer;
+import chav1961.purelib.i18n.interfaces.LocalizerOwner;
 import chav1961.purelib.json.JsonNode;
 import chav1961.purelib.json.JsonUtils;
 import chav1961.purelib.streams.JsonStaxParser;
@@ -63,7 +70,7 @@ import chav1961.purelib.streams.JsonStaxPrinter;
  * Structure project description has a json content. See...
  */
 
-public class ProjectContainer {
+public class ProjectContainer implements LocalizerOwner {
 	public static final String		PROJECT_VERSION = "project.version";
 	public static final String		DEFAULT_PROJECT_VERSION = "1.0";
 	public static final String		PROJECT_NAME = "project.name";
@@ -89,8 +96,10 @@ public class ProjectContainer {
 										};
 	
 	private final Application				app;
+	private Localizer						localizer = null;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
+	private ProjectNavigator				navigator = null;
 	private String							projectFileName = null;
 	
 	public ProjectContainer(final Application app) {
@@ -99,7 +108,13 @@ public class ProjectContainer {
 		}
 		else {
 			this.app = app;
+			this.localizer = app.getLocalizer();
 		}
+	}
+
+	@Override
+	public Localizer getLocalizer() {
+		return localizer;
 	}
 	
 	public String getProjectFileName() {
@@ -108,6 +123,10 @@ public class ProjectContainer {
 	
 	public void setProjectFileName(final String name) {
 		projectFileName = name;
+	}
+	
+	public ProjectNavigator getProjectNavigator() {
+		return navigator;
 	}
 	
 	public boolean validateProject(final LoggerFacade logger) {
@@ -173,11 +192,31 @@ public class ProjectContainer {
 				props.putAll(projectProps);
 				content.clear();
 				content.putAll(projectParts);
+				navigator = prepareProjectNavigator((JsonNode)content.get(props.getProperty(PROJECT_TREE)), props.getProperty(PROJECT_ROOT));
+				localizer = prepareLocalizer((byte[])content.get(props.getProperty(PROJECT_LOCALIZATION)));
 			}
 			else {
 				throw new IOException("Project validation failed : "+logger.toString()); 
 			}
 		}
+	}
+	
+	private ProjectNavigator prepareProjectNavigator(final JsonNode content, final String rootName) throws IOException {
+		try{
+			return new ProjectNavigator(this, content, rootName);
+		} catch (ContentException e) {
+			throw new IOException(e); 
+		}
+	}
+
+	private Localizer prepareLocalizer(final byte[] content) {
+		final Localizer	newlocalizer = LocalizerFactory.getLocalizer(URI.create(Localizer.LOCALIZER_SCHEME+":xml:"+URIUtils.convert2selfURI(content).toString()));
+
+		if (localizer != null) {
+			app.getLocalizer().pop(localizer);
+		}
+		app.getLocalizer().push(newlocalizer);
+		return newlocalizer;
 	}
 	
 	private boolean validateProject(final LoggerFacade logger, final SubstitutableProperties props, final Map<String, Object> parts) {
@@ -270,6 +309,8 @@ public class ProjectContainer {
 				props.putAll(projectProps);
 				content.clear();
 				content.putAll(projectParts);
+				navigator = prepareProjectNavigator((JsonNode)content.get(props.getProperty(PROJECT_TREE)), props.getProperty(PROJECT_ROOT));
+				localizer = prepareLocalizer((byte[])content.get(props.getProperty(PROJECT_LOCALIZATION)));
 			}
 		}
 	}
