@@ -16,13 +16,16 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 
 import chav1961.csce.project.ProjectContainer;
+import chav1961.csce.project.ProjectNavigator.ItemType;
+import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.csce.swing.ProjectItemEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.purelib.basic.ArgParser;
 import chav1961.purelib.basic.PureLibSettings;
@@ -35,6 +38,7 @@ import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.basic.interfaces.LoggerFacadeOwner;
+import chav1961.purelib.basic.interfaces.ModuleAccessor;
 import chav1961.purelib.fsys.FileSystemFactory;
 import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
@@ -44,15 +48,19 @@ import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
+import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 import chav1961.purelib.nanoservice.NanoServiceFactory;
 import chav1961.purelib.nanoservice.StaticHelp;
-import chav1961.purelib.model.interfaces.NodeMetadataOwner;
+import chav1961.purelib.ui.interfaces.FormManager;
 import chav1961.purelib.ui.interfaces.LRUPersistence;
+import chav1961.purelib.ui.swing.AutoBuiltForm;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
 import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
+import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JStateString;
+import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangeListener;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 
@@ -71,6 +79,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_APPLICATION_FRAME_TITLE = "chav1961.csce.Application.frame.title";
 	public static final String		KEY_APPLICATION_HELP_TITLE = "chav1961.csce.Application.help.title";
 	public static final String		KEY_APPLICATION_HELP_CONTENT = "chav1961.csce.Application.help.content";
+
+	public static final String		KEY_APPLICATION_CONFIRM_DELETE_TITLE = "chav1961.csce.Application.confirm.delete.title";
+	public static final String		KEY_APPLICATION_CONFIRM_DELETE_MESSAGE = "chav1961.csce.Application.confirm.delete.message";
 	
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
 	public static final String		KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS = "chav1961.csce.Application.message.file.not.exists";
@@ -121,7 +132,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final JStateString				state;
 	private final LRUPersistence			lru;
 	private final JFileContentManipulator	fcm;
-	private final ProjectContainer			project = new ProjectContainer(this);
+	private final ProjectContainer			project;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 
 	private long[]							enableMask = new long[] {0};
@@ -132,6 +143,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		try(final InputStream		is = this.getClass().getResourceAsStream("application.xml");) {
 			
 			this.mdi = ContentModelFactory.forXmlDescription(is);
+			this.project = new ProjectContainer(this, mdi);
 			this.localizer = Localizer.Factory.newInstance(mdi.getRoot().getLocalizerAssociated());
 	        this.localizer.addLocaleChangeListener(this);
 			
@@ -139,7 +151,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 
 		this.helpServerURI = helpServerURI;
-		this.menuBar =  SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.mainmenu")), JMenuBar.class); 
+		this.menuBar = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.mainmenu")), JMenuBar.class); 
 		this.state = new JStateString(localizer, 100);
 		this.lru = LRUPersistence.of(propFile, LRU_PREFIX); 
 		this.fcm = new JFileContentManipulator(repo, localizer, 
@@ -319,10 +331,33 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/insertPart")
 	public void insertPart() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+																	, pni.id
+																	, "newItem"
+																	, ItemType.Subtree
+																	, ""
+																	, "label"
+																	, -1);
+			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), toAdd);
+			
+			try{if (ask(pie, getLocalizer(), 400, 120)) {
+					project.getProjectNavigator().addItem(toAdd);
+					viewer.refreshProject();
+				}
+			} catch (ContentException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
 	}
 	
 	@OnAction("action:/insertPage")
 	public void insertPage() {
+	}
+
+	@OnAction("action:/insertDocument")
+	public void insertDocument() {
 	}
 	
 	@OnAction("action:/insertImage")
@@ -333,6 +368,40 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void insertUri() {
 	}
 
+	@OnAction("action:/editItem")
+	public void editItem() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			
+			switch (pni.type) {
+				case CreoleRef	:
+					break;
+				case Root		:
+					break;
+				case Subtree	:
+					break;
+				default:
+					throw new UnsupportedOperationException("Item type ["+pni.type+"] is not supported yet"); 
+			}
+		}
+	}
+	
+	@OnAction("action:/deleteItem")
+	public void deleteItem() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			
+			if (pni.type != ItemType.Root && new JLocalizedOptionPane(getLocalizer()).confirm(this
+							, new LocalizedFormatter(KEY_APPLICATION_CONFIRM_DELETE_MESSAGE, pni.getNodeMetadata().getLabelId())
+							, KEY_APPLICATION_CONFIRM_DELETE_TITLE
+							, JOptionPane.QUESTION_MESSAGE
+							, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				project.getProjectNavigator().removeItem(pni.id);
+				viewer.refreshProject();
+			}
+		}
+	}
+	
 	@OnAction("action:/validateProject")
 	public void validateProject() {
 	}
@@ -448,7 +517,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	}
 	
 	private void placeViewer() {
-		viewer = new ProjectViewer(Application.this, project);
+		viewer = new ProjectViewer(Application.this, project, mdi);
 		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();
@@ -494,7 +563,17 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		System.exit(retcode);
 	}
 
-
+	public static <T> boolean ask(final T instance, final Localizer localizer, final int width, final int height) throws ContentException {
+		final ContentMetadataInterface	mdi = ContentModelFactory.forAnnotatedClass(instance.getClass());
+		
+		try(final AutoBuiltForm<T,?>	abf = new AutoBuiltForm<>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, instance, (FormManager<?,T>)instance)) {
+			
+			((ModuleAccessor)instance).allowUnnamedModuleAccess(abf.getUnnamedModules());
+			abf.setPreferredSize(new Dimension(width,height));
+			return AutoBuiltForm.ask((JFrame)null,localizer,abf);
+		}
+	}
+	
 	private static class ApplicationArgParser extends ArgParser {
 		private static final ArgParser.AbstractArg[]	KEYS = {
 			new IntegerArg(ARG_HELP_PORT, true, "Help port to use for help browser", 0),

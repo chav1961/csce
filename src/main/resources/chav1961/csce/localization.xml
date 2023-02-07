@@ -12,73 +12,94 @@
 		<key name="chav1961.csce.Application.message.confirm.delete">Scheme file [%1$s] will be removed. Are you sure to delete it?</key>
 		<key name="chav1961.csce.Application.message.confirm.delete.title">Confirm deletion</key>
 		<key name="chav1961.csce.Application.message.not.implemented.yet">NOT IMPLEMENTED YET!</key>
+		<key name="chav1961.csce.Application.confirm.delete.title">Confirm delete</key>
+		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
 
 <!-- Localization for application menu --> 
-		<key name="menu.main.file">Файл</key>
-		<key name="menu.main.file.tt">Файл</key>
-		<key name="menu.main.file.new">Новый проект</key>
-		<key name="menu.main.file.new.tt">Новый проект</key>
-		<key name="menu.main.file.open">Открыть проект</key>
-		<key name="menu.main.file.open.tt">Открыть проект</key>
-		<key name="menu.main.file.lru">Открыть последние...</key>
-		<key name="menu.main.file.lru.tt">Открыть последние...</key>
-		<key name="menu.main.file.save">Сохранить проект</key>
-		<key name="menu.main.file.save.tt">Сохранить проект</key>
-		<key name="menu.main.file.saveAs">Сохранить проект как...</key>
-		<key name="menu.main.file.saveAs.tt">Сохранить проект как...</key>
-		<key name="menu.main.file.export">Экспорт проекта</key>
-		<key name="menu.main.file.export.tt">Экспорт проекта</key>
-		<key name="menu.main.file.export.war">В формат сервлета</key>
-		<key name="menu.main.file.export.war.tt">В формат сервлета</key>
-		<key name="menu.main.file.export.scorm2004">В формат SCORM 2004</key>
-		<key name="menu.main.file.export.scorm2004.tt">В формат SCORM 2004</key>
-		<key name="menu.main.file.export.subdir">В папку</key>
-		<key name="menu.main.file.export.subdir.tt">В папку</key>
-		<key name="menu.main.file.exit">Выход</key>
-		<key name="menu.main.file.exit.tt">Завершить работу программы</key>
-		<key name="menu.main.edit">Редактор</key>
-		<key name="menu.main.edit.tt">Редактор</key>
-		<key name="menu.main.edit.undo">Откат изменений</key>
-		<key name="menu.main.edit.undo.tt">Откат изменений</key>
-		<key name="menu.main.edit.redo">Отмена отката</key>
-		<key name="menu.main.edit.redo.tt">Отмена отката</key>
-		<key name="menu.main.edit.find">Найти</key>
-		<key name="menu.main.edit.find.tt">Найти</key>
-		<key name="menu.main.edit.findAndGo">Поиск и переход</key>
-		<key name="menu.main.edit.findAndGo.tt">Поиск и переход</key>
-		<key name="menu.main.edit.properties">Свойства</key>
-		<key name="menu.main.edit.properties.tt">Свойства проекта</key>
-		<key name="menu.main.insert">Вставить</key>
-		<key name="menu.main.insert.tt">Вставить</key>
-		<key name="menu.main.insert.part">Раздел</key>
-		<key name="menu.main.insert.part.tt">Раздел</key>
-		<key name="menu.main.insert.page">Страницу</key>
-		<key name="menu.main.insert.page.tt">Страницу</key>
-		<key name="menu.main.insert.image">Изображение</key>
-		<key name="menu.main.insert.image.tt">Изображение</key>
-		<key name="menu.main.insert.uri">Ссылку</key>
-		<key name="menu.main.insert.uri.tt">Ссылку</key>
-		<key name="menu.main.tools">Инструменты</key>
-		<key name="menu.main.tools.tt">Инструменты</key>
-		<key name="menu.main.tools.validate">Валидация</key>
-		<key name="menu.main.tools.validate.tt">Проверка проекта на наличие ошибок</key>		
-		<key name="menu.main.tools.preview">Просмотр</key>
-		<key name="menu.main.tools.preview.tt">Предварительный просмотр проекта</key>
-		<key name="menu.main.tools.buildIndex">Индекс</key>
-		<key name="menu.main.tools.buildIndex.tt">Построить поисковый индекс</key>
-		<key name="menu.main.tools.settings">Настройки</key>
-		<key name="menu.main.tools.settings.tt">Настройки</key>
-		<key name="menu.main.tools.languages">Языки</key>
-		<key name="menu.main.tools.languages.tt">Языки</key>
-		<key name="menu.main.help">Справка</key>
-		<key name="menu.main.help.tt">Справка</key>
-		<key name="menu.main.help.manual">Описание</key>
-		<key name="menu.main.help.manual.tt">Описание</key>
-		<key name="menu.main.help.about">О программе...</key>
-		<key name="menu.main.help.about.tt">О программе...</key>
+		<key name="menu.main.file">File</key>
+		<key name="menu.main.file.tt">File</key>
+		<key name="menu.main.file.new">New project</key>
+		<key name="menu.main.file.new.tt">New project</key>
+		<key name="menu.main.file.open">Open project</key>
+		<key name="menu.main.file.open.tt">Open project</key>
+		<key name="menu.main.file.lru">Open recent ...</key>
+		<key name="menu.main.file.lru.tt">Open recent ...</key>
+		<key name="menu.main.file.save">Save project</key>
+		<key name="menu.main.file.save.tt">Save project</key>
+		<key name="menu.main.file.saveAs">Save project as...</key>
+		<key name="menu.main.file.saveAs.tt">Save project as...</key>
+		<key name="menu.main.file.export">Export project</key>
+		<key name="menu.main.file.export.tt">Export project</key>
+		<key name="menu.main.file.export.war">...as servlet</key>
+		<key name="menu.main.file.export.war.tt">...as servlet</key>
+		<key name="menu.main.file.export.scorm2004">...as SCORM-2004</key>
+		<key name="menu.main.file.export.scorm2004.tt">...as SCORM-2004</key>
+		<key name="menu.main.file.export.subdir">...to directory</key>
+		<key name="menu.main.file.export.subdir.tt">...to directory</key>
+		<key name="menu.main.file.exit">Quit</key>
+		<key name="menu.main.file.exit.tt">Qoit application</key>
+		<key name="menu.main.edit">Edit</key>
+		<key name="menu.main.edit.tt">Edit</key>
+		<key name="menu.main.edit.undo">Undo</key>
+		<key name="menu.main.edit.undo.tt">Undo</key>
+		<key name="menu.main.edit.redo">Redo</key>
+		<key name="menu.main.edit.redo.tt">Redo</key>
+		<key name="menu.main.edit.find">Find</key>
+		<key name="menu.main.edit.find.tt">Find</key>
+		<key name="menu.main.edit.findAndGo">Find and go</key>
+		<key name="menu.main.edit.findAndGo.tt">Find and go</key>
+		<key name="menu.main.edit.properties">Properties</key>
+		<key name="menu.main.edit.properties.tt">Properties</key>
+		<key name="menu.main.insert">Insert</key>
+		<key name="menu.main.insert.tt">Insert</key>
+		<key name="menu.main.insert.part">New part</key>
+		<key name="menu.main.insert.part.tt">New part</key>
+		<key name="menu.main.insert.page">Page</key>
+		<key name="menu.main.insert.page.tt">Page</key>
+		<key name="menu.main.insert.document">Document</key>
+		<key name="menu.main.insert.document.tt">Document</key>
+		<key name="menu.main.insert.image">Image</key>
+		<key name="menu.main.insert.image.tt">Image</key>
+		<key name="menu.main.insert.uri">Link</key>
+		<key name="menu.main.insert.uri.tt">Link</key>
+		<key name="menu.main.tools">Tools</key>
+		<key name="menu.main.tools.tt">Tools</key>
+		<key name="menu.main.tools.validate">Validate</key>
+		<key name="menu.main.tools.validate.tt">Validate project</key>		
+		<key name="menu.main.tools.preview">Preview</key>
+		<key name="menu.main.tools.preview.tt">Preview project</key>
+		<key name="menu.main.tools.buildIndex">Indexing</key>
+		<key name="menu.main.tools.buildIndex.tt">Build search index</key>
+		<key name="menu.main.tools.settings">Settings</key>
+		<key name="menu.main.tools.settings.tt">Settings</key>
+		<key name="menu.main.tools.languages">Languages</key>
+		<key name="menu.main.tools.languages.tt">Languages</key>
+		<key name="menu.main.help">Help</key>
+		<key name="menu.main.help.tt">Help</key>
+		<key name="menu.main.help.manual">User guide</key>
+		<key name="menu.main.help.manual.tt">User guide</key>
+		<key name="menu.main.help.about">About...</key>
+		<key name="menu.main.help.about.tt">About...</key>
 
-<!-- Локализация класса FirstSceen -->
+<!-- Localization for tree menu --> 
+		<key name="treemenu.properties">Edit</key>
+		<key name="treemenu.properties.tt">Edit item</key>
+		<key name="treemenu.delete">Delete</key>
+		<key name="treemenu.delete.tt">Delete item</key>
+
+<!-- FirstScreen class localization -->
 		<key name="chav1961.csce.FirstScreen.title">Drag project file *.csc here to start editing it</key>
+
+<!-- ProjectItemEditor class localization -->
+		<key name="ProjectItemEditor.caption">Part properties</key>
+		<key name="ProjectItemEditor.caption.tt">Part properties</key>
+		<key name="ProjectItemEditor.caption.help">Part properties</key>
+		<key name="ProjectItemEditor.name">Part name</key>
+		<key name="ProjectItemEditor.name.tt">Part name</key>
+		<key name="ProjectItemEditor.desc">Description</key>
+		<key name="ProjectItemEditor.desc.tt">Description</key>
+		<key name="ProjectItemEditor.title">Part title</key>
+		<key name="ProjectItemEditor.title.tt">Part title</key>
  
  	</lang>
 	<lang name="ru">
@@ -93,6 +114,9 @@
 		<key name="chav1961.csce.Application.message.confirm.delete">Файл схемы [%1$s] будкт удален. Вы действительно хотите его удалить?</key>
 		<key name="chav1961.csce.Application.message.confirm.delete.title">Подтвердите удаление</key>
 		<key name="chav1961.csce.Application.message.not.implemented.yet">ПОКА НЕ РЕАЛИЗОВАНО!</key>
+		<key name="chav1961.csce.Application.confirm.delete.title">Подтвердите удаление</key>
+		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
+		
 
 <!-- Локализация меню приложения -->
 		<key name="menu.main.file">Файл</key>
@@ -135,6 +159,8 @@
 		<key name="menu.main.insert.part.tt">Раздел</key>
 		<key name="menu.main.insert.page">Страницу</key>
 		<key name="menu.main.insert.page.tt">Страницу</key>
+		<key name="menu.main.insert.document">Документ</key>
+		<key name="menu.main.insert.document.tt">Документ</key>
 		<key name="menu.main.insert.image">Изображение</key>
 		<key name="menu.main.insert.image.tt">Изображение</key>
 		<key name="menu.main.insert.uri">Ссылку</key>
@@ -158,8 +184,25 @@
 		<key name="menu.main.help.about">О программе...</key>
 		<key name="menu.main.help.about.tt">О программе...</key>
 
-<!-- Локализация класса FirstSceen -->
+<!-- Локализация меню дерева проекта -->
+		<key name="treemenu.properties">Редактировать</key>
+		<key name="treemenu.properties.tt">Редактировать элемент</key>
+		<key name="treemenu.delete">Удалить</key>
+		<key name="treemenu.delete.tt">Удалить элемент</key>
+
+<!-- Локализация класса FirstScreen -->
 		<key name="chav1961.csce.FirstScreen.title">Перетащите сюда файл проекта *.csc чтобы начать работу с ним</key>
+ 
+<!-- Локализация класса ProjectItemEditor -->
+		<key name="ProjectItemEditor.caption">Свойства раздела</key>
+		<key name="ProjectItemEditor.caption.tt">Свойства раздела</key>
+		<key name="ProjectItemEditor.caption.help">Свойства раздела</key>
+		<key name="ProjectItemEditor.name">Имя раздела</key>
+		<key name="ProjectItemEditor.name.tt">Уникальное имя в поддереве проекта</key>
+		<key name="ProjectItemEditor.desc">Описание</key>
+		<key name="ProjectItemEditor.desc.tt">Описание раздела</key>
+		<key name="ProjectItemEditor.title">Заголовок раздела</key>
+		<key name="ProjectItemEditor.title.tt">Заголовок раздела в навигаторе</key>
  
 	</lang>	
 </localization>

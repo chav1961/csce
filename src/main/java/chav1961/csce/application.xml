@@ -32,6 +32,7 @@
 			<app:item name="menu.main.insert.part" caption="menu.main.insert.part" tooltip="menu.main.insert.part.tt" action="insertPart"/>
 			<app:separator/>
 			<app:item name="menu.main.insert.page" caption="menu.main.insert.page" tooltip="menu.main.insert.page.tt" action="insertPage"/>
+			<app:item name="menu.main.insert.document" caption="menu.main.insert.document" tooltip="menu.main.insert.document.tt" action="insertDocument"/>
 			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
 			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
 		</app:submenu>
@@ -57,4 +58,17 @@
 		<app:key code="P" ctrl="true" action="previewProject"/>
 		<app:key code="F1" action="manual"/>
 	</app:keyset>
+ 	<app:menu id="treemenu">
+		<app:submenu name="menu.main.insert" caption="menu.main.insert" tooltip="menu.main.insert.tt">
+			<app:item name="menu.main.insert.part" caption="menu.main.insert.part" tooltip="menu.main.insert.part.tt" action="insertPart"/>
+			<app:separator/>
+			<app:item name="menu.main.insert.page" caption="menu.main.insert.page" tooltip="menu.main.insert.page.tt" action="insertPage"/>
+			<app:item name="menu.main.insert.document" caption="menu.main.insert.document" tooltip="menu.main.insert.document.tt" action="insertDocument"/>
+			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
+			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
+		</app:submenu>
+		<app:separator/>
+		<app:item name="treemenu.properties" caption="treemenu.properties" tooltip="treemenu.properties.tt" action="editItem"/>
+		<app:item name="treemenu.delete" caption="treemenu.delete" tooltip="treemenu.delete.tt" action="deleteItem"/>
+	</app:menu>
 </app:root>

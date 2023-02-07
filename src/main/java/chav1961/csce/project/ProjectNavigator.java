@@ -52,6 +52,7 @@ public class ProjectNavigator {
 	public static final String	F_REFERENCE = "reference";
 
 	public static enum ItemType {
+		Root("favicon16x16.png"),
 		CreoleRef("favicon16x16.png"),
 		Subtree("favicon16x16.png");
 		

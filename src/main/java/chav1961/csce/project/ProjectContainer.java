@@ -37,6 +37,7 @@ import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
 import chav1961.purelib.json.JsonNode;
 import chav1961.purelib.json.JsonUtils;
+import chav1961.purelib.model.interfaces.ContentMetadataInterface;
 import chav1961.purelib.streams.JsonStaxParser;
 import chav1961.purelib.streams.JsonStaxPrinter;
 
@@ -96,22 +97,31 @@ public class ProjectContainer implements LocalizerOwner {
 										};
 	
 	private final Application				app;
+	private final ContentMetadataInterface	mdi;
 	private Localizer						localizer = null;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
 	private ProjectNavigator				navigator = null;
 	private String							projectFileName = null;
 	
-	public ProjectContainer(final Application app) {
+	public ProjectContainer(final Application app, final ContentMetadataInterface mdi) {
 		if (app == null) {
 			throw new NullPointerException("Application can't be null");
+		}
+		else if (mdi == null) {
+			throw new NullPointerException("Metadata can't be null");
 		}
 		else {
 			this.app = app;
 			this.localizer = app.getLocalizer();
+			this.mdi = mdi;
 		}
 	}
 
+	public Application getApplication() {
+		return app;
+	}
+	
 	@Override
 	public Localizer getLocalizer() {
 		return localizer;
