@@ -162,7 +162,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		this.fcm.addFileContentChangeListener(new FileContentChangeListener<Application>() {
 			@Override
 			public void actionPerformed(FileContentChangedEvent<Application> event) {
-				System.err.println("Call: "+event.getChangeType());
 				switch (event.getChangeType()) {
 					case LRU_LIST_REFRESHED			:
 						fillLRU(fcm.getLastUsed());
@@ -173,7 +172,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						if (viewer == null) {
 							placeViewer();
 						}
-						viewer.refreshProject();
 						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					case FILE_STORED 				:
@@ -193,7 +191,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						if (viewer == null) {
 							placeViewer();
 						}
-						viewer.refreshProject();
 						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					default :
@@ -344,7 +341,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			
 			try{if (ask(pie, getLocalizer(), 400, 120)) {
 					project.getProjectNavigator().addItem(toAdd);
-					viewer.refreshProject();
 				}
 			} catch (ContentException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());
@@ -397,7 +393,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 							, JOptionPane.QUESTION_MESSAGE
 							, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				project.getProjectNavigator().removeItem(pni.id);
-				viewer.refreshProject();
 			}
 		}
 	}
@@ -518,6 +513,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	private void placeViewer() {
 		viewer = new ProjectViewer(Application.this, project, mdi);
+		project.addProjectChangeListener((e)->viewer.refreshProject(e));
 		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();

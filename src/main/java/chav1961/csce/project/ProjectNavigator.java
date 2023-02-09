@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.PreparationException;
@@ -73,6 +74,7 @@ public class ProjectNavigator {
 	
 	private static final ProjectNavigatorItem[]	EMPTY_ARRAY = new ProjectNavigatorItem[0];
 	
+	private final ProjectContainer			container;
 	private final String					version;
 	private final String					rootName;
 	private ProjectNavigatorItem[]			items;
@@ -99,6 +101,7 @@ public class ProjectNavigator {
 			final JsonTreeWalkerCallback		itemFilter = JsonUtils.filterOf("/items/[]", (mode, node, parm)->appendItem(temp,mode,node));
 	
 			JsonUtils.walkDownJson(root, itemFilter);
+			this.container = container;
 			this.version = root.getChild(F_VERSION).getStringValue();
 			this.rootName = rootName;
 			this.items = temp.toArray(new ProjectNavigatorItem[temp.size()]);
@@ -206,6 +209,7 @@ public class ProjectNavigator {
 			items = Arrays.copyOf(items, items.length + 1);
 			items[items.length - 1] = item;
 			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			container.fireProjectChangeEvent(new ProjectChangeEvent(container, ProjectChangeType.PART_INSERTED, item.parent, item.id));
 		}
 	}
 

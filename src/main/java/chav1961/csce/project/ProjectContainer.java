@@ -15,6 +15,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -31,6 +32,7 @@ import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.PrintingException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
+import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.i18n.LocalizerFactory;
 import chav1961.purelib.i18n.XMLLocalizer;
 import chav1961.purelib.i18n.interfaces.Localizer;
@@ -98,11 +100,12 @@ public class ProjectContainer implements LocalizerOwner {
 	
 	private final Application				app;
 	private final ContentMetadataInterface	mdi;
-	private Localizer						localizer = null;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
+	private final LightWeightListenerList<ProjectChangeListener>	listeners = new LightWeightListenerList<>(ProjectChangeListener.class);  
+	private Localizer						localizer = null;
 	private ProjectNavigator				navigator = null;
-	private String							projectFileName = null;
+	private String							projectFileName = "";
 	
 	public ProjectContainer(final Application app, final ContentMetadataInterface mdi) {
 		if (app == null) {
@@ -127,12 +130,38 @@ public class ProjectContainer implements LocalizerOwner {
 		return localizer;
 	}
 	
+	public void addProjectChangeListener(final ProjectChangeListener l) {
+		if (l == null) {
+			throw new NullPointerException("Project change listener to add can't be null"); 
+		}
+		else {
+			listeners.addListener(l);
+		}
+	}
+
+	public void removeProjectChangeListener(final ProjectChangeListener l) {
+		if (l == null) {
+			throw new NullPointerException("Project change listener to remove can't be null"); 
+		}
+		else {
+			listeners.removeListener(l);
+		}
+	}
+	
 	public String getProjectFileName() {
 		return projectFileName;
 	}
 	
 	public void setProjectFileName(final String name) {
-		projectFileName = name;
+		if (Utils.checkEmptyOrNullString(name)) {
+			throw new IllegalArgumentException("Project file name to set can't be null or empty");
+		}
+		else if (!Objects.equals(projectFileName, name)) {
+			final ProjectChangeEvent pce = new ProjectChangeEvent(this, ProjectChangeEvent.ProjectChangeType.PROJECT_FILENAME_CHANGED, getProjectFileName(), name);
+
+			projectFileName = name;
+			fireProjectChangeEvent(pce);
+		}
 	}
 	
 	public ProjectNavigator getProjectNavigator() {
@@ -182,6 +211,10 @@ public class ProjectContainer implements LocalizerOwner {
 				}
 			};
 		};
+	}
+	
+	protected void fireProjectChangeEvent(final ProjectChangeEvent event) {
+		listeners.fireEvent((l)->l.processEvent(event));
 	}
 	
 	private void createNewProject() throws IOException {

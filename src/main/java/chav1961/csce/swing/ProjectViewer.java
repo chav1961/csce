@@ -5,9 +5,12 @@ import java.util.Locale;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import chav1961.csce.Application;
+import chav1961.csce.project.ProjectChangeEvent;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
@@ -47,11 +50,6 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 		// TODO Auto-generated method stub
 		SwingUtils.refreshLocale(tree, oldLocale, newLocale);
-		refreshProject();
-	}
-	
-	public void refreshProject() {
-		
 	}
 	
 	public boolean isProjectNavigatorItemSelected() {
@@ -67,5 +65,9 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		else {
 			return null;
 		}
+	}
+
+	public void refreshProject(final ProjectChangeEvent event) {
+		tree.refreshTree(event);
 	}
 }
