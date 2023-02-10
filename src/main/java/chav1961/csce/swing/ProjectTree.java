@@ -1,5 +1,6 @@
 package chav1961.csce.swing;
 
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -34,7 +35,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 	private final ProjectContainer			project;
 	private final ContentMetadataInterface	mdi;
 	private final JPopupMenu				popup; 
-	private DefaultMutableTreeNode			rootNode;
+	private ProjectItemTreeNode				rootNode;
 	
 	public ProjectTree(final ProjectContainer project, final ContentMetadataInterface mdi) {
 		super();
@@ -92,11 +93,12 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 	public void refreshTree(final ProjectChangeEvent event) {
 		switch (event.getChangeType()) {
 			case PART_INSERTED				:
-				final TreePath 					parentPath = long2TreePath((long)event.getParameters()[0]);
-				final DefaultMutableTreeNode	parentNode = ((DefaultMutableTreeNode)parentPath.getLastPathComponent());
-				final DefaultMutableTreeNode	child = new DefaultMutableTreeNode(project.getProjectNavigator().getItem((long)event.getParameters()[1]));
+				final TreePath 				parentPath = long2TreePath((long)event.getParameters()[0]);
+				final ProjectItemTreeNode	parentNode = ((ProjectItemTreeNode)parentPath.getLastPathComponent());
+				final ProjectItemTreeNode	child = new ProjectItemTreeNode(project.getProjectNavigator().getItem((long)event.getParameters()[1]));
 
-				((DefaultTreeModel)getModel()).insertNodeInto(child, parentNode, 0);
+				((DefaultTreeModel)getModel()).insertNodeInto(child, parentNode, parentNode.getChildCount());
+				getSelectionModel().setSelectionPath(parentPath.pathByAddingChild(child));
 				break;
 			case PROJECT_FILENAME_CHANGED	:
 				break;
@@ -108,25 +110,25 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 	private TreePath long2TreePath(final long id) {
 		final TreePath[]	path = new TreePath[] {null};
 		
-		walkAndProcess((DefaultMutableTreeNode)getModel().getRoot(), (node)->{
-			if (((ProjectNavigatorItem)node.getUserObject()).id == id) {
+		walkAndProcess((ProjectItemTreeNode)getModel().getRoot(), (node)->{
+			if (node.getUserObject().id == id) {
 				path[0] = new TreePath(node.getPath());
 			}
 		});
 		return path[0];
 	}
 
-	private void walkAndProcess(final DefaultMutableTreeNode node, final Consumer<DefaultMutableTreeNode> consumer) {
+	private void walkAndProcess(final ProjectItemTreeNode node, final Consumer<ProjectItemTreeNode> consumer) {
 		for (int index = 0; index < node.getChildCount(); index++) {
-			walkAndRefresh((DefaultMutableTreeNode)node.getChildAt(index));
+			walkAndProcess((ProjectItemTreeNode)node.getChildAt(index), consumer);
 		}
 		consumer.accept(node);
 	}
 	
 	
-	private void walkAndRefresh(final DefaultMutableTreeNode node) {
+	private void walkAndRefresh(final ProjectItemTreeNode node) {
 		for (int index = 0; index < node.getChildCount(); index++) {
-			walkAndRefresh((DefaultMutableTreeNode)node.getChildAt(index));
+			walkAndRefresh((ProjectItemTreeNode)node.getChildAt(index));
 		}
 		((DefaultTreeModel)getModel()).nodeChanged(node);
 	}
@@ -151,17 +153,52 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 		}
 	}
 	
-	private static DefaultMutableTreeNode buildTree(final ProjectNavigator navigator) {
+	private static ProjectItemTreeNode buildTree(final ProjectNavigator navigator) {
 		return buildTree(navigator, navigator.getRoot().id);
 	}	
 	
-	private static DefaultMutableTreeNode buildTree(final ProjectNavigator navigator, final long id) {
-		final DefaultMutableTreeNode	result = new DefaultMutableTreeNode(navigator.getItem(id));
+	private static ProjectItemTreeNode buildTree(final ProjectNavigator navigator, final long id) {
+		final ProjectItemTreeNode	result = new ProjectItemTreeNode(navigator.getItem(id));
 		
 		for (ProjectNavigatorItem item : navigator.getChildren(id)) {
 			result.add(buildTree(navigator, item.id));
 		}
 		return result;
+	}
+	
+	private static class ProjectItemTreeNode extends DefaultMutableTreeNode {
+		private static final long serialVersionUID = 1L;
+
+		public ProjectItemTreeNode(final ProjectNavigatorItem userObject) {
+			this(userObject, !userObject.type.isLeafItem());
+		}
+		
+		public ProjectItemTreeNode(final ProjectNavigatorItem userObject, boolean allowsChildren) {
+			super(userObject, allowsChildren);
+			if (userObject == null) {
+				throw new NullPointerException("User object can't be null");
+			}
+		}
+
+		@Override
+		public ProjectNavigatorItem getUserObject() {
+			return (ProjectNavigatorItem)super.getUserObject();
+		}
+		
+		@Override
+		public void setUserObject(final Object userObject) {
+			if (!(userObject instanceof ProjectNavigatorItem)) {
+				throw new IllegalArgumentException("User object no set can't be null and must be ProjectNavigatorItem instance"); 
+			}
+			else {
+				super.setUserObject(userObject);
+			}
+		}
+		
+		@Override
+		public boolean isLeaf() {
+			return getUserObject().type.isLeafItem();
+		}
 	}
 
 }

@@ -53,13 +53,14 @@ public class ProjectNavigator {
 	public static final String	F_REFERENCE = "reference";
 
 	public static enum ItemType {
-		Root("favicon16x16.png"),
-		CreoleRef("favicon16x16.png"),
-		Subtree("favicon16x16.png");
+		Root("favicon16x16.png", false),
+		CreoleRef("favicon16x16.png", true),
+		Subtree("favicon16x16.png", false);
 		
 		private final URI	icon;
+		private boolean		isLeaf;
 		
-		private ItemType(final String icon) {
+		private ItemType(final String icon, final boolean isLeaf) {
 			try {
 				this.icon = getClass().getResource(icon).toURI();
 			} catch (URISyntaxException e) {
@@ -69,6 +70,10 @@ public class ProjectNavigator {
 		
 		private URI getIconURI() {
 			return icon;
+		}
+		
+		public boolean isLeafItem() {
+			return isLeaf;
 		}
 	}
 	
