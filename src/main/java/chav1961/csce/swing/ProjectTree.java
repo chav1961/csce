@@ -166,7 +166,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 		return result;
 	}
 	
-	private static class ProjectItemTreeNode extends DefaultMutableTreeNode {
+	static class ProjectItemTreeNode extends DefaultMutableTreeNode {
 		private static final long serialVersionUID = 1L;
 
 		public ProjectItemTreeNode(final ProjectNavigatorItem userObject) {

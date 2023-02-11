@@ -27,6 +27,7 @@ import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.swing.ProjectItemEditor;
 import chav1961.csce.swing.ProjectViewer;
+import chav1961.csce.swing.ProjectViewerChangeEvent;
 import chav1961.purelib.basic.ArgParser;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -172,7 +173,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						if (viewer == null) {
 							placeViewer();
 						}
-						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					case FILE_STORED 				:
 						break;
@@ -191,7 +192,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						if (viewer == null) {
 							placeViewer();
 						}
-						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | INSERT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
 						break;
 					default :
 						throw new UnsupportedOperationException("Change type ["+event.getChangeType()+"] is not supported yet");
@@ -517,8 +518,24 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();
+        viewer.addProjectViewerChangeListener((e)->refreshProjectMenu(e));
 	}
 	
+	private void refreshProjectMenu(final ProjectViewerChangeEvent e) {
+		switch (e.getChangeType()) {
+			case NAVIGATOR_ITEM_DESELECTED	:
+				setEnableMenuMask(getEnableMenuMask() & ~(INSERT));
+				break;
+			case NAVIGATOR_ITEM_SELECTED	:
+				if (!project.getProjectNavigator().getItem((long)e.getParameters()[0]).type.isLeafItem()) {
+					setEnableMenuMask(getEnableMenuMask() | INSERT);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException("Change type ["+e.getChangeType()+"] is not supported yet");
+		}
+	}
+
 	private void refreshMenuState(long enableMask) {
 		for (int index = 0; index < MENUS.length; index++, enableMask >>= 1) {
 			SwingUtils.findComponentByName(menuBar, MENUS[index]).setEnabled((enableMask & 1L) != 0);
