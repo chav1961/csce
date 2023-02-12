@@ -34,8 +34,8 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 
 	private final ProjectContainer			project;
 	private final ContentMetadataInterface	mdi;
-	private final JPopupMenu				popup; 
 	private ProjectItemTreeNode				rootNode;
+	final JPopupMenu						popup; 
 	
 	public ProjectTree(final ProjectContainer project, final ContentMetadataInterface mdi) {
 		super();
@@ -92,13 +92,26 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 	
 	public void refreshTree(final ProjectChangeEvent event) {
 		switch (event.getChangeType()) {
-			case PART_INSERTED				:
-				final TreePath 				parentPath = long2TreePath((long)event.getParameters()[0]);
-				final ProjectItemTreeNode	parentNode = ((ProjectItemTreeNode)parentPath.getLastPathComponent());
-				final ProjectItemTreeNode	child = new ProjectItemTreeNode(project.getProjectNavigator().getItem((long)event.getParameters()[1]));
+			case PART_INSERTED : case ITEM_INSERTED :
+				final TreePath 				parentPathInserted = long2TreePath((long)event.getParameters()[0]);
+				final ProjectItemTreeNode	parentNodeInserted = ((ProjectItemTreeNode)parentPathInserted.getLastPathComponent());
+				final ProjectItemTreeNode	childInserted = new ProjectItemTreeNode(project.getProjectNavigator().getItem((long)event.getParameters()[1]));
 
-				((DefaultTreeModel)getModel()).insertNodeInto(child, parentNode, parentNode.getChildCount());
-				getSelectionModel().setSelectionPath(parentPath.pathByAddingChild(child));
+				((DefaultTreeModel)getModel()).insertNodeInto(childInserted, parentNodeInserted, parentNodeInserted.getChildCount());
+				getSelectionModel().setSelectionPath(parentPathInserted.pathByAddingChild(childInserted));
+				break;
+			case PART_REMOVED : case ITEM_REMOVED :
+				final TreePath 				pathRemoved = long2TreePath((long)event.getParameters()[1]);
+				final ProjectItemTreeNode	nodeRemoved = ((ProjectItemTreeNode)pathRemoved.getLastPathComponent());
+
+				((DefaultTreeModel)getModel()).removeNodeFromParent(nodeRemoved);
+				getSelectionModel().setSelectionPath(pathRemoved.getParentPath());
+				break;
+			case PART_CHANGED : case ITEM_CHANGED :
+				final TreePath 				pathChanged = long2TreePath((long)event.getParameters()[1]);
+				final ProjectItemTreeNode	nodeChanged = ((ProjectItemTreeNode)pathChanged.getLastPathComponent());
+				
+				((DefaultTreeModel)getModel()).reload(nodeChanged);
 				break;
 			case PROJECT_FILENAME_CHANGED	:
 				break;
@@ -144,9 +157,10 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			final TreePath	path = getClosestPathForLocation(p.x, p.y);
 			
 			if (path != null) {
+				final ProjectItemTreeNode	pitn = (ProjectItemTreeNode)path.getLastPathComponent();
 				final int	row = getRowForPath(path);
 				
-				SwingUtils.findComponentByName(popup, "treemenu.properties").setEnabled(row != 0);
+				SwingUtils.findComponentByName(popup, "treemenu.properties").setEnabled(pitn.getUserObject().type.isEditingSipported());
 				SwingUtils.findComponentByName(popup, "treemenu.delete").setEnabled(row != 0);
 				popup.show(this, p.x, p.y);
 			}

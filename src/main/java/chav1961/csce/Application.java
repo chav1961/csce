@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -26,6 +27,7 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.swing.ProjectItemEditor;
+import chav1961.csce.swing.ProjectPartEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.csce.swing.ProjectViewerChangeEvent;
 import chav1961.purelib.basic.ArgParser;
@@ -57,7 +59,9 @@ import chav1961.purelib.ui.interfaces.LRUPersistence;
 import chav1961.purelib.ui.swing.AutoBuiltForm;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
+import chav1961.purelib.ui.swing.useful.JEnableMaskManipulator;
 import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
+import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JStateString;
@@ -87,6 +91,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
 	public static final String		KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS = "chav1961.csce.Application.message.file.not.exists";
 
+	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
+	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
+	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
+	
 	private static final String		MENU_FILE_LRU = "menu.main.file.lru";
 	private static final String		MENU_FILE_SAVE = "menu.main.file.save";
 	private static final String		MENU_FILE_SAVEAS = "menu.main.file.saveAs";
@@ -124,6 +132,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final long 		TOOLS_VALIDATE = 1L << 8;
 	private static final long 		TOOLS_PREVIEW = 1L << 9;
 	private static final long 		TOOLS_BUILD_INDEX = 1L << 10;
+
+	private static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
+	private static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
+	private static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
+	
 	
 	private final URI						helpServerURI;
 	private final ContentMetadataInterface	mdi;
@@ -135,8 +148,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final JFileContentManipulator	fcm;
 	private final ProjectContainer			project;
 	private final CountDownLatch			latch = new CountDownLatch(1);
+	private final JEnableMaskManipulator	emm;
 
-	private long[]							enableMask = new long[] {0};
 	private FirstScreen						firstScreen = null; 
 	private ProjectViewer					viewer = null;
 	
@@ -153,6 +166,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 		this.helpServerURI = helpServerURI;
 		this.menuBar = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.mainmenu")), JMenuBar.class); 
+		this.emm = new JEnableMaskManipulator(MENUS, this.menuBar);
 		this.state = new JStateString(localizer, 100);
 		this.lru = LRUPersistence.of(propFile, LRU_PREFIX); 
 		this.fcm = new JFileContentManipulator(repo, localizer, 
@@ -169,30 +183,34 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						break;
 					case FILE_LOADED 				:
 						project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
-						fillTitle();
 						if (viewer == null) {
 							placeViewer();
 						}
-						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						fillTitle();
 						break;
 					case FILE_STORED 				:
+						fcm.clearModificationFlag();
 						break;
 					case FILE_STORED_AS 			:
 						project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
+						fcm.clearModificationFlag();
 						fillTitle();
 						break;
 					case MODIFICATION_FLAG_CLEAR 	:
-						setEnableMenuMask(getEnableMenuMask() & ~(FILE_SAVE));
+						getEnableMaskManipulator().setEnableMaskOff(FILE_SAVE);
+						fillTitle();
 						break;
 					case MODIFICATION_FLAG_SET 		:
-						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | (Utils.checkEmptyOrNullString(project.getProjectFileName()) ? 0 : FILE_SAVE));
+						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | (Utils.checkEmptyOrNullString(project.getProjectFileName()) ? 0 : FILE_SAVE));
+						fillTitle();
 						break;
 					case NEW_FILE_CREATED 			:
-						fillTitle();
 						if (viewer == null) {
 							placeViewer();
 						}
-						setEnableMenuMask(getEnableMenuMask() | FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+						fillTitle();
 						break;
 					default :
 						throw new UnsupportedOperationException("Change type ["+event.getChangeType()+"] is not supported yet");
@@ -231,6 +249,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 		SwingUtils.refreshLocale(getContentPane(), oldLocale, newLocale);
 		SwingUtils.refreshLocale(menuBar, oldLocale, newLocale);
+		SwingUtils.refreshLocale(state, oldLocale, newLocale);
 		fillLocalizationStrings();
 	}
 
@@ -243,7 +262,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void close() throws EnvironmentException {
 		try{latch.await();
 
-			fcm.close();
 			repo.close();
 			if (localizer != null) {
 				getLocalizer().pop();
@@ -338,10 +356,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 																	, ""
 																	, "label"
 																	, -1);
-			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), toAdd);
+			final ProjectPartEditor		ppe = new ProjectPartEditor(getLogger(), toAdd);
 			
-			try{if (ask(pie, getLocalizer(), 400, 120)) {
-					project.getProjectNavigator().addItem(toAdd);
+			try{if (ask(ppe, getLocalizer(), 400, 180)) {
+					project.getProjectNavigator().addItem(ppe.getNavigatorItem());
 				}
 			} catch (ContentException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());
@@ -351,14 +369,76 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/insertPage")
 	public void insertPage() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+																	, pni.id
+																	, "newItem"
+																	, ItemType.CreoleRef
+																	, ""
+																	, "label"
+																	, -1);
+			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), toAdd);
+			
+			try{if (ask(pie, getLocalizer(), 400, 180)) {
+					project.getProjectNavigator().addItem(pie.getNavigatorItem());
+				}
+			} catch (ContentException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
 	}
 
 	@OnAction("action:/insertDocument")
 	public void insertDocument() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			boolean		wasSelected = false;
+			
+			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, PDF_FILTER, DJVU_FILTER)) {
+					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+															, pni.id
+															, item
+															, ItemType.DocumentRef
+															, ""
+															, "label"
+															, -1);
+					project.getProjectNavigator().addItem(toAdd);
+					wasSelected = true;
+				}
+				if (wasSelected) {
+					fcm.setModificationFlag();
+				}
+			} catch (IOException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
 	}
 	
 	@OnAction("action:/insertImage")
 	public void insertImage() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			boolean		wasSelected = false;
+			
+			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, IMAGE_FILTER)) {
+					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+															, pni.id
+															, item
+															, ItemType.ImageRef
+															, ""
+															, "label"
+															, -1);
+					project.getProjectNavigator().addItem(toAdd);
+					wasSelected = true;
+				}
+				if (wasSelected) {
+					fcm.setModificationFlag();
+				}
+			} catch (IOException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
 	}
 	
 	@OnAction("action:/insertUri")
@@ -368,17 +448,30 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	@OnAction("action:/editItem")
 	public void editItem() {
 		if (viewer.isProjectNavigatorItemSelected()) {
-			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
-			
-			switch (pni.type) {
-				case CreoleRef	:
-					break;
-				case Root		:
-					break;
-				case Subtree	:
-					break;
-				default:
-					throw new UnsupportedOperationException("Item type ["+pni.type+"] is not supported yet"); 
+			try{final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+				
+				switch (pni.type) {
+					case CreoleRef	:
+						final ProjectItemEditor	pie = new ProjectItemEditor(getLogger(), pni);
+						
+						if (ask(pie, getLocalizer(), 400, 180)) {
+							project.getProjectNavigator().setItem(pni.id, pie.getNavigatorItem());
+						}
+						break;
+					case Root		:
+						break;
+					case Subtree	:
+						final ProjectPartEditor	ppe = new ProjectPartEditor(getLogger(), pni);
+						
+						if (ask(ppe, getLocalizer(), 400, 180)) {
+							project.getProjectNavigator().setItem(pni.id, ppe.getNavigatorItem());
+						}
+						break;
+					default:
+						throw new UnsupportedOperationException("Item type ["+pni.type+"] is not supported yet"); 
+				}
+			} catch (ContentException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
 			}
 		}
 	}
@@ -435,41 +528,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		SwingUtils.showAboutScreen(this, localizer, KEY_APPLICATION_HELP_TITLE, KEY_APPLICATION_HELP_CONTENT, URI.create("root://"+getClass().getCanonicalName()+"/chav1961/csce/avatar.jpg"), new Dimension(640, 400));
 	}
 
-	protected long getEnableMenuMask() {
-		return enableMask[0];
+	public JEnableMaskManipulator getEnableMaskManipulator() {
+		return emm;
 	}
 	
-	protected void setEnableMenuMask(final long mask) {
-		enableMask[0] = mask;
-		refreshMenuState(mask);
-	}
-	
-	protected long pushEnableMenuMask(final long mask) {
-		final long		result = enableMask[0];
-		final long[]	temp = new long[enableMask.length + 1];
-
-		System.arraycopy(enableMask, 0, temp, 1, enableMask.length);
-		temp[0] = result;
-		enableMask = temp;
-		refreshMenuState(result);
-		return result;
-	}
-	
-	protected long popEnableMenuMask() {
-		if (enableMask.length == 1) {
-			throw new IllegalStateException("Pop enable mask error - stack is empty");
-		}
-		else {
-			final long		result = enableMask[0];
-			final long[]	temp = new long[enableMask.length - 1];
-
-			System.arraycopy(enableMask, 1, temp, 0, enableMask.length - 1);
-			enableMask = temp;
-			refreshMenuState(result);
-			return result;
-		}
-	}
-
 	void loadLRU(final String path) {
 		final File	f = new File(path);
 		
@@ -487,7 +549,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	private void fillLRU(final List<String> lastUsed) {
 		if (lastUsed.isEmpty()) {
-			setEnableMenuMask(getEnableMenuMask() & ~(FILE_LRU));
+			getEnableMaskManipulator().setEnableMaskOff(FILE_LRU);
 		}
 		else {
 			final JMenu	menu = (JMenu)SwingUtils.findComponentByName(menuBar, MENU_FILE_LRU);
@@ -499,10 +561,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				item.addActionListener((e)->loadLRU(item.getText()));
 				menu.add(item);
 			}
-			setEnableMenuMask(getEnableMenuMask() | FILE_LRU);
+			getEnableMaskManipulator().setEnableMaskOn(FILE_LRU);
 		}
 	}
-
 	
 	private void fillLocalizationStrings() {
 		fillTitle();
@@ -514,7 +575,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	private void placeViewer() {
 		viewer = new ProjectViewer(Application.this, project, mdi);
-		project.addProjectChangeListener((e)->viewer.refreshProject(e));
+		project.addProjectChangeListener((e)->{
+			fcm.setModificationFlag();
+			viewer.refreshProject(e);
+		});
 		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();
@@ -524,11 +588,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private void refreshProjectMenu(final ProjectViewerChangeEvent e) {
 		switch (e.getChangeType()) {
 			case NAVIGATOR_ITEM_DESELECTED	:
-				setEnableMenuMask(getEnableMenuMask() & ~(INSERT));
+				getEnableMaskManipulator().setEnableMaskOff(INSERT);
 				break;
 			case NAVIGATOR_ITEM_SELECTED	:
 				if (!project.getProjectNavigator().getItem((long)e.getParameters()[0]).type.isLeafItem()) {
-					setEnableMenuMask(getEnableMenuMask() | INSERT);
+					getEnableMaskManipulator().setEnableMaskOn(INSERT);
 				}
 				break;
 			default:
@@ -536,12 +600,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 
-	private void refreshMenuState(long enableMask) {
-		for (int index = 0; index < MENUS.length; index++, enableMask >>= 1) {
-			SwingUtils.findComponentByName(menuBar, MENUS[index]).setEnabled((enableMask & 1L) != 0);
-		}
-	}
-	
 	public static void main(String[] args) {
 		final ArgParser	parser = new ApplicationArgParser();
 		int				retcode = 0;	

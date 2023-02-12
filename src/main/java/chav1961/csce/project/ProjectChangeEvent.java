@@ -9,7 +9,12 @@ public class ProjectChangeEvent extends AWTEvent {
 
 	public static enum ProjectChangeType {
 		PROJECT_FILENAME_CHANGED,
-		PART_INSERTED
+		PART_INSERTED,
+		PART_REMOVED,
+		ITEM_INSERTED,
+		ITEM_REMOVED,
+		PART_CHANGED,
+		ITEM_CHANGED
 	}
 	
 	private final ProjectChangeType	type;

@@ -14,6 +14,9 @@
 		<key name="chav1961.csce.Application.message.not.implemented.yet">NOT IMPLEMENTED YET!</key>
 		<key name="chav1961.csce.Application.confirm.delete.title">Confirm delete</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
+		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
+		<key name="chav1961.csce.Application.filter.djvu.file">DJVU files</key>
+		<key name="chav1961.csce.Application.filter.image.file">Image files</key>
 
 <!-- Localization for application menu --> 
 		<key name="menu.main.file">File</key>
@@ -90,16 +93,27 @@
 <!-- FirstScreen class localization -->
 		<key name="chav1961.csce.FirstScreen.title">Drag project file *.csc here to start editing it</key>
 
+<!-- ProjectPartEditor class localization -->
+		<key name="ProjectPartEditor.caption">Part properties</key>
+		<key name="ProjectPartEditor.caption.tt">Part properties</key>
+		<key name="ProjectPartEditor.caption.help">Part properties</key>
+		<key name="ProjectPartEditor.name">Part name</key>
+		<key name="ProjectPartEditor.name.tt">Unique part name in the project tree</key>
+		<key name="ProjectPartEditor.desc">Description</key>
+		<key name="ProjectPartEditor.desc.tt">Part description</key>
+		<key name="ProjectPartEditor.title">Part title</key>
+		<key name="ProjectPartEditor.title.tt">Part title in the navigator</key>
+
 <!-- ProjectItemEditor class localization -->
-		<key name="ProjectItemEditor.caption">Part properties</key>
-		<key name="ProjectItemEditor.caption.tt">Part properties</key>
-		<key name="ProjectItemEditor.caption.help">Part properties</key>
-		<key name="ProjectItemEditor.name">Part name</key>
-		<key name="ProjectItemEditor.name.tt">Part name</key>
+		<key name="ProjectItemEditor.caption">Page properties</key>
+		<key name="ProjectItemEditor.caption.tt">Page properties</key>
+		<key name="ProjectItemEditor.caption.help">Page properties</key>
+		<key name="ProjectItemEditor.name">Page name</key>
+		<key name="ProjectItemEditor.name.tt">Page name</key>
 		<key name="ProjectItemEditor.desc">Description</key>
-		<key name="ProjectItemEditor.desc.tt">Description</key>
-		<key name="ProjectItemEditor.title">Part title</key>
-		<key name="ProjectItemEditor.title.tt">Part title</key>
+		<key name="ProjectItemEditor.desc.tt">Page description</key>
+		<key name="ProjectItemEditor.title">Page title</key>
+		<key name="ProjectItemEditor.title.tt">Page title</key>
  
  	</lang>
 	<lang name="ru">
@@ -116,7 +130,9 @@
 		<key name="chav1961.csce.Application.message.not.implemented.yet">ПОКА НЕ РЕАЛИЗОВАНО!</key>
 		<key name="chav1961.csce.Application.confirm.delete.title">Подтвердите удаление</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
-		
+		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
+		<key name="chav1961.csce.Application.filter.djvu.file">DJVU файлы</key>
+		<key name="chav1961.csce.Application.filter.image.file">Файлы изображений</key>
 
 <!-- Локализация меню приложения -->
 		<key name="menu.main.file">Файл</key>
@@ -192,17 +208,28 @@
 
 <!-- Локализация класса FirstScreen -->
 		<key name="chav1961.csce.FirstScreen.title">Перетащите сюда файл проекта *.csc чтобы начать работу с ним</key>
+
+<!-- Локализация класса ProjectPartEditor -->
+		<key name="ProjectPartEditor.caption">Свойства раздела</key>
+		<key name="ProjectPartEditor.caption.tt">Свойства раздела</key>
+		<key name="ProjectPartEditor.caption.help">Свойства раздела</key>
+		<key name="ProjectPartEditor.name">Имя раздела</key>
+		<key name="ProjectPartEditor.name.tt">Уникальное имя в поддереве проекта</key>
+		<key name="ProjectPartEditor.desc">Описание</key>
+		<key name="ProjectPartEditor.desc.tt">Описание раздела</key>
+		<key name="ProjectPartEditor.title">Заголовок раздела</key>
+		<key name="ProjectPartEditor.title.tt">Заголовок раздела в навигаторе</key>
  
 <!-- Локализация класса ProjectItemEditor -->
-		<key name="ProjectItemEditor.caption">Свойства раздела</key>
-		<key name="ProjectItemEditor.caption.tt">Свойства раздела</key>
-		<key name="ProjectItemEditor.caption.help">Свойства раздела</key>
-		<key name="ProjectItemEditor.name">Имя раздела</key>
+		<key name="ProjectItemEditor.caption">Свойства страницы</key>
+		<key name="ProjectItemEditor.caption.tt">Свойства страницы</key>
+		<key name="ProjectItemEditor.caption.help">Свойства страницы</key>
+		<key name="ProjectItemEditor.name">Имя страницы</key>
 		<key name="ProjectItemEditor.name.tt">Уникальное имя в поддереве проекта</key>
 		<key name="ProjectItemEditor.desc">Описание</key>
-		<key name="ProjectItemEditor.desc.tt">Описание раздела</key>
-		<key name="ProjectItemEditor.title">Заголовок раздела</key>
-		<key name="ProjectItemEditor.title.tt">Заголовок раздела в навигаторе</key>
+		<key name="ProjectItemEditor.desc.tt">Описание страницы</key>
+		<key name="ProjectItemEditor.title">Заголовок страницы</key>
+		<key name="ProjectItemEditor.title.tt">Заголовок страницы в навигаторе</key>
  
 	</lang>	
 </localization>

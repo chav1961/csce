@@ -53,16 +53,21 @@ public class ProjectNavigator {
 	public static final String	F_REFERENCE = "reference";
 
 	public static enum ItemType {
-		Root("favicon16x16.png", false),
-		CreoleRef("favicon16x16.png", true),
-		Subtree("favicon16x16.png", false);
+		Root("favicon16x16.png", false, false),
+		CreoleRef("favicon16x16.png", true, true),
+		DocumentRef("favicon16x16.png", true, false),
+		ImageRef("favicon16x16.png", true, false),
+		Subtree("favicon16x16.png", false, true);
 		
-		private final URI	icon;
-		private boolean		isLeaf;
+		private final URI		icon;
+		private final boolean	isLeaf;
+		private final boolean	isEditingSupported;
 		
-		private ItemType(final String icon, final boolean isLeaf) {
+		private ItemType(final String icon, final boolean isLeaf, final boolean isEditingSupported) {
 			try {
 				this.icon = getClass().getResource(icon).toURI();
+				this.isLeaf = isLeaf;
+				this.isEditingSupported = isEditingSupported;
 			} catch (URISyntaxException e) {
 				throw new PreparationException(e);
 			}
@@ -74,6 +79,10 @@ public class ProjectNavigator {
 		
 		public boolean isLeafItem() {
 			return isLeaf;
+		}
+		
+		public boolean isEditingSipported() {
+			return isEditingSupported;
 		}
 	}
 	
@@ -211,10 +220,29 @@ public class ProjectNavigator {
 			throw new NullPointerException("Item to add can't be null"); 
 		}
 		else {
+			final ProjectChangeEvent	pce;
+			
 			items = Arrays.copyOf(items, items.length + 1);
 			items[items.length - 1] = item;
 			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
-			container.fireProjectChangeEvent(new ProjectChangeEvent(container, ProjectChangeType.PART_INSERTED, item.parent, item.id));
+			switch (item.type) {
+				case CreoleRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_INSERTED, item.parent, item.id);
+					break;
+				case DocumentRef	:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_INSERTED, item.parent, item.id);
+					break;
+				case ImageRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_INSERTED, item.parent, item.id);
+					break;
+				case Subtree		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.PART_INSERTED, item.parent, item.id);
+					break;
+				case Root :
+				default :
+					throw new UnsupportedOperationException("Navigator item type ["+item.type+"] is not supported yet");
+			}
+			container.fireProjectChangeEvent(pce);
 		}
 	}
 
@@ -229,7 +257,7 @@ public class ProjectNavigator {
 				throw new IllegalArgumentException("Item id ["+id+"] is missing in the list"); 
 			}
 			else {
-				return getItemByIndex(index);
+				return setItemByIndex(index, item);
 			}
 		}
 	}
@@ -240,11 +268,30 @@ public class ProjectNavigator {
 		}
 		else {
 			final ProjectNavigatorItem	result = items[index];
+			final ProjectChangeEvent	pce;
 			
 			items[index] = item;
 			if (item.id != result.id) {
 				Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
 			}
+			switch (result.type) {
+				case CreoleRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_CHANGED, result.parent, result.id);
+					break;
+				case DocumentRef	:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_CHANGED, result.parent, result.id);
+					break;
+				case ImageRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_CHANGED, result.parent, result.id);
+					break;
+				case Subtree		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.PART_CHANGED, result.parent, result.id);
+					break;
+				case Root	:
+				default :
+					throw new UnsupportedOperationException("Navigator item type ["+result.type+"] is not supported yet");
+			}
+			container.fireProjectChangeEvent(pce);
 			return result;
 		}
 	}
@@ -266,10 +313,29 @@ public class ProjectNavigator {
 		}
 		else {
 			final ProjectNavigatorItem	result = items[index];
+			final ProjectChangeEvent	pce;
 
 			System.arraycopy(items, index+1, items, index, items.length-index-1);
 			items = Arrays.copyOf(items, items.length - 1); 
 			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			switch (result.type) {
+				case ImageRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_REMOVED, result.parent, result.id);
+					break;
+				case DocumentRef	:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_REMOVED, result.parent, result.id);
+					break;
+				case CreoleRef		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_REMOVED, result.parent, result.id);
+					break;
+				case Subtree		:
+					pce = new ProjectChangeEvent(container, ProjectChangeType.PART_REMOVED, result.parent, result.id);
+					break;
+				case Root :
+				default :
+					throw new UnsupportedOperationException("Navigator item type ["+result.type+"] is not supported yet");
+			}
+			container.fireProjectChangeEvent(pce);
 			return result;
 		}
 	}
@@ -308,10 +374,19 @@ public class ProjectNavigator {
 			final String	titleId = node.getChild(F_TITLE_ID).getStringValue();
 			
 			switch (type) {
-				case CreoleRef	:
+				case Root			:
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, "???"));
+					break;
+				case CreoleRef		:
 					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
 					break;
-				case Subtree	:
+				case DocumentRef	:
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					break;
+				case ImageRef		:
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					break;
+				case Subtree		:
 					if (node.getChild(F_REFERENCE).getType() == JsonNodeType.JsonInteger) {
 						list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getLongValue()));
 					}
@@ -326,7 +401,7 @@ public class ProjectNavigator {
 		return ContinueMode.CONTINUE;
 	}
 
-	public static class ProjectNavigatorItem implements NodeMetadataOwner {
+	public static class ProjectNavigatorItem implements NodeMetadataOwner, Cloneable {
 		public final long		id;
 		public final long		parent;
 		public final String		name;
@@ -359,6 +434,10 @@ public class ProjectNavigator {
 							, titleId, null, null, new FieldFormat(getClass()), URI.create(ContentMetadataInterface.APPLICATION_SCHEME+":item:/"+name), type.getIconURI());
 		}
 
+		private ProjectNavigatorItem(final ProjectNavigatorItem another) {
+			this(another.id, another.parent, another.name, another.type, another.desc, another.titleId, another.subtreeRef, another.partRef);
+		}
+		
 		@Override
 		public ContentNodeMetadata getNodeMetadata() {
 			return meta;
@@ -411,5 +490,9 @@ public class ProjectNavigator {
 					+ "]";
 		}
 
+		@Override
+		public Object clone() throws CloneNotSupportedException {
+			return new ProjectNavigatorItem(this);
+		}
 	}
 }

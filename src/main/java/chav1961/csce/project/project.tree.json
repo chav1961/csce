@@ -3,7 +3,7 @@
  	{"id" : 0,
  	 "parent" : -1,
  	 "name" : "root",
- 	 "type" : "Subtree",
+ 	 "type" : "Root",
  	 "descriptor" : "Root of the project",
  	 "titleId" : "project.root",
  	 "reference" : null

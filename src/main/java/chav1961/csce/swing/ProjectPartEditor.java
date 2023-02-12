@@ -16,26 +16,26 @@ import chav1961.purelib.ui.interfaces.FormManager;
 import chav1961.purelib.ui.interfaces.Format;
 import chav1961.purelib.ui.interfaces.RefreshMode;
 
-@LocaleResourceLocation("i18n:xml:root://chav1961.csce.swing.ProjectItemEditor/chav1961/csce/localization.xml")
-@LocaleResource(value="ProjectItemEditor.caption",tooltip="ProjectItemEditor.caption.tt",help="ProjectItemEditor.caption.help")
-public class ProjectItemEditor implements FormManager<Object, ProjectItemEditor>, ModuleAccessor {
+@LocaleResourceLocation("i18n:xml:root://chav1961.csce.swing.ProjectPartEditor/chav1961/csce/localization.xml")
+@LocaleResource(value="ProjectPartEditor.caption",tooltip="ProjectPartEditor.caption.tt",help="ProjectPartEditor.caption.help")
+public class ProjectPartEditor implements FormManager<Object, ProjectPartEditor>, ModuleAccessor {
 	private final LoggerFacade			logger;
 	private final ProjectNavigatorItem	pni;
 
-	@LocaleResource(value="ProjectItemEditor.name",tooltip="ProjectItemEditor.name.tt")
+	@LocaleResource(value="ProjectPartEditor.name",tooltip="ProjectPartEditor.name.tt")
 	@Format("20m")
 	public String			name;
 
-	@LocaleResource(value="ProjectItemEditor.title",tooltip="ProjectItemEditor.title.tt")
+	@LocaleResource(value="ProjectPartEditor.title",tooltip="ProjectPartEditor.title.tt")
 	@Format("20m")
 	public LocalizedString	titleId;
 
-	@LocaleResource(value="ProjectItemEditor.desc",tooltip="ProjectItemEditor.desc.tt")
+	@LocaleResource(value="ProjectPartEditor.desc",tooltip="ProjectPartEditor.desc.tt")
 	@Format("20*5m")
 	public String			desc;
 	
 
-	public ProjectItemEditor(final LoggerFacade logger, final ProjectNavigatorItem pni) {
+	public ProjectPartEditor(final LoggerFacade logger, final ProjectNavigatorItem pni) {
 		if (logger == null) {
 			throw new NullPointerException("Logger can't be null"); 
 		}
@@ -91,7 +91,7 @@ public class ProjectItemEditor implements FormManager<Object, ProjectItemEditor>
 	}
 	
 	@Override
-	public RefreshMode onField(final ProjectItemEditor inst, final Object id, final String fieldName, final Object oldValue, final boolean beforeCommit) throws FlowException, LocalizationException {
+	public RefreshMode onField(final ProjectPartEditor inst, final Object id, final String fieldName, final Object oldValue, final boolean beforeCommit) throws FlowException, LocalizationException {
 		return RefreshMode.DEFAULT;
 	}
 
