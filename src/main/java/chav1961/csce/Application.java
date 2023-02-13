@@ -15,7 +15,6 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -47,6 +46,7 @@ import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
+import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
@@ -348,15 +348,15 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	@OnAction("action:/insertPart")
 	public void insertPart() {
 		if (viewer.isProjectNavigatorItemSelected()) {
-			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
-			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+			final ProjectNavigatorItem		pni = viewer.getProjectNavigatorItemSelected();
+			final ProjectNavigatorItem		toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
 																	, pni.id
 																	, "newItem"
 																	, ItemType.Subtree
 																	, ""
-																	, "label"
+																	, project.createUniqueLocalizationString()
 																	, -1);
-			final ProjectPartEditor		ppe = new ProjectPartEditor(getLogger(), toAdd);
+			final ProjectPartEditor		ppe = new ProjectPartEditor(getLogger(), project, toAdd);
 			
 			try{if (ask(ppe, getLocalizer(), 400, 180)) {
 					project.getProjectNavigator().addItem(ppe.getNavigatorItem());
@@ -376,9 +376,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 																	, "newItem"
 																	, ItemType.CreoleRef
 																	, ""
-																	, "label"
+																	, project.createUniqueLocalizationString()
 																	, -1);
-			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), toAdd);
+			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), project, toAdd);
 			
 			try{if (ask(pie, getLocalizer(), 400, 180)) {
 					project.getProjectNavigator().addItem(pie.getNavigatorItem());
@@ -401,7 +401,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 															, item
 															, ItemType.DocumentRef
 															, ""
-															, "label"
+															, project.createUniqueLocalizationString()
 															, -1);
 					project.getProjectNavigator().addItem(toAdd);
 					wasSelected = true;
@@ -427,7 +427,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 															, item
 															, ItemType.ImageRef
 															, ""
-															, "label"
+															, project.createUniqueLocalizationString()
 															, -1);
 					project.getProjectNavigator().addItem(toAdd);
 					wasSelected = true;
@@ -452,7 +452,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				
 				switch (pni.type) {
 					case CreoleRef	:
-						final ProjectItemEditor	pie = new ProjectItemEditor(getLogger(), pni);
+						final ProjectItemEditor	pie = new ProjectItemEditor(getLogger(), project, pni);
 						
 						if (ask(pie, getLocalizer(), 400, 180)) {
 							project.getProjectNavigator().setItem(pni.id, pie.getNavigatorItem());
@@ -461,7 +461,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 					case Root		:
 						break;
 					case Subtree	:
-						final ProjectPartEditor	ppe = new ProjectPartEditor(getLogger(), pni);
+						final ProjectPartEditor	ppe = new ProjectPartEditor(getLogger(), project, pni);
 						
 						if (ask(ppe, getLocalizer(), 400, 180)) {
 							project.getProjectNavigator().setItem(pni.id, ppe.getNavigatorItem());

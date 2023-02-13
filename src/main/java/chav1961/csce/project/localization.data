@@ -1,0 +1,12 @@
+[
+	{ "lang" : "en",
+	  "keys" : [
+	  	{"key" : "project.root", "value" : "Root"}
+	  ]
+	},
+	{ "lang" : "ru",
+	  "keys" : [
+	  	{"key" : "project.root", "value" : "Корень"}
+	  ]
+	}
+]

@@ -2,6 +2,7 @@ package chav1961.csce.swing;
 
 import java.util.Locale;
 
+import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.purelib.basic.exceptions.FlowException;
@@ -35,9 +36,12 @@ public class ProjectPartEditor implements FormManager<Object, ProjectPartEditor>
 	public String			desc;
 	
 
-	public ProjectPartEditor(final LoggerFacade logger, final ProjectNavigatorItem pni) {
+	public ProjectPartEditor(final LoggerFacade logger, final ProjectContainer project, final ProjectNavigatorItem pni) {
 		if (logger == null) {
 			throw new NullPointerException("Logger can't be null"); 
+		}
+		else if (project == null) {
+			throw new NullPointerException("Project can't be null"); 
 		}
 		else if (pni == null) {
 			throw new NullPointerException("Logger can't be null"); 
@@ -47,46 +51,7 @@ public class ProjectPartEditor implements FormManager<Object, ProjectPartEditor>
 			this.name = pni.name;
 			this.desc = pni.desc;
 			this.pni = pni;
-			this.titleId = new LocalizedString() {
-				
-				@Override
-				public Localizer getLocalizer() {
-					return null;
-				}
-				
-				@Override
-				public boolean isLanguageSupported(Locale lang) throws LocalizationException {
-					return false;
-				}
-				
-				@Override
-				public String getValueOrDefault(Locale lang) throws LocalizationException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public String getValue(Locale lang) throws LocalizationException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public String getValue() throws LocalizationException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public String getId() throws LocalizationException {
-					return pni.titleId;
-				}
-				
-				@Override
-				public Object clone() throws CloneNotSupportedException {
-					return super.clone();
-				}
-			};
+			this.titleId = project.getLocalizationString(pni.titleId);
 		}
 	}
 	

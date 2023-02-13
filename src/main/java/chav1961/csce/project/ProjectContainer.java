@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -34,9 +35,11 @@ import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.i18n.LocalizerFactory;
+import chav1961.purelib.i18n.MutableJsonLocalizer;
 import chav1961.purelib.i18n.XMLLocalizer;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
+import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
 import chav1961.purelib.json.JsonNode;
 import chav1961.purelib.json.JsonUtils;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
@@ -93,8 +96,7 @@ public class ProjectContainer implements LocalizerOwner {
 	private static final String		JSON_EXT = ".json";
 	private static final String[]	PARTS = {
 											"project.tree.json",
-											"localization.xml",
-											"project.tree.json",
+											"localization.data",
 											"project.default.license.cre"
 										};
 	
@@ -103,7 +105,7 @@ public class ProjectContainer implements LocalizerOwner {
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
 	private final LightWeightListenerList<ProjectChangeListener>	listeners = new LightWeightListenerList<>(ProjectChangeListener.class);  
-	private Localizer						localizer = null;
+	private MutableJsonLocalizer			localizer = null;
 	private ProjectNavigator				navigator = null;
 	private String							projectFileName = "";
 	
@@ -116,7 +118,7 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 		else {
 			this.app = app;
-			this.localizer = app.getLocalizer();
+			this.localizer = null;
 			this.mdi = mdi;
 		}
 	}
@@ -128,6 +130,23 @@ public class ProjectContainer implements LocalizerOwner {
 	@Override
 	public Localizer getLocalizer() {
 		return localizer;
+	}
+	
+	public String getUniqueLocalizationKey() {
+		return "localizer."+UUID.randomUUID().toString();
+	}
+	
+	public String createUniqueLocalizationString() {
+		return localizer.createLocalValue(getUniqueLocalizationKey()).getId();
+	}
+	
+	public MutableLocalizedString getLocalizationString(final String id) {
+		if (Utils.checkEmptyOrNullString(id)) {
+			throw new IllegalArgumentException("String id can't be null or empty"); 
+		}
+		else {
+			return (MutableLocalizedString) localizer.getLocalizedString(id);
+		}
 	}
 	
 	public void addProjectChangeListener(final ProjectChangeListener l) {
@@ -252,8 +271,8 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 	}
 
-	private Localizer prepareLocalizer(final byte[] content) {
-		final Localizer	newlocalizer = LocalizerFactory.getLocalizer(URI.create(Localizer.LOCALIZER_SCHEME+":xml:"+URIUtils.convert2selfURI(content).toString()));
+	private MutableJsonLocalizer prepareLocalizer(final byte[] content) {
+		final MutableJsonLocalizer	newlocalizer = (MutableJsonLocalizer)LocalizerFactory.getLocalizer(URI.create(Localizer.LOCALIZER_SCHEME+":mutablejson:"+URIUtils.convert2selfURI(content).toString()));
 
 		if (localizer != null) {
 			app.getLocalizer().pop(localizer);
