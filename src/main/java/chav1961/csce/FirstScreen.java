@@ -8,10 +8,9 @@ import java.util.List;
 import javax.swing.JLabel;
 
 import chav1961.purelib.basic.exceptions.ContentException;
-import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.ui.swing.useful.JDropTargetPlaceholder;
 
-class FirstScreen extends JDropTargetPlaceholder implements LocaleChangeListener {
+class FirstScreen extends JDropTargetPlaceholder {
 	private static final long serialVersionUID = 1L;
 
 	private static final String		KEY_FIRST_SCREEN_TITLE = "chav1961.csce.FirstScreen.title";

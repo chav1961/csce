@@ -115,6 +115,10 @@
 		<key name="ProjectItemEditor.title">Page title</key>
 		<key name="ProjectItemEditor.title.tt">Page title</key>
  
+<!-- ProjectTabbedPane class localization -->
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">File %1$s was modified. Save changes?</key>
+		
  	</lang>
 	<lang name="ru">
 <!-- Локализация приложения --> 
@@ -231,5 +235,8 @@
 		<key name="ProjectItemEditor.title">Заголовок страницы</key>
 		<key name="ProjectItemEditor.title.tt">Заголовок страницы в навигаторе</key>
  
+<!-- Локализация класса ProjectTabbedPane -->
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">Файл %1$s содержит несохраненные изменения. Сохранить их?</key>
 	</lang>	
 </localization>

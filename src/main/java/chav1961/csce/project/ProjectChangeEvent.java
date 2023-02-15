@@ -14,7 +14,9 @@ public class ProjectChangeEvent extends AWTEvent {
 		ITEM_INSERTED,
 		ITEM_REMOVED,
 		PART_CHANGED,
-		ITEM_CHANGED
+		ITEM_CHANGED,
+		PART_CONTENT_CHANGED,
+		ITEM_CONTENT_CHANGED
 	}
 	
 	private final ProjectChangeType	type;

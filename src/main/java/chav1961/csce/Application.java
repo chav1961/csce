@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -46,7 +47,6 @@ import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
-import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
@@ -70,6 +70,7 @@ import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangeListener;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 
 // https://burakkanber.com/blog/machine-learning-full-text-search-in-javascript-relevance-scoring/
+// https://stackoverflow.com/questions/4437910/java-pdf-viewer
 public class Application  extends JFrame implements AutoCloseable, NodeMetadataOwner, LocaleChangeListener, LoggerFacadeOwner, LocalizerOwner  {
 	private static final long 		serialVersionUID = 8855923580582029585L;
 	
@@ -349,11 +350,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void insertPart() {
 		if (viewer.isProjectNavigatorItemSelected()) {
 			final ProjectNavigatorItem		pni = viewer.getProjectNavigatorItemSelected();
-			final ProjectNavigatorItem		toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+			final long						unique = project.getProjectNavigator().getUniqueId();
+			final ProjectNavigatorItem		toAdd = new ProjectNavigatorItem(unique
 																	, pni.id
-																	, "newItem"
+																	, "part"+unique
 																	, ItemType.Subtree
-																	, ""
+																	, "New part"
 																	, project.createUniqueLocalizationString()
 																	, -1);
 			final ProjectPartEditor		ppe = new ProjectPartEditor(getLogger(), project, toAdd);
@@ -371,17 +373,19 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void insertPage() {
 		if (viewer.isProjectNavigatorItemSelected()) {
 			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
-			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+			final long					unique = project.getProjectNavigator().getUniqueId();
+			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 																	, pni.id
-																	, "newItem"
+																	, "CreoleContent"+unique
 																	, ItemType.CreoleRef
-																	, ""
+																	, "Creole content"
 																	, project.createUniqueLocalizationString()
 																	, -1);
 			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), project, toAdd);
 			
 			try{if (ask(pie, getLocalizer(), 400, 180)) {
 					project.getProjectNavigator().addItem(pie.getNavigatorItem());
+					project.addProjectPartContent(project.getPartNameById(toAdd.id), "");
 				}
 			} catch (ContentException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());
@@ -396,11 +400,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			boolean		wasSelected = false;
 			
 			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, PDF_FILTER, DJVU_FILTER)) {
-					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+					final long					unique = project.getProjectNavigator().getUniqueId();
+					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 															, pni.id
-															, item
+															, "Document"+unique
 															, ItemType.DocumentRef
-															, ""
+															, "Document "+item
 															, project.createUniqueLocalizationString()
 															, -1);
 					project.getProjectNavigator().addItem(toAdd);
@@ -422,14 +427,16 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			boolean		wasSelected = false;
 			
 			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, IMAGE_FILTER)) {
-					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(project.getProjectNavigator().getUniqueId()
+					final long					unique = project.getProjectNavigator().getUniqueId();
+					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 															, pni.id
-															, item
+															, "Image"+unique
 															, ItemType.ImageRef
-															, ""
+															, "Image "+item
 															, project.createUniqueLocalizationString()
 															, -1);
 					project.getProjectNavigator().addItem(toAdd);
+					project.addProjectPartContent(project.getPartNameById(toAdd.id), ImageIO.read(new File(item)));
 					wasSelected = true;
 				}
 				if (wasSelected) {

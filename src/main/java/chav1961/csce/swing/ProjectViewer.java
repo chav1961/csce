@@ -31,7 +31,7 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 	private final ProjectContainer 			project;
 	private final ContentMetadataInterface	mdi;
 	private final LightWeightListenerList<ProjectViewerChangeListener>	listeners = new LightWeightListenerList<>(ProjectViewerChangeListener.class);  
-	private final ProjectTabbedPane			tabs = new ProjectTabbedPane();
+	private final ProjectTabbedPane			tabs;
 	private final ScreenLogger				screenLogger = new ScreenLogger();
 	private final ProjectTree				tree;
 	private boolean							recursionProtector = false;
@@ -41,7 +41,8 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		this.parent = parent;
 		this.project = project;
 		this.mdi = mdi;
-		this.tree = new ProjectTree(project, mdi);
+		this.tree = new ProjectTree(this, project, mdi);
+		this.tabs = new ProjectTabbedPane(parent, project);
 		this.tree.getSelectionModel().addTreeSelectionListener((e)->treeSelectionChanged(e));
 		
 		parent.getEnableMaskManipulator().addComponent(tree.popup);
@@ -54,12 +55,15 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		setRightComponent(rightSplit);
 		
 		setDividerLocation(300);
+		fillLocalizedStrings();
 	}
 
 	@Override
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 		// TODO Auto-generated method stub
 		SwingUtils.refreshLocale(tree, oldLocale, newLocale);
+		SwingUtils.refreshLocale(tabs, oldLocale, newLocale);
+		fillLocalizedStrings();
 	}
 
 	public void addProjectViewerChangeListener(final ProjectViewerChangeListener l) {
@@ -95,6 +99,10 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		}
 	}
 
+	public ProjectTabbedPane getProjectTabbedPane() {
+		return tabs;
+	}
+	
 	public void refreshProject(final ProjectChangeEvent event) {
 		tree.refreshTree(event);
 	}
@@ -127,4 +135,8 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		}
 	}
 
+	private void fillLocalizedStrings() {
+		// TODO Auto-generated method stub
+		
+	}
 }

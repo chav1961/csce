@@ -32,17 +32,22 @@ import chav1961.purelib.ui.swing.SwingUtils;
 public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeListener {
 	private static final long serialVersionUID = 1L;
 
+	private final ProjectViewer				viewer;
 	private final ProjectContainer			project;
 	private final ContentMetadataInterface	mdi;
 	private ProjectItemTreeNode				rootNode;
 	final JPopupMenu						popup; 
 	
-	public ProjectTree(final ProjectContainer project, final ContentMetadataInterface mdi) {
+	public ProjectTree(final ProjectViewer viewer, final ProjectContainer project, final ContentMetadataInterface mdi) {
 		super();
-		if (project == null) {
-			throw new NullPointerException("Project can't be null"); 
+		if (viewer == null) {
+			throw new NullPointerException("Project viewer can't be null"); 
+		}
+		else if (project == null) {
+			throw new NullPointerException("Project container can't be null"); 
 		}
 		else {
+			this.viewer = viewer;
 			this.project = project;
 			this.mdi = mdi;
 			this.popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.treemenu")), JPopupMenu.class);
@@ -64,6 +69,9 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON3) {
 						showMenu(e.getPoint());
+					}
+					else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() >= 2) {
+						openTab(e.getPoint());
 					}
 					else {
 						super.mouseClicked(e);
@@ -112,6 +120,8 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				final ProjectItemTreeNode	nodeChanged = ((ProjectItemTreeNode)pathChanged.getLastPathComponent());
 				
 				((DefaultTreeModel)getModel()).reload(nodeChanged);
+				break;
+			case PART_CONTENT_CHANGED : case ITEM_CONTENT_CHANGED :
 				break;
 			case PROJECT_FILENAME_CHANGED	:
 				break;
@@ -163,6 +173,31 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				SwingUtils.findComponentByName(popup, "treemenu.properties").setEnabled(pitn.getUserObject().type.isEditingSipported());
 				SwingUtils.findComponentByName(popup, "treemenu.delete").setEnabled(row != 0);
 				popup.show(this, p.x, p.y);
+			}
+		}
+	}
+
+	private void openTab(final Point p) {
+		if (!isSelectionEmpty()) {
+			final TreePath	path = getClosestPathForLocation(p.x, p.y);
+			
+			if (path != null) {
+				final ProjectItemTreeNode	pitn = (ProjectItemTreeNode)path.getLastPathComponent();
+
+				switch (pitn.getUserObject().type) {
+					case CreoleRef		:
+						viewer.getProjectTabbedPane().openCreoleTab(pitn.getUserObject());
+						break;
+					case DocumentRef	:
+						break;
+					case ImageRef		:
+						viewer.getProjectTabbedPane().openImageTab(pitn.getUserObject());
+						break;
+					case Root : case Subtree :
+						break;
+					default :
+						throw new UnsupportedOperationException("Type ["+pitn.getUserObject().type+"] is not supported yet");
+				}
 			}
 		}
 	}

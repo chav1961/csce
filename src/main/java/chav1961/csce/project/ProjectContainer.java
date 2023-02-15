@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -24,6 +26,8 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 
 import chav1961.csce.Application;
+import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
+import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.StringLoggerFacade;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -99,6 +103,10 @@ public class ProjectContainer implements LocalizerOwner {
 											"localization.data",
 											"project.default.license.cre"
 										};
+	private static final Pattern	CREOLE_PATTERN = Pattern.compile("creole(\\d+)\\.cre");
+	private static final Pattern	DOCUMENT_PATTERN = Pattern.compile("document(\\d+)\\.doc");
+	private static final Pattern	IMAGE_PATTERN = Pattern.compile("image(\\d+)\\.png");
+	private static final Pattern[]	PATTERNS = {CREOLE_PATTERN, DOCUMENT_PATTERN, IMAGE_PATTERN};
 	
 	private final Application				app;
 	private final ContentMetadataInterface	mdi;
@@ -186,6 +194,100 @@ public class ProjectContainer implements LocalizerOwner {
 	public ProjectNavigator getProjectNavigator() {
 		return navigator;
 	}
+
+	public boolean hasProjectPart(final String partName) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else {
+			return content.containsKey(partName);
+		}
+	}
+	
+	public <T> T getProjectPartContent(final String partName) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else if (!content.containsKey(partName)) {
+			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
+		}
+		else {
+			return (T)content.get(partName);
+		}
+	}
+
+	public <T> void addProjectPartContent(final String partName, final T data) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else if (content.containsKey(partName)) {
+			throw new IllegalArgumentException("Part name ["+partName+"] already existst in the project"); 
+		}
+		else {
+			content.put(partName, data);
+			notifyContentChanges(partName);
+		}
+	}
+	
+	public <T> void setProjectPartContent(final String partName, final T data) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else if (!content.containsKey(partName)) {
+			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
+		}
+		else {
+			content.put(partName, data);
+			notifyContentChanges(partName);
+		}
+	}
+
+	public <T> void removeProjectPartContent(final String partName) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else if (!content.containsKey(partName)) {
+			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
+		}
+		else {
+			content.remove(partName);
+			notifyContentChanges(partName);
+		}
+	}
+	
+	public String getPartNameById(final long id) {
+		final ProjectNavigatorItem	item = getProjectNavigator().getItem(id);
+		
+		switch (item.type) {
+			case CreoleRef		:
+				return "creole"+id+".cre";
+			case DocumentRef	:
+				return "document"+id+".doc";
+			case ImageRef		:
+				return "image"+id+".png";
+			case Root : case Subtree :
+				throw new IllegalArgumentException("Item type ["+item.type+"] can't have part name");
+			default :
+				throw new UnsupportedOperationException("Item type ["+item.type+"] is not supported yet"); 
+		}
+	}
+	
+	public long getIdByPartName(final String partName) {
+		if (Utils.checkEmptyOrNullString(partName)) {
+			throw new IllegalArgumentException("Part name can't be null or empty"); 
+		}
+		else {
+			for (Pattern item : PATTERNS) {
+				final Matcher	m = item.matcher(partName); 
+				
+				if (m.find()) {
+					return Long.valueOf(m.group(1));
+				}
+			}
+			throw new IllegalArgumentException("Part name ["+partName+"] doesn't match any part templates");
+		}
+	}
+	
 	
 	public boolean validateProject(final LoggerFacade logger) {
 		return validateProject(logger, props, content);
@@ -375,5 +477,29 @@ public class ProjectContainer implements LocalizerOwner {
 				localizer = prepareLocalizer((byte[])content.get(props.getProperty(PROJECT_LOCALIZATION)));
 			}
 		}
+	}
+	
+	private void notifyContentChanges(final String partName) {
+		final ProjectNavigatorItem	pni = getProjectNavigator().getItem(getIdByPartName(partName));
+		final ProjectChangeEvent	pce;
+		
+		switch (pni.type) {
+			case ImageRef		:
+				pce = new ProjectChangeEvent(this, ProjectChangeType.ITEM_CONTENT_CHANGED, pni.parent, pni.id);
+				break;
+			case DocumentRef	:
+				pce = new ProjectChangeEvent(this, ProjectChangeType.ITEM_CONTENT_CHANGED, pni.parent, pni.id);
+				break;
+			case CreoleRef		:
+				pce = new ProjectChangeEvent(this, ProjectChangeType.ITEM_CONTENT_CHANGED, pni.parent, pni.id);
+				break;
+			case Subtree		:
+				pce = new ProjectChangeEvent(this, ProjectChangeType.PART_CONTENT_CHANGED, pni.parent, pni.id);
+				break;
+			case Root :
+			default :
+				throw new UnsupportedOperationException("Navigator item type ["+pni.type+"] is not supported yet");
+		}
+		fireProjectChangeEvent(pce);
 	}
 }
