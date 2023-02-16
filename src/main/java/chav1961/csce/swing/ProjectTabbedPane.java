@@ -42,7 +42,7 @@ import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListener {
 	private static final long 		serialVersionUID = 1L;
 
-	private static final Icon		SAVE_ICON = new ImageIcon(ProjectTabbedPane.class.getResource("icon_save_24.png"));
+	private static final Icon		SAVE_ICON = new ImageIcon(ProjectTabbedPane.class.getResource("icon_save_16.png"));
 	private static final Icon		GRAY_SAVE_ICON = new ImageIcon(GrayFilter.createDisabledImage(((ImageIcon)SAVE_ICON).getImage()));
 	
 	private final Application		parent;
@@ -87,6 +87,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			setTabComponentAt(getTabCount()-1, tab.getTabLabel());
 			setSelectedIndex(getTabCount()-1);
 			tab.setText(project.getProjectPartContent(partName));
+			tab.getTabLabel().setToolTipText(item.desc);
 			tab.setModified(false);
 		}
 	}
@@ -107,6 +108,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			setTabComponentAt(getTabCount()-1, tab.getTabLabel());
 			setSelectedIndex(getTabCount()-1);
 			tab.setImage(project.getProjectPartContent(partName));
+			tab.getTabLabel().setToolTipText(item.desc);
 			tab.setModified(false);
 		}
 	}
@@ -160,7 +162,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			this.tab.setText(partName);
 			this.tab.setIcon(GRAY_SAVE_ICON);
 
-			this.editor.setText(project.getProjectPartContent(partName));
+			this.editor.setText(project.getProjectPartContent(projectPartName));
 			SwingUtils.assignActionKey(editor, SwingUtils.KS_SAVE, (e)->saveContent(), SwingUtils.ACTION_SAVE);
 			
 			SimpleTimerTask.start(()->{

@@ -442,6 +442,21 @@ public class ProjectNavigator {
 		public ContentNodeMetadata getNodeMetadata() {
 			return meta;
 		}
+
+		@Override
+		public String[] getMetadataChildrenNames() {
+			// TODO Auto-generated method stub
+			return new String[0];
+//			int	count = 0;
+//			
+//			for (ProjectNavigatorItem item : items) {
+//				if (item.parent == id) {
+//					count++;
+//				}
+//			}
+//			final String[]	result = new String[count];
+//			return NodeMetadataOwner.super.getMetadataChildrenNames();
+		}
 		
 		@Override
 		public int hashCode() {

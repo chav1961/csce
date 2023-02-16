@@ -4,14 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -23,6 +26,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 
+import chav1961.csce.builders.HTMLBuilder;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
@@ -95,6 +99,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
 	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
 	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
+	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
 	
 	private static final String		MENU_FILE_LRU = "menu.main.file.lru";
 	private static final String		MENU_FILE_SAVE = "menu.main.file.save";
@@ -137,6 +142,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
 	private static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
 	private static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
+	private static final FilterCallback		ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
 	
 	
 	private final URI						helpServerURI;
@@ -317,6 +323,19 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/exportProjectAsSubdir")
 	public void exportProjectAsSubdir() {
+		try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FOR_SAVE | JFileSelectionDialog.OPTIONS_ALLOW_MKDIR | JFileSelectionDialog.OPTIONS_CONFIRM_REPLACEMENT, ZIP_FILTER)) {
+				try(final OutputStream		os = new FileOutputStream(item);
+					final ZipOutputStream	zos = new ZipOutputStream(os);
+					final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
+					
+					builder.upload(zos);
+					zos.flush();
+				}
+			}
+			getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+		} catch (IOException e) {
+			getLogger().message(Severity.error, e, e.getLocalizedMessage());
+		}
 	}
 	
 	@OnAction("action:/exit")

@@ -1,8 +1,11 @@
 package chav1961.csce.builders;
 
 import java.awt.Image;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -10,7 +13,11 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.purelib.basic.PureLibSettings;
+import chav1961.purelib.enumerations.MarkupOutputFormat;
 import chav1961.purelib.i18n.interfaces.Localizer;
+import chav1961.purelib.streams.char2char.CreoleWriter;
+import chav1961.purelib.streams.interfaces.PrologueEpilogueMaster;
 
 //Builder:
 //1. Build full navigation tree by project structure. It includes:
@@ -38,9 +45,9 @@ import chav1961.purelib.i18n.interfaces.Localizer;
 //- build epilog
 //-- project contacts
 //-- project copyrights
-public class HTMLBuilder {
-	private final Localizer			localizer;
-	private final ProjectContainer	project;
+public class HTMLBuilder implements Closeable {
+	private final Localizer						localizer;
+	private final ProjectContainer				project;
 	
 	public HTMLBuilder(final Localizer localizer, final ProjectContainer project) {
 		if (localizer == null) {
@@ -53,6 +60,12 @@ public class HTMLBuilder {
 			this.localizer = localizer;
 			this.project = project;
 		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public void upload(final ZipOutputStream os) throws IOException {
@@ -75,20 +88,36 @@ public class HTMLBuilder {
 		walkNavigatorTree("", root, os);
 	}
 	
-	private void buildDefaultOverviewPage(final ProjectNavigatorItem root, final ZipOutputStream os) throws IOException {
-		final ZipEntry	ze = new ZipEntry("index.html");
+	private void buildDefaultOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException {
+		final ZipEntry		ze = new ZipEntry("index.html");
+		final String		content = project.getProjectPartContent(project.getPartNameById(item.id));
 		
 		ze.setMethod(ZipEntry.DEFLATED);
 		os.putNextEntry(ze);
-		// TODO Auto-generated method stub
+		
+		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
+		
+		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
+			cwr.write(content);
+		}
+		wr.flush();
+		os.closeEntry();
 	}
 
 	private void buildOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException {
-		final ZipEntry	ze = new ZipEntry("index.html");
+		final ZipEntry		ze = new ZipEntry("index.html");
+		final String		content = project.getProjectPartContent(project.getPartNameById(item.id));
 		
 		ze.setMethod(ZipEntry.DEFLATED);
 		os.putNextEntry(ze);
-		// TODO Auto-generated method stub
+		
+		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
+		
+		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
+			cwr.write(content);
+		}
+		wr.flush();
+		os.closeEntry();
 	}
 	
 	private void buildNavigatorTree(final ProjectNavigator navigator, final ZipOutputStream os) {
@@ -123,5 +152,26 @@ public class HTMLBuilder {
 				throw new UnsupportedOperationException("Item type ["+item.type+"] is not supported yet"); 
 		}
 	}
+
+	private boolean writePrologue(final Writer wr) throws IOException {
+		wr.write("<!DOCTYPE html>\r\n"
+				+ "<html>\r\n"
+				+ " <head>\r\n"
+				+ "  <meta charset=\"utf-8\">\r\n"
+				+ "  <title>Пример страницы</title>\r\n"
+				+ "  <style>\r\n"
+				+ "  p { color:  navy; }\r\n"
+				+ "  </style>\r\n"
+				+ " </head>\r\n"
+				+ " <body class=\"creole\">");
+		return true;
+	}
+
+	private boolean writeEpilogue(final Writer wr) throws IOException {
+		wr.write(" </body>\r\n"
+				+ "</html>");
+		return true;
+	}
+	
 	
 }

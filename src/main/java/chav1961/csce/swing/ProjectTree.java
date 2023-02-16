@@ -118,7 +118,9 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			case PART_CHANGED : case ITEM_CHANGED :
 				final TreePath 				pathChanged = long2TreePath((long)event.getParameters()[1]);
 				final ProjectItemTreeNode	nodeChanged = ((ProjectItemTreeNode)pathChanged.getLastPathComponent());
-				
+				final ProjectNavigatorItem 	itemChanged = project.getProjectNavigator().getItem((long)event.getParameters()[1]);
+
+				nodeChanged.setUserObject(itemChanged);
 				((DefaultTreeModel)getModel()).reload(nodeChanged);
 				break;
 			case PART_CONTENT_CHANGED : case ITEM_CONTENT_CHANGED :

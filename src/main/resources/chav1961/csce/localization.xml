@@ -17,6 +17,7 @@
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU files</key>
 		<key name="chav1961.csce.Application.filter.image.file">Image files</key>
+		<key name="chav1961.csce.Application.filter.zip.file">ZIP files</key>	
 
 <!-- Localization for application menu --> 
 		<key name="menu.main.file">File</key>
@@ -137,6 +138,7 @@
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU файлы</key>
 		<key name="chav1961.csce.Application.filter.image.file">Файлы изображений</key>
+		<key name="chav1961.csce.Application.filter.zip.file">Файлы ZIP-архивов</key>	
 
 <!-- Локализация меню приложения -->
 		<key name="menu.main.file">Файл</key>
