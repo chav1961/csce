@@ -333,7 +333,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				}
 			}
 			getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
-		} catch (IOException e) {
+		} catch (IOException | ContentException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
 	}

@@ -1,5 +1,6 @@
 package chav1961.csce.project;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -52,6 +53,11 @@ public class ProjectNavigator {
 	public static final String	F_TITLE_ID = "titleId";
 	public static final String	F_REFERENCE = "reference";
 
+	@FunctionalInterface
+	public interface WalkDownCallback {
+		ContinueMode process(final NodeEnterMode mode, ProjectNavigatorItem node) throws ContentException, IOException;
+	}
+	
 	public static enum ItemType {
 		Root("favicon16x16.png", false, false),
 		CreoleRef("favicon16x16.png", true, true),
@@ -339,6 +345,15 @@ public class ProjectNavigator {
 			return result;
 		}
 	}
+
+	public ContinueMode walkDown(final WalkDownCallback callback) throws ContentException, IOException {
+		if (callback == null) {
+			throw new NullPointerException("Callback can't be null"); 
+		}
+		else {
+			return walkDown(getItem(0), callback);
+		}
+	}
 	
 	public JsonNode buildJsonNode() {
 		return null;
@@ -401,6 +416,35 @@ public class ProjectNavigator {
 		return ContinueMode.CONTINUE;
 	}
 
+	private ContinueMode walkDown(final ProjectNavigatorItem node, final WalkDownCallback callback) throws ContentException, IOException {
+		ContinueMode	rc;
+		
+		switch (rc = callback.process(NodeEnterMode.ENTER, node)) {
+			case CONTINUE		:
+loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
+					switch (rc = walkDown(item, callback)) {
+						case CONTINUE : case SIBLINGS_ONLY :
+							break;
+						case PARENT_ONLY : case SKIP_CHILDREN : case SKIP_PARENT : case SKIP_SIBLINGS :
+							break loop;
+						case STOP:
+							callback.process(NodeEnterMode.EXIT, node);
+							return ContinueMode.STOP;
+						default: throw new UnsupportedOperationException("Continue node type ["+rc+"] is not supported yet"); 
+					}
+				}	
+				// break not needed!!!
+			case PARENT_ONLY : case SIBLINGS_ONLY : case SKIP_CHILDREN : case SKIP_PARENT :
+				return callback.process(NodeEnterMode.EXIT, node);
+			case SKIP_SIBLINGS	:
+				return callback.process(NodeEnterMode.EXIT, node) == ContinueMode.STOP ? ContinueMode.STOP : ContinueMode.SKIP_CHILDREN;
+			case STOP			:
+				callback.process(NodeEnterMode.EXIT, node);
+				return ContinueMode.STOP;
+			default: throw new UnsupportedOperationException("Continue node type ["+rc+"] is not supported yet"); 
+		}
+	}
+	
 	public static class ProjectNavigatorItem implements NodeMetadataOwner, Cloneable {
 		public final long		id;
 		public final long		parent;
@@ -443,21 +487,6 @@ public class ProjectNavigator {
 			return meta;
 		}
 
-		@Override
-		public String[] getMetadataChildrenNames() {
-			// TODO Auto-generated method stub
-			return new String[0];
-//			int	count = 0;
-//			
-//			for (ProjectNavigatorItem item : items) {
-//				if (item.parent == id) {
-//					count++;
-//				}
-//			}
-//			final String[]	result = new String[count];
-//			return NodeMetadataOwner.super.getMetadataChildrenNames();
-		}
-		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
