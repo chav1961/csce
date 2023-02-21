@@ -98,9 +98,11 @@ public class ProjectContainer implements LocalizerOwner {
 	private static final String		CREOLE_EXT = ".cre";	
 	private static final String		IMAGE_EXT = ".png";	
 	private static final String		JSON_EXT = ".json";
+	private static final String		JSON_TREE_PART = "project.tree.json";
+	private static final String		LOCALIZATION_PART = "localization.data";
 	private static final String[]	PARTS = {
-											"project.tree.json",
-											"localization.data",
+											JSON_TREE_PART,
+											LOCALIZATION_PART,
 											"project.default.license.cre"
 										};
 	private static final Pattern	CREOLE_PATTERN = Pattern.compile("creole(\\d+)\\.cre");
@@ -347,7 +349,7 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 		for (String item : PARTS) {
 			try(final InputStream	is = getClass().getResourceAsStream(item)) {
-				loadPart(item, is, projectParts);
+				loadPart(item, is, projectProps, projectParts);
 			}
 		}
 		try(final LoggerFacade	logger = new StringLoggerFacade()) {
@@ -357,7 +359,6 @@ public class ProjectContainer implements LocalizerOwner {
 				content.clear();
 				content.putAll(projectParts);
 				navigator = prepareProjectNavigator((JsonNode)content.get(props.getProperty(PROJECT_TREE)), props.getProperty(PROJECT_ROOT));
-				localizer = prepareLocalizer((byte[])content.get(props.getProperty(PROJECT_LOCALIZATION)));
 			}
 			else {
 				throw new IOException("Project validation failed : "+logger.toString()); 
@@ -387,8 +388,15 @@ public class ProjectContainer implements LocalizerOwner {
 		return true;
 	}
 
-	private void loadPart(final String name, final InputStream is, final Map<String, Object> target) throws IOException {
-		if (name.endsWith(CREOLE_EXT)) {
+	private void loadPart(final String name, final InputStream is, final SubstitutableProperties props, final Map<String, Object> target) throws IOException {
+		if (name.equals(LOCALIZATION_PART)) {
+			final ByteArrayOutputStream	baos = new ByteArrayOutputStream();
+
+			Utils.copyStream(is, baos);
+			target.put(props.getProperty(PROJECT_LOCALIZATION), baos.toByteArray());
+			localizer = prepareLocalizer((byte[])target.get(props.getProperty(PROJECT_LOCALIZATION)));
+		}
+		else if (name.endsWith(CREOLE_EXT)) {
 			final Reader	rdr = new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 			final Writer	wr = new StringWriter();
 			
@@ -417,7 +425,29 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 
 	private void storePart(final String name, final Object content, final OutputStream os) throws IOException {
-		if (name.endsWith(CREOLE_EXT)) {
+		if (name.equals(LOCALIZATION_PART)) {
+			final Writer			wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
+			final JsonStaxPrinter	prn = new JsonStaxPrinter(wr);
+			
+			try{
+				localizer.saveContent(prn);
+				prn.flush();
+			} catch (PrintingException e) {
+				throw new IOException(e);
+			}
+		}
+		else if (name.equals(JSON_TREE_PART)) {
+			final Writer			wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
+			final JsonStaxPrinter	prn = new JsonStaxPrinter(wr);
+			
+			try{
+				JsonUtils.unloadJsonTree(getProjectNavigator().buildJsonNode(), prn);
+				prn.flush();
+			} catch (PrintingException e) {
+				throw new IOException(e);
+			}
+		}
+		else if (name.endsWith(CREOLE_EXT)) {
 			final Writer	wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 			
 			wr.write(content.toString());
@@ -459,7 +489,7 @@ public class ProjectContainer implements LocalizerOwner {
 					propsDetected = true;
 				}
 				else {
-					loadPart(ze.getName(), zis, projectParts);
+					loadPart(ze.getName(), zis, projectProps, projectParts);
 				}
 			}
 			if (!propsDetected) {
@@ -474,7 +504,6 @@ public class ProjectContainer implements LocalizerOwner {
 				content.clear();
 				content.putAll(projectParts);
 				navigator = prepareProjectNavigator((JsonNode)content.get(props.getProperty(PROJECT_TREE)), props.getProperty(PROJECT_ROOT));
-				localizer = prepareLocalizer((byte[])content.get(props.getProperty(PROJECT_LOCALIZATION)));
 			}
 		}
 	}

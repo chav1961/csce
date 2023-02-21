@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 
 import chav1961.csce.builders.HTMLBuilder;
+import chav1961.csce.project.ProjectChangeEvent;
+import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
@@ -174,7 +176,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		this.helpServerURI = helpServerURI;
 		this.menuBar = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.mainmenu")), JMenuBar.class); 
 		this.emm = new JEnableMaskManipulator(MENUS, this.menuBar);
-		this.state = new JStateString(localizer, 100);
+		this.state = new JStateString(localizer, 30);
 		this.lru = LRUPersistence.of(propFile, LRU_PREFIX); 
 		this.fcm = new JFileContentManipulator(repo, localizer, 
 				()->project.toIntputStream(), 
@@ -399,7 +401,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 																	, ItemType.CreoleRef
 																	, "Creole content"
 																	, project.createUniqueLocalizationString()
-																	, -1);
+																	, pni.id);
 			final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), project, toAdd);
 			
 			try{if (ask(pie, getLocalizer(), 400, 180)) {
@@ -608,6 +610,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		getContentPane().remove(firstScreen);
         getContentPane().add(viewer, BorderLayout.CENTER);
         ((JComponent)getContentPane()).revalidate();
+		viewer.refreshProject(new ProjectChangeEvent(project, ProjectChangeType.PROJECT_LOADED));
         viewer.addProjectViewerChangeListener((e)->refreshProjectMenu(e));
 	}
 	

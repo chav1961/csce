@@ -356,7 +356,23 @@ public class ProjectNavigator {
 	}
 	
 	public JsonNode buildJsonNode() {
-		return null;
+		final JsonNode	list = new JsonNode(JsonNodeType.JsonArray).setName(F_ITEMS);
+		final JsonNode	result = new JsonNode(JsonNodeType.JsonObject, new JsonNode(version).setName(F_VERSION), list);
+		
+		for (ProjectNavigatorItem item : items) {
+			final JsonNode	toAdd = new JsonNode(JsonNodeType.JsonObject
+										, new JsonNode(item.id).setName(F_ID)
+										, new JsonNode(item.parent).setName(F_PARENT)
+										, new JsonNode(item.name).setName(F_NAME)
+										, new JsonNode(item.type.name()).setName(F_TYPE)
+										, new JsonNode(item.desc).setName(F_DESCRIPTOR)
+										, new JsonNode(item.titleId).setName(F_TITLE_ID)
+										, new JsonNode(item.subtreeRef).setName(F_REFERENCE)
+									);
+			list.addChild(toAdd);
+		}
+		
+		return result;
 	}
 
 	private int id2index(final long id) {
@@ -393,13 +409,13 @@ public class ProjectNavigator {
 					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, "???"));
 					break;
 				case CreoleRef		:
-					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getLongValue()));
 					break;
 				case DocumentRef	:
-					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getLongValue()));
 					break;
 				case ImageRef		:
-					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getStringValue()));
+					list.add(new ProjectNavigatorItem(id, parent, name, type, descriptor, titleId, node.getChild(F_REFERENCE).getLongValue()));
 					break;
 				case Subtree		:
 					if (node.getChild(F_REFERENCE).getType() == JsonNodeType.JsonInteger) {
@@ -453,7 +469,6 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 		public final String		desc;
 		public final String		titleId;
 		public final long		subtreeRef;
-		public final String		partRef;
 		private final ContentNodeMetadata	meta;
 
 		public ProjectNavigatorItem(long id, long parent, String name, ItemType type, String desc, String titleId, long subtreeRef) {
@@ -472,14 +487,13 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 			this.desc = desc;
 			this.titleId = titleId;
 			this.subtreeRef = subtreeRef;
-			this.partRef = partRef;
 			
 			this.meta = new MutableContentNodeMetadata(name, getClass(), "./"+name, URI.create("i18n:xml:root://chav1961.csce.Application/chav1961/csce/localization.xml")
 							, titleId, null, null, new FieldFormat(getClass()), URI.create(ContentMetadataInterface.APPLICATION_SCHEME+":item:/"+name), type.getIconURI());
 		}
 
 		private ProjectNavigatorItem(final ProjectNavigatorItem another) {
-			this(another.id, another.parent, another.name, another.type, another.desc, another.titleId, another.subtreeRef, another.partRef);
+			this(another.id, another.parent, another.name, another.type, another.desc, another.titleId, another.subtreeRef);
 		}
 		
 		@Override
@@ -495,7 +509,6 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 			result = prime * result + (int) (id ^ (id >>> 32));
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			result = prime * result + (int) (parent ^ (parent >>> 32));
-			result = prime * result + ((partRef == null) ? 0 : partRef.hashCode());
 			result = prime * result + (int) (subtreeRef ^ (subtreeRef >>> 32));
 			result = prime * result + ((titleId == null) ? 0 : titleId.hashCode());
 			result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -516,9 +529,6 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 				if (other.name != null) return false;
 			} else if (!name.equals(other.name)) return false;
 			if (parent != other.parent) return false;
-			if (partRef == null) {
-				if (other.partRef != null) return false;
-			} else if (!partRef.equals(other.partRef)) return false;
 			if (subtreeRef != other.subtreeRef) return false;
 			if (titleId == null) {
 				if (other.titleId != null) return false;
@@ -530,8 +540,7 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 		@Override
 		public String toString() {
 			return "ProjectNavigatorItem [id=" + id + ", parent=" + parent + ", name=" + name + ", type=" + type
-					+ ", desc=" + desc + ", titleId=" + titleId + ", subtreeRef=" + subtreeRef + ", partRef=" + partRef
-					+ "]";
+					+ ", desc=" + desc + ", titleId=" + titleId + ", subtreeRef=" + subtreeRef + "]";
 		}
 
 		@Override

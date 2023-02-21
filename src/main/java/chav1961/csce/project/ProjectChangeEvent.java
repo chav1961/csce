@@ -1,6 +1,7 @@
 package chav1961.csce.project;
 
 import java.awt.AWTEvent;
+import java.util.Arrays;
 
 import chav1961.purelib.basic.Utils;
 
@@ -8,6 +9,7 @@ public class ProjectChangeEvent extends AWTEvent {
 	private static final long serialVersionUID = 1871822799791039071L;
 
 	public static enum ProjectChangeType {
+		PROJECT_LOADED,
 		PROJECT_FILENAME_CHANGED,
 		PART_INSERTED,
 		PART_REMOVED,
@@ -39,5 +41,10 @@ public class ProjectChangeEvent extends AWTEvent {
 	
 	public Object[] getParameters() {
 		return parameters;
+	}
+
+	@Override
+	public String toString() {
+		return "ProjectChangeEvent [type=" + type + ", parameters=" + Arrays.toString(parameters) + "]";
 	}
 }

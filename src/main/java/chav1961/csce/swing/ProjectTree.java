@@ -125,6 +125,9 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				break;
 			case PART_CONTENT_CHANGED : case ITEM_CONTENT_CHANGED :
 				break;
+			case PROJECT_LOADED :
+				((DefaultTreeModel)getModel()).reload((ProjectItemTreeNode)getModel().getRoot());
+				break;
 			case PROJECT_FILENAME_CHANGED	:
 				break;
 			default :

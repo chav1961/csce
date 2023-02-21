@@ -73,6 +73,6 @@ public class ProjectItemEditor implements FormManager<Object, ProjectItemEditor>
 	}
 	
 	public ProjectNavigatorItem getNavigatorItem() {
-		return new ProjectNavigatorItem(pni.id, pni.parent, name, pni.type, desc, titleId.getId(), pni.subtreeRef, pni.partRef);
+		return new ProjectNavigatorItem(pni.id, pni.parent, name, pni.type, desc, titleId.getId(), pni.subtreeRef);
 	}
 }
