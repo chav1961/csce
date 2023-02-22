@@ -103,7 +103,9 @@ public class ProjectContainer implements LocalizerOwner {
 	private static final String[]	PARTS = {
 											JSON_TREE_PART,
 											LOCALIZATION_PART,
-											"project.default.license.cre"
+											"project.default.license.cre",
+											"style.css",
+											"utils.js",
 										};
 	private static final Pattern	CREOLE_PATTERN = Pattern.compile("creole(\\d+)\\.cre");
 	private static final Pattern	DOCUMENT_PATTERN = Pattern.compile("document(\\d+)\\.doc");
@@ -289,7 +291,20 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name ["+partName+"] doesn't match any part templates");
 		}
 	}
+
+	public SubstitutableProperties getProperties() {
+		return props;
+	}
 	
+	public String[] getPartNames() {
+		final String[]	result = new String[content.size()];
+		int	index = 0;
+		
+		for(Entry<String, Object> item : content.entrySet()) {
+			result[index++] = item.getKey();
+		}
+		return result;
+	}
 	
 	public boolean validateProject(final LoggerFacade logger) {
 		return validateProject(logger, props, content);

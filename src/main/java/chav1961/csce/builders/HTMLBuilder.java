@@ -5,8 +5,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
@@ -17,13 +22,13 @@ import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.purelib.basic.PureLibSettings;
+import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.enumerations.ContinueMode;
 import chav1961.purelib.enumerations.MarkupOutputFormat;
 import chav1961.purelib.enumerations.NodeEnterMode;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.streams.char2char.CreoleWriter;
-import chav1961.purelib.streams.interfaces.PrologueEpilogueMaster;
 
 //Builder:
 //1. Build full navigation tree by project structure. It includes:
@@ -53,7 +58,6 @@ import chav1961.purelib.streams.interfaces.PrologueEpilogueMaster;
 //-- project copyrights
 public class HTMLBuilder implements Closeable {
 	private static final String		OVERVIEW_PAGE_NAME = "index.html";
-	private static final String		NAVIGATOR_PAGE_NAME = "navigator.html";
 	
 	private final Localizer			localizer;
 	private final ProjectContainer	project;
@@ -78,7 +82,7 @@ public class HTMLBuilder implements Closeable {
 	}
 	
 	public void upload(final ZipOutputStream os) throws IOException, ContentException {
-		final ProjectNavigatorItem		root = project.getProjectNavigator().getItem(1);
+		final ProjectNavigatorItem		root = project.getProjectNavigator().getItem(0);
 		final ProjectNavigatorItem[]	children = project.getProjectNavigator().getChildren(root.id);
 		boolean							overviewFound = false;
 		
@@ -92,43 +96,53 @@ public class HTMLBuilder implements Closeable {
 		if (!overviewFound) {
 			buildDefaultOverviewPage(root, os);
 		}
-		buildNavigatorTree(project.getProjectNavigator(), os);
 		buildContent(project.getProjectNavigator(), os);
+		for (String item : project.getPartNames()) {
+			if (item.endsWith(".css") || item.endsWith(".js")) {
+				storePartContent(item, project.getProjectPartContent(item), os);
+			}
+		}
 	}
 	
-	private void buildDefaultOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException {
+	private void buildDefaultOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException, ContentException {
 		final ZipEntry		ze = new ZipEntry(OVERVIEW_PAGE_NAME);
 		final String		content = project.getProjectPartContent(project.getPartNameById(item.id));
+		final String		navigatorTree = buildNavigatorTree(project.getProjectNavigator(), "/");
 		
 		ze.setMethod(ZipEntry.DEFLATED);
 		os.putNextEntry(ze);
 		
 		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 		
-		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
+		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML
+										, (Writer wrP, Object instP)->{writePrologue(wrP, "/", getPageTitle(item)); wrP.write(navigatorTree); return true;}
+										, (Writer wrE, Object instE)->writeEpilogue(wrE))) {
 			cwr.write(content);
 		}
 		wr.flush();
 		os.closeEntry();
 	}
 
-	private void buildOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException {
+	private void buildOverviewPage(final ProjectNavigatorItem item, final ZipOutputStream os) throws IOException, ContentException {
 		final ZipEntry		ze = new ZipEntry(OVERVIEW_PAGE_NAME);
 		final String		content = project.getProjectPartContent(project.getPartNameById(item.id));
+		final String		navigatorTree = buildNavigatorTree(project.getProjectNavigator(), "/");
 		
 		ze.setMethod(ZipEntry.DEFLATED);
 		os.putNextEntry(ze);
 		
 		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 		
-		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
+		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML
+										, (Writer wrP, Object instP)->{writePrologue(wrP, "/", getPageTitle(item)); wrP.write(navigatorTree); return true;}
+										, (Writer wrE, Object instE)->writeEpilogue(wrE))) {
 			cwr.write(content);
 		}
 		wr.flush();
 		os.closeEntry();
 	}
 
-	private void buildNavigatorTree(final ProjectNavigator navigator, final ZipOutputStream os) throws ContentException, IOException {
+	private String buildNavigatorTree(final ProjectNavigator navigator, final String currentPath) throws ContentException, IOException {
 		final StringBuilder	sb = new StringBuilder();
 		final List<String>	path = new ArrayList<>();
 		
@@ -146,13 +160,13 @@ public class HTMLBuilder implements Closeable {
 						for (int index = 0; index < path.size(); index++) {
 							sb.append('*');
 						}
-						sb.append(" [[./").append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
+						sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
 						break;
 					case CreoleRef: 
 						for (int index = 0; index < path.size(); index++) {
 							sb.append('*');
 						}
-						sb.append(" [[./").append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
+						sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(".cre", ".html")).append('|').append(node.desc).append("]]\n");
 						break;
 					case ImageRef : case Root : 
 						break;
@@ -166,18 +180,16 @@ public class HTMLBuilder implements Closeable {
 			return ContinueMode.CONTINUE;
 		});
 		
-		final ZipEntry		ze = new ZipEntry(NAVIGATOR_PAGE_NAME);
-		
-		ze.setMethod(ZipEntry.DEFLATED);
-		os.putNextEntry(ze);
-		
-		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
-		
-		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
-			cwr.write(sb.toString());
+		try(final Writer			wr = new StringWriter()) {
+			try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML
+										, (Writer wrP, Object instP)->true
+										, (Writer wrE, Object instE)->true)) {
+				
+				cwr.write(sb.toString());
+			}
+			wr.flush();
+			return wr.toString();
 		}
-		wr.flush();
-		os.closeEntry();
 	}	
 	
 	private void buildContent(final ProjectNavigator navigator, final ZipOutputStream os) throws ContentException, IOException {
@@ -185,6 +197,8 @@ public class HTMLBuilder implements Closeable {
 		
 		navigator.walkDown((mode, node)->{
 			if (mode == NodeEnterMode.ENTER) {
+				final String	navigatorTree = buildNavigatorTree(project.getProjectNavigator(), toPath(path));
+				
 				switch (node.type) {
 					case Subtree	:
 						path.add(node.name);
@@ -196,7 +210,7 @@ public class HTMLBuilder implements Closeable {
 						storeDocument(toPath(path), node, os);
 						break;
 					case CreoleRef: 
-						storeCreolePage(toPath(path), node, os);
+						storeCreolePage(toPath(path), node.titleId, navigatorTree, node, os);
 						break;
 					case Root: 
 						break;
@@ -220,6 +234,19 @@ public class HTMLBuilder implements Closeable {
 		return sb.append('/').toString();
 	}
 	
+	private String relativize(final String path, final String relatedTo) {
+		if (path.equals(relatedTo)) {
+			return "";
+		}
+		else {
+			final Path first = Paths.get(path);
+			final Path second = Paths.get(relatedTo);
+	        final Path pathRelative = second.relativize(first);			
+		
+	        return pathRelative.toString()+'/';
+		}
+	}
+	
 	private void storeImage(final String path, final ProjectNavigatorItem node, final ZipOutputStream os) throws IOException {
 		final ZipEntry	ze = new ZipEntry(path+project.getPartNameById(node.id));
 		
@@ -239,41 +266,58 @@ public class HTMLBuilder implements Closeable {
 	}
 
 
-	private void storeCreolePage(final String path, final ProjectNavigatorItem node, final ZipOutputStream os) throws IOException {
-		final ZipEntry	ze = new ZipEntry(path+project.getPartNameById(node.id));
-		final String		content = project.getProjectPartContent(project.getPartNameById(node.id));
+	private void storeCreolePage(final String path, final String comment, final String navigatorTree, final ProjectNavigatorItem node, final ZipOutputStream os) throws IOException {
+		final ZipEntry	ze = new ZipEntry(path+project.getPartNameById(node.id).replace(".cre", ".html"));
+		final String	content = project.getProjectPartContent(project.getPartNameById(node.id));
 		
 		ze.setMethod(ZipEntry.DEFLATED);
 		os.putNextEntry(ze);
 		
 		final Writer		wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 		
-		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML, (Writer wrP, Object instP)->writePrologue(wrP), (Writer wrE, Object instE)->writeEpilogue(wrE))) {
+		try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML
+										, (Writer wrP, Object instP)->{writePrologue(wrP, path, comment); wrP.write(navigatorTree); return true;}
+										, (Writer wrE, Object instE)->writeEpilogue(wrE))) {
 			cwr.write(content);
 		}
 		wr.flush();
 		os.closeEntry();
 	}
 
-	private boolean writePrologue(final Writer wr) throws IOException {
+	private void storePartContent(final String partName, final byte[] content, final ZipOutputStream os) throws IOException {
+		final ZipEntry	ze = new ZipEntry(partName);
+		
+		ze.setMethod(ZipEntry.DEFLATED);
+		os.putNextEntry(ze);
+		os.write(content);
+		os.closeEntry();
+	}
+
+	private boolean writePrologue(final Writer wr, final String path, final String comment) throws IOException {
 		wr.write("<!DOCTYPE html>\r\n"
 				+ "<html>\r\n"
 				+ " <head>\r\n"
 				+ "  <meta charset=\"utf-8\">\r\n"
-				+ "  <title>Пример страницы</title>\r\n"
+				+ "  <link rel=\"stylesheet\" href=\""+relativize("/", path)+"style.css\">\r\n"
+				+ "  <link rel=\"script\" href=\""+relativize("/", path)+"utils.js\">\r\n"
+				+ "  <title>"+comment+"</title>\r\n"
 				+ "  <style>\r\n"
 				+ "  p { color:  navy; }\r\n"
 				+ "  </style>\r\n"
 				+ " </head>\r\n"
-				+ " <body class=\"creole\">");
+				+ " <body class=\"creole\">\r\n");
 		return true;
 	}
 
 	private boolean writeEpilogue(final Writer wr) throws IOException {
-		wr.write(" </body>\r\n"
-				+ "</html>");
+		wr.write(" <footer>\r\n"
+				+ "<p>© "+new Date(System.currentTimeMillis()).getYear()+" "+project.getProperties().getValue(ProjectContainer.PROJECT_AUTHOR)+"</p>\r\n"
+				+ " </footer>\r\n");
 		return true;
 	}
-	
+
+	private String getPageTitle(final ProjectNavigatorItem node) {
+		return project.getLocalizer().getValue(node.titleId);
+	}
 	
 }

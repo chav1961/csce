@@ -34,6 +34,7 @@ import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.swing.ProjectItemEditor;
 import chav1961.csce.swing.ProjectPartEditor;
+import chav1961.csce.swing.ProjectPropertiesEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.csce.swing.ProjectViewerChangeEvent;
 import chav1961.purelib.basic.ArgParser;
@@ -44,6 +45,8 @@ import chav1961.purelib.basic.exceptions.CommandLineParametersException;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
+import chav1961.purelib.basic.exceptions.PrintingException;
+import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.basic.interfaces.LoggerFacadeOwner;
@@ -364,7 +367,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	}
 	
 	@OnAction("action:/properties")
-	public void properties() {
+	public void properties() throws ContentException {
+		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), project.getLocalizer(), project.getProperties());
+		
+		if (ask(ppe, getLocalizer(), 400, 180)) {
+			ppe.storeProperties(project.getProperties());
+		}
 	}
 	
 	@OnAction("action:/insertPart")
