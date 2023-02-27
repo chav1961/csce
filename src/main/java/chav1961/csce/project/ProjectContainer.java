@@ -88,6 +88,7 @@ public class ProjectContainer implements LocalizerOwner {
 	public static final String		PROJECT_AUTHOR = "project.author";
 	public static final String		PROJECT_DESCRIPTOR = "project.descriptor";
 	public static final String		PROJECT_LICENSES = "project.licenses";
+	public static final String		PROJECT_EMAIL = "project.email";
 	public static final String		PROJECT_TREE = "project.tree";
 	public static final String		PROJECT_ROOT = "project.root"; 
 	public static final String		PROJECT_LANG = "project.lang";
@@ -310,7 +311,7 @@ public class ProjectContainer implements LocalizerOwner {
 		return validateProject(logger, props, content);
 	}
 
-	public InputStream toIntputStream() {
+	public InputStream toInputStream() {
 		try(final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final ZipOutputStream		zos = new ZipOutputStream(baos)) {
 			
@@ -360,7 +361,7 @@ public class ProjectContainer implements LocalizerOwner {
 		final Map<String, Object>		projectParts = new HashMap<>();
 		
 		try(final InputStream	is = getClass().getResourceAsStream("project.template.properties")) {
-			projectProps.load(is);
+			projectProps.load(new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING));
 		}
 		for (String item : PARTS) {
 			try(final InputStream	is = getClass().getResourceAsStream(item)) {
@@ -390,7 +391,9 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 
 	private MutableJsonLocalizer prepareLocalizer(final byte[] content) {
-		final MutableJsonLocalizer	newlocalizer = (MutableJsonLocalizer)LocalizerFactory.getLocalizer(URI.create(Localizer.LOCALIZER_SCHEME+":mutablejson:"+URIUtils.convert2selfURI(content).toString()));
+		final MutableJsonLocalizer	newlocalizer = (MutableJsonLocalizer)LocalizerFactory.getLocalizer(
+										URI.create(Localizer.LOCALIZER_SCHEME+":mutablejson:"+URIUtils.convert2selfURI(content).toString())
+									);
 
 		if (localizer != null) {
 			app.getLocalizer().pop(localizer);
@@ -500,7 +503,7 @@ public class ProjectContainer implements LocalizerOwner {
 			
 			while ((ze = zis.getNextEntry()) != null) {
 				if (PART_DESCRIPTION.equals(ze.getName())) {
-					projectProps.load(zis);
+					projectProps.load(new InputStreamReader(zis, PureLibSettings.DEFAULT_CONTENT_ENCODING));
 					propsDetected = true;
 				}
 				else {

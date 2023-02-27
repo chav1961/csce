@@ -3,6 +3,8 @@ package chav1961.csce;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +16,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
@@ -89,7 +93,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	static final String				PROJECT_SUFFIX = "csc";
 
 	private static final String		LRU_PREFIX = "lru";
+	private static final String		EXPORT_LRU_PREFIX = "export_lru";
+	private static final String		PREVIEW_DIR = "preview";
+	
 	private static final FilterCallback	FILE_FILTER = FilterCallback.of("CSC project", "*."+PROJECT_SUFFIX);
+	private static final FilterCallback	EXPORT_WAR_FILTER = FilterCallback.of("WAR plugin", "*.war");
+	private static final FilterCallback	EXPORT_SCORM2004_FILTER = FilterCallback.of("Scorm 2004 plugin", "*.scorm");
+	private static final FilterCallback	EXPORT_DIRECTORY_FILTER = FilterCallback.of("Packed directory content", "*.zip");
 	
 	public static final String		KEY_APPLICATION_FRAME_TITLE = "chav1961.csce.Application.frame.title";
 	public static final String		KEY_APPLICATION_HELP_TITLE = "chav1961.csce.Application.help.title";
@@ -97,9 +107,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 	public static final String		KEY_APPLICATION_CONFIRM_DELETE_TITLE = "chav1961.csce.Application.confirm.delete.title";
 	public static final String		KEY_APPLICATION_CONFIRM_DELETE_MESSAGE = "chav1961.csce.Application.confirm.delete.message";
+
+	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_TITLE = "chav1961.csce.Application.confirm.replace.title";
+	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_MESSAGE = "chav1961.csce.Application.confirm.replace.message";
 	
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
 	public static final String		KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS = "chav1961.csce.Application.message.file.not.exists";
+	public static final String		KEY_APPLICATION_MESSAGE_DESKTOP_IS_NOT_SUPPORTED = "chav1961.csce.Application.message.desktop.is.not.supported";
 
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
 	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
@@ -117,6 +131,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final String		MENU_TOOLS_VALIDATE = "menu.main.tools.validate";
 	private static final String		MENU_TOOLS_PREVIEW = "menu.main.tools.preview";
 	private static final String		MENU_TOOLS_BUILD_INDEX = "menu.main.tools.buildIndex";
+	private static final String		MENU_FILE_EXPORT_LRU = "menu.main.file.export.lru";
 
 	private static final String[]	MENUS = {
 										MENU_FILE_LRU,
@@ -129,7 +144,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 										MENU_INSERT,
 										MENU_TOOLS_VALIDATE,
 										MENU_TOOLS_PREVIEW,
-										MENU_TOOLS_BUILD_INDEX
+										MENU_TOOLS_BUILD_INDEX,
+										MENU_FILE_EXPORT_LRU
 									};
 	
 	private static final long 		FILE_LRU = 1L << 0;
@@ -143,12 +159,28 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final long 		TOOLS_VALIDATE = 1L << 8;
 	private static final long 		TOOLS_PREVIEW = 1L << 9;
 	private static final long 		TOOLS_BUILD_INDEX = 1L << 10;
+	private static final long 		FILE_EXPORT_LRU = 1L << 11;
 
 	private static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
 	private static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
 	private static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
 	private static final FilterCallback		ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
-	
+
+	private static enum ExportFormat {
+		AS_WAR(EXPORT_WAR_FILTER),
+		AS_SCORM_2004(EXPORT_SCORM2004_FILTER),
+		AS_DIRECTORY(EXPORT_DIRECTORY_FILTER);
+		
+		private final FilterCallback	callback;
+		
+		private ExportFormat(final FilterCallback callback) {
+			this.callback = callback;
+		}
+		
+		public FilterCallback getCallbackFilter() {
+			return callback;
+		}
+	}
 	
 	private final URI						helpServerURI;
 	private final ContentMetadataInterface	mdi;
@@ -158,12 +190,15 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final JStateString				state;
 	private final LRUPersistence			lru;
 	private final JFileContentManipulator	fcm;
+	private final LRUPersistence			exportLru;
+	private final JFileContentManipulator	exportFcm;
 	private final ProjectContainer			project;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final JEnableMaskManipulator	emm;
 
 	private FirstScreen						firstScreen = null; 
 	private ProjectViewer					viewer = null;
+	private ExportFormat					exportFormat = null;
 	
 	public Application(final File propFile, final URI helpServerURI) throws ContentException, IOException {
 		try(final InputStream		is = this.getClass().getResourceAsStream("application.xml");) {
@@ -182,53 +217,18 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		this.state = new JStateString(localizer, 30);
 		this.lru = LRUPersistence.of(propFile, LRU_PREFIX); 
 		this.fcm = new JFileContentManipulator(repo, localizer, 
-				()->project.toIntputStream(), 
+				()->project.toInputStream(), 
 				()->project.fromOutputStream(), 
 				lru);
 		this.fcm.setFilters(FILE_FILTER);
-		this.fcm.addFileContentChangeListener(new FileContentChangeListener<Application>() {
-			@Override
-			public void actionPerformed(FileContentChangedEvent<Application> event) {
-				switch (event.getChangeType()) {
-					case LRU_LIST_REFRESHED			:
-						fillLRU(fcm.getLastUsed());
-						break;
-					case FILE_LOADED 				:
-						project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
-						if (viewer == null) {
-							placeViewer();
-						}
-						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
-						fillTitle();
-						break;
-					case FILE_STORED 				:
-						fcm.clearModificationFlag();
-						break;
-					case FILE_STORED_AS 			:
-						project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
-						fcm.clearModificationFlag();
-						fillTitle();
-						break;
-					case MODIFICATION_FLAG_CLEAR 	:
-						getEnableMaskManipulator().setEnableMaskOff(FILE_SAVE);
-						fillTitle();
-						break;
-					case MODIFICATION_FLAG_SET 		:
-						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | (Utils.checkEmptyOrNullString(project.getProjectFileName()) ? 0 : FILE_SAVE));
-						fillTitle();
-						break;
-					case NEW_FILE_CREATED 			:
-						if (viewer == null) {
-							placeViewer();
-						}
-						getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
-						fillTitle();
-						break;
-					default :
-						throw new UnsupportedOperationException("Change type ["+event.getChangeType()+"] is not supported yet");
-				}
-			}
-		});
+		this.fcm.addFileContentChangeListener((e)->processLRU(e));
+		this.exportLru = LRUPersistence.of(propFile, EXPORT_LRU_PREFIX); 
+		this.exportFcm = new JFileContentManipulator(repo, localizer, 
+				()->toInputStream(exportFormat), 
+				()->new OutputStream() {@Override public void write(int b) throws IOException {}}, 
+				exportLru);
+		this.exportFcm.setFilters(EXPORT_DIRECTORY_FILTER);
+		this.exportFcm.addFileContentChangeListener((e)->processExportLRU(e));
 		
 		state.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		setJMenuBar(menuBar);		
@@ -238,6 +238,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
         SwingUtils.assignActionListeners(menuBar, this);
 		SwingUtils.assignExitMethod4MainWindow(this,()->exit());
         fillLRU(fcm.getLastUsed());
+        fillExportLRU(exportFcm.getLastUsed());
 		
 		SwingUtils.centerMainWindow(this, 0.85f);
 		fillLocalizationStrings();
@@ -304,7 +305,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProject")
 	public void saveProject() {
-		try{fcm.saveFile();
+		try{exportFormat = ExportFormat.AS_WAR;
+		
+			exportFcm.setFilters(exportFormat.getCallbackFilter());
+			exportFcm.saveFileAs();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -312,7 +316,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProjectAs")
 	public void saveProjectAs() {
-		try{fcm.saveFileAs();
+		try{exportFormat = ExportFormat.AS_SCORM_2004;
+		
+			exportFcm.setFilters(exportFormat.getCallbackFilter());
+			exportFcm.saveFileAs();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -320,25 +327,33 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/exportProjectAsWar")
 	public void exportProjectAsWar() {
+		try{exportFormat = ExportFormat.AS_WAR;
+		
+			exportFcm.setFilters(exportFormat.getCallbackFilter());
+			exportFcm.saveFileAs();
+		} catch (IOException e) {
+			getLogger().message(Severity.error, e, e.getLocalizedMessage());
+		}
 	}
 	
 	@OnAction("action:/exportProjectAsScorm2004")
 	public void exportProjectAsScorm2004() {
+		try{exportFormat = ExportFormat.AS_SCORM_2004;
+		
+			exportFcm.setFilters(EXPORT_SCORM2004_FILTER);
+			exportFcm.saveFileAs();
+		} catch (IOException e) {
+			getLogger().message(Severity.error, e, e.getLocalizedMessage());
+		}
 	}
 	
 	@OnAction("action:/exportProjectAsSubdir")
 	public void exportProjectAsSubdir() {
-		try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FOR_SAVE | JFileSelectionDialog.OPTIONS_ALLOW_MKDIR | JFileSelectionDialog.OPTIONS_CONFIRM_REPLACEMENT, ZIP_FILTER)) {
-				try(final OutputStream		os = new FileOutputStream(item);
-					final ZipOutputStream	zos = new ZipOutputStream(os);
-					final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
-					
-					builder.upload(zos);
-					zos.flush();
-				}
-			}
-			getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
-		} catch (IOException | ContentException e) {
+		try{exportFormat = ExportFormat.AS_DIRECTORY;
+		
+			exportFcm.setFilters(EXPORT_DIRECTORY_FILTER);
+			exportFcm.saveFileAs();
+		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
 	}
@@ -346,6 +361,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	@OnAction("action:/exit")
 	public void exit() throws IOException {
 		if (fcm.commit()) {
+			fcm.close();
+			exportFcm.close();
 			latch.countDown();
 		}
 	}
@@ -370,7 +387,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void properties() throws ContentException {
 		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), project.getLocalizer(), project.getProperties());
 		
-		if (ask(ppe, getLocalizer(), 400, 180)) {
+		if (ask(ppe, getLocalizer(), 480, 220)) {
 			ppe.storeProperties(project.getProperties());
 		}
 	}
@@ -533,6 +550,33 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/previewProject")
 	public void previewProject() {
+		if (Desktop.isDesktopSupported()) {
+			final File	tempDir = new File(new File(System.getProperty("java.io.tmpdir")), PREVIEW_DIR);
+			final File	startPage = new File(tempDir, "index_"+project.getLocalizer().currentLocale().getLanguage()+".html");
+			
+			if (tempDir.exists() && tempDir.isDirectory()) {
+				Utils.deleteDir(tempDir);
+			}
+			try(final ZipInputStream	zis = new ZipInputStream(toInputStream(ExportFormat.AS_DIRECTORY))) {
+				ZipEntry	ze;
+				
+				while ((ze = zis.getNextEntry()) != null) {
+					final File	f = new File(tempDir, ze.getName());
+					
+					f.getParentFile().mkdirs();
+					
+					try(final OutputStream	os = new FileOutputStream(f)) {
+						Utils.copyStream(zis, os);						
+					}
+				}
+				Desktop.getDesktop().browse(startPage.toURI());
+			} catch (IOException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+		else {
+			getLogger().message(Severity.error, KEY_APPLICATION_MESSAGE_DESKTOP_IS_NOT_SUPPORTED);
+		}
 	}
 	
 	@OnAction("action:/buildIndex")
@@ -582,6 +626,29 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
 		}
 	}
+
+	void exportLRU(final String path) {
+		try(final FileSystemInterface	fsi = repo.clone().open(path)) {
+			for (ExportFormat item : ExportFormat.values()) {
+				if (item.getCallbackFilter().accept(fsi)) {
+					if (!fsi.exists() || 
+						fsi.isFile() && new JLocalizedOptionPane(getLocalizer()).confirm(this
+							, new LocalizedFormatter(KEY_APPLICATION_CONFIRM_REPLACE_MESSAGE, path)
+							, KEY_APPLICATION_CONFIRM_REPLACE_TITLE
+							, JOptionPane.QUESTION_MESSAGE
+							, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						try(final OutputStream	os = fsi.write()) {
+							Utils.copyStream(toInputStream(item), os);
+						}
+						getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+						return;
+					}
+				}
+			}
+		} catch (IOException e) {
+			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
+		}
+	}
 	
 	private void fillLRU(final List<String> lastUsed) {
 		if (lastUsed.isEmpty()) {
@@ -600,6 +667,99 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			getEnableMaskManipulator().setEnableMaskOn(FILE_LRU);
 		}
 	}
+
+	private void fillExportLRU(final List<String> lastUsed) {
+		if (lastUsed.isEmpty()) {
+			getEnableMaskManipulator().setEnableMaskOff(FILE_EXPORT_LRU);
+		}
+		else {
+			final JMenu	menu = (JMenu)SwingUtils.findComponentByName(menuBar, MENU_FILE_EXPORT_LRU);
+			
+			menu.removeAll();
+			for (String file : lastUsed) {
+				final JMenuItem	item = new JMenuItem(file);
+				
+				item.addActionListener((e)->exportLRU(item.getText()));
+				menu.add(item);
+			}
+			getEnableMaskManipulator().setEnableMaskOn(FILE_EXPORT_LRU);
+		}
+	}
+	
+	private void processLRU(final FileContentChangedEvent<?> event) {
+		switch (event.getChangeType()) {
+			case LRU_LIST_REFRESHED			:
+				fillLRU(fcm.getLastUsed());
+				break;
+			case FILE_LOADED 				:
+				project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
+				if (viewer == null) {
+					placeViewer();
+				}
+				getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+				fillTitle();
+				break;
+			case FILE_STORED 				:
+				fcm.clearModificationFlag();
+				break;
+			case FILE_STORED_AS 			:
+				project.setProjectFileName(fcm.getCurrentPathOfTheFile());						
+				fcm.clearModificationFlag();
+				fillTitle();
+				break;
+			case MODIFICATION_FLAG_CLEAR 	:
+				getEnableMaskManipulator().setEnableMaskOff(FILE_SAVE);
+				fillTitle();
+				break;
+			case MODIFICATION_FLAG_SET 		:
+				getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | (Utils.checkEmptyOrNullString(project.getProjectFileName()) ? 0 : FILE_SAVE));
+				fillTitle();
+				break;
+			case NEW_FILE_CREATED 			:
+				if (viewer == null) {
+					placeViewer();
+				}
+				getEnableMaskManipulator().setEnableMaskOn(FILE_SAVEAS | FILE_EXPORT | EDIT | TOOLS_VALIDATE | TOOLS_PREVIEW | TOOLS_BUILD_INDEX);
+				fillTitle();
+				break;
+			default :
+				throw new UnsupportedOperationException("Change type ["+event.getChangeType()+"] is not supported yet");
+		}
+	}
+
+	private void processExportLRU(final FileContentChangedEvent<?> event) {
+		switch (event.getChangeType()) {
+			case LRU_LIST_REFRESHED			:
+				fillExportLRU(exportFcm.getLastUsed());
+				break;
+			case FILE_LOADED : case FILE_STORED : case MODIFICATION_FLAG_CLEAR : case MODIFICATION_FLAG_SET : case NEW_FILE_CREATED : case FILE_STORED_AS :
+				break;
+			default :
+				throw new UnsupportedOperationException("Change type ["+event.getChangeType()+"] is not supported yet");
+		}
+	}
+
+	private InputStream toInputStream(final ExportFormat format) throws IOException {
+		try(final ByteArrayOutputStream	os = new ByteArrayOutputStream()) {
+			switch (format) {
+				case AS_DIRECTORY:
+					try(final ZipOutputStream	zos = new ZipOutputStream(os);
+						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
+						
+						builder.upload(zos);
+						zos.flush();
+					}
+					return new ByteArrayInputStream(os.toByteArray());
+				case AS_SCORM_2004:
+				case AS_WAR:
+				default:
+					throw new UnsupportedOperationException("Export format ["+format+"] is not supported yet"); 
+			}
+		} catch (ContentException e) {
+			throw new IOException(e); 
+		}
+	}
+	
 	
 	private void fillLocalizationStrings() {
 		fillTitle();

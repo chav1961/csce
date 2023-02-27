@@ -12,7 +12,10 @@
 		<key name="chav1961.csce.Application.message.confirm.delete">Scheme file [%1$s] will be removed. Are you sure to delete it?</key>
 		<key name="chav1961.csce.Application.message.confirm.delete.title">Confirm deletion</key>
 		<key name="chav1961.csce.Application.message.not.implemented.yet">NOT IMPLEMENTED YET!</key>
+		<key name="chav1961.csce.Application.message.desktop.is.not.supported">Desktop is not supported</key>		
 		<key name="chav1961.csce.Application.confirm.delete.title">Confirm delete</key>
+		<key name="chav1961.csce.Application.confirm.replace.title">Confirm replacement</key>
+		<key name="chav1961.csce.Application.confirm.replace.message">File to export [%1$s] already exists. Replace it?</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU files</key>
@@ -34,6 +37,8 @@
 		<key name="menu.main.file.saveAs.tt">Save project as...</key>
 		<key name="menu.main.file.export">Export project</key>
 		<key name="menu.main.file.export.tt">Export project</key>
+		<key name="menu.main.file.export.lru">Export as recent...</key>
+		<key name="menu.main.file.export.lru.tt">Export as recent...</key>
 		<key name="menu.main.file.export.war">...as servlet</key>
 		<key name="menu.main.file.export.war.tt">...as servlet</key>
 		<key name="menu.main.file.export.scorm2004">...as SCORM-2004</key>
@@ -115,6 +120,17 @@
 		<key name="ProjectItemEditor.desc.tt">Page description</key>
 		<key name="ProjectItemEditor.title">Page title</key>
 		<key name="ProjectItemEditor.title.tt">Page title</key>
+
+<!-- ProjectPropertiesEditor class localization -->
+		<key name="ProjectPropertiesEditor.caption">Project settings</key>
+		<key name="ProjectPropertiesEditor.caption.tt">Project settings</key>
+		<key name="ProjectPropertiesEditor.caption.help">Project settings</key>
+		<key name="ProjectPropertiesEditor.name">Project name</key>
+		<key name="ProjectPropertiesEditor.name.tt">Project name</key>
+		<key name="ProjectPropertiesEditor.author">Author(s)</key>
+		<key name="ProjectPropertiesEditor.author.tt">Author(s)</key>
+		<key name="ProjectPropertiesEditor.desc">Description</key>
+		<key name="ProjectPropertiesEditor.desc.tt">Description</key>
  
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
@@ -133,8 +149,11 @@
 		<key name="chav1961.csce.Application.message.confirm.delete">Файл схемы [%1$s] будкт удален. Вы действительно хотите его удалить?</key>
 		<key name="chav1961.csce.Application.message.confirm.delete.title">Подтвердите удаление</key>
 		<key name="chav1961.csce.Application.message.not.implemented.yet">ПОКА НЕ РЕАЛИЗОВАНО!</key>
+		<key name="chav1961.csce.Application.message.desktop.is.not.supported">Работа с браузером не поддерживается</key>		
 		<key name="chav1961.csce.Application.confirm.delete.title">Подтвердите удаление</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
+		<key name="chav1961.csce.Application.confirm.replace.title">Подтвердите замену</key>
+		<key name="chav1961.csce.Application.confirm.replace.message">Файл экспорта [%1$s] уже существует. Заменить его?</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU файлы</key>
 		<key name="chav1961.csce.Application.filter.image.file">Файлы изображений</key>
@@ -155,6 +174,8 @@
 		<key name="menu.main.file.saveAs.tt">Сохранить проект как...</key>
 		<key name="menu.main.file.export">Экспорт проекта</key>
 		<key name="menu.main.file.export.tt">Экспорт проекта...</key>
+		<key name="menu.main.file.export.lru">Последние экспорты...</key>
+		<key name="menu.main.file.export.lru.tt">Последние экспорты...</key>
 		<key name="menu.main.file.export.war">В формат сервлета</key>
 		<key name="menu.main.file.export.war.tt">В формат сервлета</key>
 		<key name="menu.main.file.export.scorm2004">В формат SCORM 2004</key>
@@ -236,9 +257,22 @@
 		<key name="ProjectItemEditor.desc.tt">Описание страницы</key>
 		<key name="ProjectItemEditor.title">Заголовок страницы</key>
 		<key name="ProjectItemEditor.title.tt">Заголовок страницы в навигаторе</key>
+
+<!-- Локализация класса ProjectPropertiesEditor -->
+		<key name="ProjectPropertiesEditor.caption">Параметры проекта</key>
+		<key name="ProjectPropertiesEditor.caption.tt">Параметры проекта</key>
+		<key name="ProjectPropertiesEditor.caption.help">Параметры проекта</key>
+		<key name="ProjectPropertiesEditor.name">Название проекта</key>
+		<key name="ProjectPropertiesEditor.name.tt">Название проекта</key>
+		<key name="ProjectPropertiesEditor.author">Автор(ы)</key>
+		<key name="ProjectPropertiesEditor.author.tt">Автор(ы)</key>
+		<key name="ProjectPropertiesEditor.desc">Описание</key>
+		<key name="ProjectPropertiesEditor.desc.tt">Описание</key>
  
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">Файл %1$s содержит несохраненные изменения. Сохранить их?</key>
+		
+		
 	</lang>	
 </localization>

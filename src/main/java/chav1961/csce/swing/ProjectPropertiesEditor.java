@@ -28,7 +28,7 @@ public class ProjectPropertiesEditor implements FormManager<Object, ProjectPrope
 	@Format("20m")
 	public SimpleLocalizedString	name;
 
-	@LocaleResource(value="ProjectPropertiesEditor.title",tooltip="ProjectPropertiesEditor.title.tt")
+	@LocaleResource(value="ProjectPropertiesEditor.author",tooltip="ProjectPropertiesEditor.author.tt")
 	@Format("20m")
 	public SimpleLocalizedString	author;
 

@@ -1,0 +1,8 @@
+				</td>
+			</tr>
+		</table>
+		<footer>
+			<p>© ${year} ${project.author} ${project.name}, E-mail ${project.email}
+		</footer>
+	</body>
+</html>

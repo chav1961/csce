@@ -12,6 +12,10 @@
 			<app:item name="menu.main.file.save" caption="menu.main.file.save" tooltip="menu.main.file.save.tt" action="saveProject"/>
 			<app:item name="menu.main.file.saveAs" caption="menu.main.file.saveAs" tooltip="menu.main.file.saveAs.tt" action="saveProjectAs"/>
 			<app:submenu  name="menu.main.file.export" caption="menu.main.file.export" tooltip="menu.main.file.export.tt">
+				<app:submenu name="menu.main.file.export.lru" caption="menu.main.file.export.lru" tooltip="menu.main.file.export.lru.tt">
+					<app:separator/>
+				</app:submenu>
+				<app:separator/>
 				<app:item name="menu.main.file.export.war" caption="menu.main.file.export.war" tooltip="menu.main.file.export.war.tt" action="exportProjectAsWar"/>
 				<app:item name="menu.main.file.export.scorm2004" caption="menu.main.file.export.scorm2004" tooltip="menu.main.file.export.scorm2004.tt" action="exportProjectAsScorm2004"/>
 				<app:item name="menu.main.file.export.subdir" caption="menu.main.file.export.subdir" tooltip="menu.main.file.export.subdir.tt" action="exportProjectAsSubdir"/>

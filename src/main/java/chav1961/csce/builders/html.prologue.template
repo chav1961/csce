@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="${path}style.css">
+		<link rel="script" href="${path}utils.js">
+		<title>${comment}</title>
+	</head>
+	<body class="creole">
+		<header>
+			<h3>${project.name}</h3>
+		</header>
+		<table cols="2">
+		 	<col width="30%">
+		 	<col width="70%">
+		 	<tr>
+		 		<td>${navigator}</td>
+		 		<td>
+		 			<h3>${comment} <input type="search" id="search" name="search"><button>Search</button></h3>
+		 			<hr/>
+		
