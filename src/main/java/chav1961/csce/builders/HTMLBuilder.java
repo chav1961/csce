@@ -21,11 +21,14 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.csce.utils.SimpleLocalizedString;
 import chav1961.purelib.basic.CharUtils;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.ContentException;
+import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
+import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.enumerations.ContinueMode;
 import chav1961.purelib.enumerations.MarkupOutputFormat;
 import chav1961.purelib.enumerations.NodeEnterMode;
@@ -337,20 +340,23 @@ public class HTMLBuilder implements Closeable {
 
 	private boolean writePrologue(final Writer wr, final String path, final String comment, final String navigatorTree) throws IOException {
 		wr.write(CharUtils.substitute("prologue", PROLOGUE, (s)->{
-			switch (s) {
-				case "path" 	:
-					return relativize("/", path);
-				case "comment" 	:
-					return getLocalizedValue(comment);
-				case "navigator":
-					return navigatorTree;
-				default :
-					if (project.getProperties().containsKey(s)) {
-						return  getLocalizedValue(project.getProperties().getProperty(s));
-					}
-					else {
-						return getLocalizedValue(s);
-					}
+			try{switch (s) {
+					case "path" 	:
+						return relativize("/", path);
+					case "comment" 	:
+						return getLocalizedValue(s, comment);
+					case "navigator":
+						return navigatorTree;
+					default :
+						if (project.getProperties().containsKey(s)) {
+							return  getLocalizedValue(s, project.getProperties().getProperty(s));
+						}
+						else {
+							return getLocalizedValue(s, s);
+						}
+				}
+			} catch (SyntaxException e) {
+				return s+"???"+e.getLocalizedMessage()+"???";
 			}
 		}));
 		return true;
@@ -358,16 +364,19 @@ public class HTMLBuilder implements Closeable {
 
 	private boolean writeEpilogue(final Writer wr) throws IOException {
 		wr.write(CharUtils.substitute("epilologue", EPILOGUE, (s)->{
-			switch (s) {
-				case "year" 	:
-					return ""+(1900 + new Date(System.currentTimeMillis()).getYear());
-				default :
-					if (project.getProperties().containsKey(s)) {
-						return getLocalizedValue(project.getProperties().getProperty(s));
-					}
-					else {
-						return getLocalizedValue(s);
-					}
+			try{switch (s) {
+					case "year" 	:
+						return ""+(1900 + new Date(System.currentTimeMillis()).getYear());
+					default :
+						if (project.getProperties().containsKey(s)) {
+							return getLocalizedValue(s, project.getProperties().getProperty(s));
+						}
+						else {
+							return getLocalizedValue(s, s);
+						}
+				}
+			} catch (SyntaxException e) {
+				return s+"???"+e.getLocalizedMessage()+"???";
 			}
 		}));
 		return true;
@@ -377,9 +386,12 @@ public class HTMLBuilder implements Closeable {
 		return project.getLocalizer().getValue(node.titleId);
 	}
 	
-	private String getLocalizedValue(final String key) {
-		if (key.startsWith("localizer.")) {
-			return project.getLocalizer().getValue(key);
+	private String getLocalizedValue(final String key, final String value) throws SyntaxException {
+		if (value.startsWith("{")) {
+			return new SimpleLocalizedString(key, value).getValue(project.getLocalizer().currentLocale().getLocale());
+		}
+		else if (value.startsWith("localizer.")) {
+			return project.getLocalizer().getValue(value);
 		}
 		else {
 			return key;

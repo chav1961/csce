@@ -71,6 +71,7 @@ public class ProjectPropertiesEditor implements FormManager<Object, ProjectPrope
 		for (Module item : unnamedModules) {
 			this.getClass().getModule().addExports(this.getClass().getPackageName(),item);
 		}
+		name.allowUnnamedModuleAccess(unnamedModules);
 	}
 	
 	public void storeProperties(final SubstitutableProperties props) throws PrintingException {

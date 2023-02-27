@@ -14,6 +14,7 @@ import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PrintingException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
+import chav1961.purelib.basic.interfaces.ModuleAccessor;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
@@ -22,7 +23,7 @@ import chav1961.purelib.json.JsonUtils;
 import chav1961.purelib.streams.JsonStaxParser;
 import chav1961.purelib.streams.JsonStaxPrinter;
 
-public class SimpleLocalizedString implements MutableLocalizedString {
+public class SimpleLocalizedString implements MutableLocalizedString, ModuleAccessor {
 	private String		key;
 	
 	private EnumMap<SupportedLanguages, String>	values = new EnumMap<>(SupportedLanguages.class);
@@ -170,6 +171,13 @@ public class SimpleLocalizedString implements MutableLocalizedString {
 		return new SimpleLocalizedString(this);
 	}
 
+	@Override
+	public void allowUnnamedModuleAccess(final Module... unnamedModules) {
+		for (Module item : unnamedModules) {
+			this.getClass().getModule().addExports(this.getClass().getPackageName(),item);
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return "SimpleLocalizedString [key=" + key + ", values=" + values + "]";

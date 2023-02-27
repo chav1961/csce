@@ -387,6 +387,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		
 		if (ask(ppe, getLocalizer(), 480, 220)) {
 			ppe.storeProperties(project.getProperties());
+			fcm.setModificationFlag();
 		}
 	}
 	
