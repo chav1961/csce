@@ -49,8 +49,6 @@ import chav1961.purelib.basic.exceptions.CommandLineParametersException;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
-import chav1961.purelib.basic.exceptions.PrintingException;
-import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.basic.interfaces.LoggerFacadeOwner;
@@ -79,11 +77,11 @@ import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JStateString;
 import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
-import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangeListener;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 
 // https://burakkanber.com/blog/machine-learning-full-text-search-in-javascript-relevance-scoring/
 // https://stackoverflow.com/questions/4437910/java-pdf-viewer
+// https://www.lucenetutorial.com/lucene-query-syntax.html
 public class Application  extends JFrame implements AutoCloseable, NodeMetadataOwner, LocaleChangeListener, LoggerFacadeOwner, LocalizerOwner  {
 	private static final long 		serialVersionUID = 8855923580582029585L;
 	

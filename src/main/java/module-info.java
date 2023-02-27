@@ -3,6 +3,9 @@ module chav1961.csce {
 	requires java.base;
 	requires java.desktop;
 	requires java.datatransfer;
+	requires transitive lucene.core;
+	requires transitive lucene.queryparser;
+	requires lucene.analyzers.common;
 	
 	exports chav1961.csce to chav1961.purelib; 
 
