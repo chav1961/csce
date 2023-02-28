@@ -2,7 +2,7 @@
 			</tr>
 		</table>
 		<footer>
-			<p>© ${year} ${project.author} ${project.name}, E-mail ${project.email}
+			<p>© ${year} ${project.author}, ${project.name}, E-mail: <a href="mailto:${project.email}">${project.email}</a> 
 		</footer>
 	</body>
 </html>

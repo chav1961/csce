@@ -6,6 +6,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import chav1961.csce.project.ProjectContainer;
+import chav1961.csce.utils.interfaces.SyntaxNodeType;
+import chav1961.purelib.basic.CharUtils;
+import chav1961.purelib.basic.Utils;
+import chav1961.purelib.cdb.SyntaxNode;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 
 public class ParserUtils {
@@ -42,6 +46,24 @@ public class ParserUtils {
 		}
 	}
 
+	public static SyntaxNode<SyntaxNodeType, SyntaxNode> parseQuery(final String query) {
+		if (Utils.checkEmptyOrNullString(query)) {
+			throw new IllegalArgumentException("Query string can't be null or empty");
+		}
+		else {
+			final char[]	content = CharUtils.terminateAndConvert2CharArray(query, '\n');
+			int				from = 0;
+			
+			for(;;) {
+				from = CharUtils.skipBlank(content, from, true);
+				switch (content[from]) {
+					case '\n' :
+						break;
+				}
+			}
+		}
+	}
+	
 	private static <T> void parseProjectContent(final String part, final T content, final OutputStream os) throws IOException {
 		// TODO Auto-generated method stub
 	}

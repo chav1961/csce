@@ -3,6 +3,9 @@ package chav1961.csce;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,6 +44,7 @@ import chav1961.csce.swing.ProjectPartEditor;
 import chav1961.csce.swing.ProjectPropertiesEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.csce.swing.ProjectViewerChangeEvent;
+import chav1961.csce.swing.SettingsEditor;
 import chav1961.purelib.basic.ArgParser;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -75,6 +79,7 @@ import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
+import chav1961.purelib.ui.swing.useful.JSimpleSplash;
 import chav1961.purelib.ui.swing.useful.JStateString;
 import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
@@ -87,9 +92,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	public static final String		ARG_HELP_PORT = "helpPort";
 	public static final String		ARG_PROPFILE_LOCATION = "prop";
-	
-	static final String				PROJECT_SUFFIX = "csc";
+	public static final String		DEFAULT_ARG_PROPFILE_LOCATION = "./.csce.properties";
+	public static final String		PROP_AUTOMATIC_PASTE = "automaticPaste";
 
+	static final String				PROJECT_SUFFIX = "csc";
+	
 	private static final String		LRU_PREFIX = "lru";
 	private static final String		EXPORT_LRU_PREFIX = "export_lru";
 	private static final String		PREVIEW_DIR = "preview";
@@ -111,6 +118,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
 	public static final String		KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS = "chav1961.csce.Application.message.file.not.exists";
+	public static final String		KEY_APPLICATION_MESSAGE_VALIDATION_SUCCESSFUL = "chav1961.csce.Application.message.validation.successful";
+	public static final String		KEY_APPLICATION_MESSAGE_VALIDATION_FAILED = "chav1961.csce.Application.message.validation.failed";
 	public static final String		KEY_APPLICATION_MESSAGE_DESKTOP_IS_NOT_SUPPORTED = "chav1961.csce.Application.message.desktop.is.not.supported";
 
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
@@ -179,7 +188,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			return callback;
 		}
 	}
-	
+
+	private final File						propFile;
 	private final URI						helpServerURI;
 	private final ContentMetadataInterface	mdi;
 	private final Localizer					localizer;
@@ -193,6 +203,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private final ProjectContainer			project;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final JEnableMaskManipulator	emm;
+	private final SettingsEditor			se;
 
 	private FirstScreen						firstScreen = null; 
 	private ProjectViewer					viewer = null;
@@ -209,10 +220,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			PureLibSettings.PURELIB_LOCALIZER.push(localizer);
 		}
 
+		this.propFile = propFile;
 		this.helpServerURI = helpServerURI;
 		this.menuBar = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.mainmenu")), JMenuBar.class); 
 		this.emm = new JEnableMaskManipulator(MENUS, this.menuBar);
 		this.state = new JStateString(localizer, 30);
+		this.se = new SettingsEditor(state, SubstitutableProperties.of(propFile));		
 		this.lru = LRUPersistence.of(propFile, LRU_PREFIX); 
 		this.fcm = new JFileContentManipulator(repo, localizer, 
 				()->project.toInputStream(), 
@@ -303,10 +316,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProject")
 	public void saveProject() {
-		try{exportFormat = ExportFormat.AS_WAR;
-		
-			exportFcm.setFilters(exportFormat.getCallbackFilter());
-			exportFcm.saveFileAs();
+		try{fcm.saveFile();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -314,10 +324,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProjectAs")
 	public void saveProjectAs() {
-		try{exportFormat = ExportFormat.AS_SCORM_2004;
-		
-			exportFcm.setFilters(exportFormat.getCallbackFilter());
-			exportFcm.saveFileAs();
+		try{fcm.saveFileAs();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -383,9 +390,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/properties")
 	public void properties() throws ContentException {
-		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), project.getLocalizer(), project.getProperties());
+		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), project.getProperties());
 		
-		if (ask(ppe, getLocalizer(), 480, 220)) {
+		if (ask(ppe, getLocalizer(), 500, 250)) {
 			ppe.storeProperties(project.getProperties());
 			fcm.setModificationFlag();
 		}
@@ -497,6 +504,31 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void insertUri() {
 	}
 
+	public void copyCreoleLink2Clipboard(final String partName, final String link) {
+		final Clipboard 		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		
+		clipboard.setContents(new StringSelection("[["+partName+"#"+link+"|"+link+"]]"), null);
+	}	
+
+	@OnAction("action:/copyLink")
+	public void copyLink2Clipboard() {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			final Clipboard 			clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			
+			switch (pni.type) {
+				case ImageRef		:
+					clipboard.setContents(new StringSelection("{{"+project.getPartNameById(pni.id)+"|"+pni.name+"}}"), null);
+					break;
+				case DocumentRef	:
+					clipboard.setContents(new StringSelection("[["+project.getPartNameById(pni.id)+"|"+pni.name+"]]"), null);
+					break;
+				default:
+					throw new UnsupportedOperationException("Item type ["+pni.type+"] is not supported yet"); 
+			}
+		}
+	}	
+	
 	@OnAction("action:/editItem")
 	public void editItem() {
 		if (viewer.isProjectNavigatorItemSelected()) {
@@ -545,6 +577,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/validateProject")
 	public void validateProject() {
+		viewer.getScreenLogger().clear();
+		if (project.validateProject(viewer.getScreenLogger())) {
+			getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_VALIDATION_SUCCESSFUL);
+		}
+		else {
+			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_VALIDATION_FAILED);
+		}
 	}
 	
 	@OnAction("action:/previewProject")
@@ -584,6 +623,17 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/settings")
 	public void settings() {
+		try{final SubstitutableProperties	props = SubstitutableProperties.of(propFile);
+		
+			se.loadProperties(props);
+			if (ask(se, getLocalizer(), 500, 100)) {
+				se.storeProperties(props);
+				props.store(propFile);
+				getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+			}
+		} catch (ContentException | IOException exc) {
+			getLogger().message(Severity.error, exc, exc.getLocalizedMessage());
+		}
 	}
 	
 	@OnAction("action:builtin:/builtin.languages")
@@ -599,6 +649,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			} catch (IOException exc) {
 				getLogger().message(Severity.error, exc, exc.getLocalizedMessage());
 			}
+		}
+		else {
+			getLogger().message(Severity.error, KEY_APPLICATION_MESSAGE_DESKTOP_IS_NOT_SUPPORTED);
 		}
 	}
 	
@@ -630,8 +683,14 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		try(final FileSystemInterface	fsi = repo.clone().open(path)) {
 			for (ExportFormat item : ExportFormat.values()) {
 				if (item.getCallbackFilter().accept(fsi)) {
-					if (!fsi.exists() || 
-						fsi.isFile() && new JLocalizedOptionPane(getLocalizer()).confirm(this
+					exportFormat = item;
+					if (!fsi.exists()) {
+						try(final OutputStream	os = fsi.create().write()) {
+							Utils.copyStream(toInputStream(item), os);
+						}
+						getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+					}
+					else if (fsi.isFile() && new JLocalizedOptionPane(getLocalizer()).confirm(this
 							, new LocalizedFormatter(KEY_APPLICATION_CONFIRM_REPLACE_MESSAGE, path)
 							, KEY_APPLICATION_CONFIRM_REPLACE_TITLE
 							, JOptionPane.QUESTION_MESSAGE
@@ -640,12 +699,12 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 							Utils.copyStream(toInputStream(item), os);
 						}
 						getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
-						return;
 					}
+					return;
 				}
 			}
 		} catch (IOException e) {
-			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
+			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
 	}
 	
@@ -799,25 +858,35 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static void main(String[] args) {
 		final ArgParser	parser = new ApplicationArgParser();
 		int				retcode = 0;	
-		
-		try(final StaticHelp	help = new StaticHelp(PureLibSettings.CURRENT_LOGGER, new URI("root://"+Application.class.getCanonicalName()+"/chav1961/csce/static.zip"), "csce.helpcontent")) {
-			final ArgParser		parsed = parser.parse(args);
-		
-			final SubstitutableProperties	nanoServerProps = new SubstitutableProperties(Utils.mkProps(
-												 NanoServiceFactory.NANOSERVICE_PORT, parsed.getValue(ARG_HELP_PORT, String.class)
-												,NanoServiceFactory.NANOSERVICE_ROOT, FileSystemInterface.FILESYSTEM_URI_SCHEME+":xmlReadOnly:root://"+Application.class.getCanonicalName()+"/chav1961/csce/helptree.xml"
-												,NanoServiceFactory.NANOSERVICE_CREOLE_PROLOGUE_URI, Application.class.getResource("prolog.cre").toString() 
-												,NanoServiceFactory.NANOSERVICE_CREOLE_EPILOGUE_URI, Application.class.getResource("epilog.cre").toString() 
-											));
 
-			try(final NanoServiceFactory	service = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, nanoServerProps)) {
-				service.start();
-				try(final Application		app = new Application(parsed.getValue(ARG_PROPFILE_LOCATION, File.class), URI.create("http://localhost:"+service.getServerAddress().getPort()))) {
+		try(final JSimpleSplash	jss = new JSimpleSplash()) {
+			
+			jss.start("Loading...", 4);
+		
+			try(final StaticHelp	help = new StaticHelp(PureLibSettings.CURRENT_LOGGER, new URI("root://"+Application.class.getCanonicalName()+"/chav1961/csce/static.zip"), "csce.helpcontent")) {
+				final ArgParser		parsed = parser.parse(args);
+				final SubstitutableProperties	nanoServerProps = new SubstitutableProperties(Utils.mkProps(
+													 NanoServiceFactory.NANOSERVICE_PORT, parsed.getValue(ARG_HELP_PORT, String.class)
+													,NanoServiceFactory.NANOSERVICE_ROOT, FileSystemInterface.FILESYSTEM_URI_SCHEME+":xmlReadOnly:root://"+Application.class.getCanonicalName()+"/chav1961/csce/helptree.xml"
+													,NanoServiceFactory.NANOSERVICE_CREOLE_PROLOGUE_URI, Application.class.getResource("prolog.cre").toString() 
+													,NanoServiceFactory.NANOSERVICE_CREOLE_EPILOGUE_URI, Application.class.getResource("epilog.cre").toString() 
+												));
+	
+				jss.processed(1);
+				
+				try(final NanoServiceFactory	service = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, nanoServerProps)) {
+					jss.processed(2);
+					service.start();
+					jss.processed(3);
 					
-					app.setVisible(true);
-					app.getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+					try(final Application		app = new Application(parsed.getValue(ARG_PROPFILE_LOCATION, File.class), URI.create("http://localhost:"+service.getServerAddress().getPort()))) {
+						
+						jss.processed(4);
+						app.setVisible(true);
+						app.getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
+					}
+					service.stop();
 				}
-				service.stop();
 			}
 		} catch (CommandLineParametersException exc) {
 			System.err.println(exc.getLocalizedMessage());
@@ -844,7 +913,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static class ApplicationArgParser extends ArgParser {
 		private static final ArgParser.AbstractArg[]	KEYS = {
 			new IntegerArg(ARG_HELP_PORT, true, "Help port to use for help browser", 0),
-			new FileArg(ARG_PROPFILE_LOCATION, false, "Property file location", "./.csce.properties"),
+			new FileArg(ARG_PROPFILE_LOCATION, false, "Property file location", DEFAULT_ARG_PROPFILE_LOCATION),
 		};
 		
 		private ApplicationArgParser() {

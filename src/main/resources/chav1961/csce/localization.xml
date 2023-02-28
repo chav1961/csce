@@ -8,6 +8,8 @@
 		<key name="chav1961.csce.Application.message.ready">Ready...</key>
 		<key name="chav1961.csce.Application.message.file.not.exists">File [%1$s] is not exists. File name fill removed from recently used files list</key>
 		<key name="chav1961.csce.Application.message.scheme.already.exists">Scheme file [%1$s] already exists in the directory [%2$s]. Type another name</key>
+		<key name="chav1961.csce.Application.message.validation.successful">Project validation successful</key>
+		<key name="chav1961.csce.Application.message.validation.failed">Project validation failed</key>
 		<key name="chav1961.csce.Application.message.rename.suffix.missing">Scheme file [%1$s] must have [%2$s] extension.</key>		
 		<key name="chav1961.csce.Application.message.confirm.delete">Scheme file [%1$s] will be removed. Are you sure to delete it?</key>
 		<key name="chav1961.csce.Application.message.confirm.delete.title">Confirm deletion</key>
@@ -90,7 +92,11 @@
 		<key name="menu.main.help.about">About...</key>
 		<key name="menu.main.help.about.tt">About...</key>
 
-<!-- Localization for tree menu --> 
+<!-- Localization for tree menu -->
+		<key name="treemenu.copyLinkList">Copy link to clipboard</key>
+		<key name="treemenu.copyLinkList.tt">Copy link to clipboard</key>
+		<key name="treemenu.copyLink">Copy link to clipboard</key>
+		<key name="treemenu.copyLink.tt">Copy link to clipboard</key> 
 		<key name="treemenu.properties">Edit</key>
 		<key name="treemenu.properties.tt">Edit item</key>
 		<key name="treemenu.delete">Delete</key>
@@ -129,8 +135,17 @@
 		<key name="ProjectPropertiesEditor.name.tt">Project name</key>
 		<key name="ProjectPropertiesEditor.author">Author(s)</key>
 		<key name="ProjectPropertiesEditor.author.tt">Author(s)</key>
+		<key name="ProjectPropertiesEditor.email">E-Mail</key>
+		<key name="ProjectPropertiesEditor.email.tt">E-Mail</key>
 		<key name="ProjectPropertiesEditor.desc">Description</key>
 		<key name="ProjectPropertiesEditor.desc.tt">Description</key>
+
+<!-- SettingsEditor class localization  -->
+		<key name="SettingsEditor.caption">Application settings</key>
+		<key name="SettingsEditor.caption.tt">Application settings</key>
+		<key name="SettingsEditor.caption.help">Application settings</key>
+		<key name="SettingsEditor.automaticPaste">Automatic Paste</key>
+		<key name="SettingsEditor.automaticPaste.tt">When copy any link to clipboard, also paste it automatically at the caret position inside Creole editor</key>
  
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
@@ -144,6 +159,8 @@
 		<key name="chav1961.csce.Application.help.content">uri(about.cre)</key>
 		<key name="chav1961.csce.Application.message.ready">Готово...</key>
 		<key name="chav1961.csce.Application.message.file.not.exists">Файл [%1$s] не существует. Его имя будет удалено из списка последних файлов</key>
+		<key name="chav1961.csce.Application.message.validation.successful">Проверка проекта успешна</key>
+		<key name="chav1961.csce.Application.message.validation.failed">Проект содержит ошибки</key>
 		<key name="chav1961.csce.Application.message.scheme.already.exists">Файл схемы [%1$s] уже существует в папке [%2$s]. Задайте другое имя</key>
 		<key name="chav1961.csce.Application.message.rename.suffix.missing">Файл схемы [%1$s] должен иметь расширение [%2$s]</key>		
 		<key name="chav1961.csce.Application.message.confirm.delete">Файл схемы [%1$s] будкт удален. Вы действительно хотите его удалить?</key>
@@ -228,6 +245,10 @@
 		<key name="menu.main.help.about.tt">О программе...</key>
 
 <!-- Локализация меню дерева проекта -->
+		<key name="treemenu.copyLinkList">Скопировать ссылку</key>
+		<key name="treemenu.copyLinkList.tt">Скопировать ссылку в буфер обмена</key>
+		<key name="treemenu.copyLink">Скопировать ссылку</key>
+		<key name="treemenu.copyLink.tt">Скопировать ссылку в буфер обмена</key> 
 		<key name="treemenu.properties">Редактировать</key>
 		<key name="treemenu.properties.tt">Редактировать элемент</key>
 		<key name="treemenu.delete">Удалить</key>
@@ -266,8 +287,17 @@
 		<key name="ProjectPropertiesEditor.name.tt">Название проекта</key>
 		<key name="ProjectPropertiesEditor.author">Автор(ы)</key>
 		<key name="ProjectPropertiesEditor.author.tt">Автор(ы)</key>
+		<key name="ProjectPropertiesEditor.email">E-Mail</key>
+		<key name="ProjectPropertiesEditor.email.tt">E-Mail</key>
 		<key name="ProjectPropertiesEditor.desc">Описание</key>
 		<key name="ProjectPropertiesEditor.desc.tt">Описание</key>
+
+<!-- Локализация класса SettingsEditor -->
+		<key name="SettingsEditor.caption">Настройки приложения</key>
+		<key name="SettingsEditor.caption.tt">Настройки приложения</key>
+		<key name="SettingsEditor.caption.help">Настройки приложения</key>
+		<key name="SettingsEditor.automaticPaste">Автоматический Paste</key>
+		<key name="SettingsEditor.automaticPaste.tt">При копировании любых ссылок в буфер обмена они также автоматически вставляются в текст Creole-редактора по текущему местоположению курсора</key>
  
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>

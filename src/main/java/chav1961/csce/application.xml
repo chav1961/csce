@@ -72,6 +72,10 @@
 			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
 		</app:submenu>
 		<app:separator/>
+		<app:submenu name="treemenu.copyLinkList" caption="treemenu.copyLinkList" tooltip="treemenu.copyLinkList.tt">
+			<app:separator/>
+		</app:submenu>
+		<app:item name="treemenu.copyLink" caption="treemenu.copyLink" tooltip="treemenu.copyLink.tt" action="copyLink"/>
 		<app:item name="treemenu.properties" caption="treemenu.properties" tooltip="treemenu.properties.tt" action="editItem"/>
 		<app:item name="treemenu.delete" caption="treemenu.delete" tooltip="treemenu.delete.tt" action="deleteItem"/>
 	</app:menu>

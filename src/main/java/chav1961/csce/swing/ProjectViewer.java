@@ -19,6 +19,7 @@ import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.swing.ProjectTree.ProjectItemTreeNode;
 import chav1961.purelib.basic.exceptions.LocalizationException;
+import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
@@ -58,6 +59,10 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		fillLocalizedStrings();
 	}
 
+	public ScreenLogger getScreenLogger() {
+		return screenLogger;
+	}
+	
 	@Override
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 		// TODO Auto-generated method stub

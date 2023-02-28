@@ -9,6 +9,8 @@ import java.net.URI;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,6 +19,7 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import chav1961.csce.Application;
 import chav1961.csce.project.ProjectChangeEvent;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator;
@@ -175,6 +178,32 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				final ProjectItemTreeNode	pitn = (ProjectItemTreeNode)path.getLastPathComponent();
 				final int	row = getRowForPath(path);
 				
+				switch (pitn.getUserObject().type) {
+					case CreoleRef		:
+						final String	partName = project.getPartNameById(pitn.getUserObject().id);
+						final String	content = project.getProjectPartContent(partName);
+						final boolean	linksPresent = fillCreoleLinks(partName, content, (JMenu)SwingUtils.findComponentByName(popup, "treemenu.copyLinkList"));
+						
+						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setVisible(true);
+						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setEnabled(linksPresent);
+						SwingUtils.findComponentByName(popup, "treemenu.copyLink").setVisible(false);
+						break;
+					case DocumentRef	:
+						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setVisible(false);
+						SwingUtils.findComponentByName(popup, "treemenu.copyLink").setVisible(true);
+						break;
+					case ImageRef		:
+						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setVisible(false);
+						SwingUtils.findComponentByName(popup, "treemenu.copyLink").setVisible(true);
+						break;
+					case Root : case Subtree :
+						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setVisible(false);
+						SwingUtils.findComponentByName(popup, "treemenu.copyLink").setVisible(false);
+						break;
+					default :
+						throw new UnsupportedOperationException("Item type ["+pitn.getUserObject().type+"] is npt supported yet");
+				}
+				
 				SwingUtils.findComponentByName(popup, "treemenu.properties").setEnabled(pitn.getUserObject().type.isEditingSipported());
 				SwingUtils.findComponentByName(popup, "treemenu.delete").setEnabled(row != 0);
 				popup.show(this, p.x, p.y);
@@ -206,6 +235,23 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			}
 		}
 	}
+
+	private boolean fillCreoleLinks(final String partName, final String content, final JMenu menu) {
+		boolean	found = false;
+		
+		menu.removeAll();
+		for (String item : content.split("\n")) {
+			if (item.trim().startsWith("=")) {
+				final JMenuItem	mi = new JMenuItem(item.trim());
+				
+				menu.add(mi);
+				mi.addActionListener((e)->((Application)SwingUtils.getNearestOwner(viewer, Application.class)).copyCreoleLink2Clipboard(partName, item));
+				found = true;
+			}
+		}
+		return found;
+	}
+
 	
 	private static ProjectItemTreeNode buildTree(final ProjectNavigator navigator) {
 		return buildTree(navigator, navigator.getRoot().id);

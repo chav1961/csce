@@ -22,7 +22,6 @@ import chav1961.purelib.ui.interfaces.RefreshMode;
 @LocaleResource(value="ProjectPropertiesEditor.caption",tooltip="ProjectPropertiesEditor.caption.tt",help="ProjectPropertiesEditor.caption.help")
 public class ProjectPropertiesEditor implements FormManager<Object, ProjectPropertiesEditor>, ModuleAccessor {
 	private final LoggerFacade		logger;
-	private final Localizer			localizer;
 
 	@LocaleResource(value="ProjectPropertiesEditor.name",tooltip="ProjectPropertiesEditor.name.tt")
 	@Format("20m")
@@ -32,26 +31,27 @@ public class ProjectPropertiesEditor implements FormManager<Object, ProjectPrope
 	@Format("20m")
 	public SimpleLocalizedString	author;
 
+	@LocaleResource(value="ProjectPropertiesEditor.email",tooltip="ProjectPropertiesEditor.email.tt")
+	@Format("20m")
+	public String					email;
+	
 	@LocaleResource(value="ProjectPropertiesEditor.desc",tooltip="ProjectPropertiesEditor.desc.tt")
 	@Format("20*5m")
 	public String					descriptor;
 
 
-	public ProjectPropertiesEditor(final LoggerFacade logger, final Localizer localizer, final SubstitutableProperties props) throws SyntaxException {
+	public ProjectPropertiesEditor(final LoggerFacade logger, final SubstitutableProperties props) throws SyntaxException {
 		if (logger == null) {
 			throw new NullPointerException("Logger can't be null"); 
-		}
-		else if (localizer == null) {
-			throw new NullPointerException("Localizer can't be null"); 
 		}
 		else if (props == null) {
 			throw new NullPointerException("Project properties can't be null"); 
 		}
 		else {
 			this.logger = logger;
-			this.localizer = localizer;
 			this.name = new SimpleLocalizedString(ProjectContainer.PROJECT_NAME, props.getProperty(ProjectContainer.PROJECT_NAME));
 			this.author = new SimpleLocalizedString(ProjectContainer.PROJECT_AUTHOR, props.getProperty(ProjectContainer.PROJECT_AUTHOR));
+			this.email = props.getProperty(ProjectContainer.PROJECT_EMAIL);
 			this.descriptor = props.getProperty(ProjectContainer.PROJECT_DESCRIPTOR);
 		}
 	}
@@ -77,6 +77,7 @@ public class ProjectPropertiesEditor implements FormManager<Object, ProjectPrope
 	public void storeProperties(final SubstitutableProperties props) throws PrintingException {
 		props.setProperty(ProjectContainer.PROJECT_NAME, name.toStringValue());
 		props.setProperty(ProjectContainer.PROJECT_AUTHOR, author.toStringValue());
+		props.setProperty(ProjectContainer.PROJECT_EMAIL, email);
 		props.setProperty(ProjectContainer.PROJECT_DESCRIPTOR, descriptor);
 	}
 }

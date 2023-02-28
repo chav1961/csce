@@ -189,7 +189,7 @@ public class HTMLBuilder implements Closeable {
 							sb.append('*');
 						}
 						sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(CREOLE_PAGE_SUFFIX, "")+'_'+lang.name())
-										.append(HTML_PAGE_SUFFIX).append('|').append(node.desc).append("]]\n");
+										.append(HTML_PAGE_SUFFIX).append('|').append(project.getLocalizer().getValue4Locale(lang.getLocale(), node.titleId)).append("]]\n");
 						break;
 					case ImageRef : case Root : 
 						break;
@@ -394,7 +394,7 @@ public class HTMLBuilder implements Closeable {
 			return project.getLocalizer().getValue(value);
 		}
 		else {
-			return key;
+			return value;
 		}
 	}
 }

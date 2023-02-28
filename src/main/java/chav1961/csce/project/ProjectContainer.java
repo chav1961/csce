@@ -37,6 +37,7 @@ import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.PrintingException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
+import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.i18n.LocalizerFactory;
 import chav1961.purelib.i18n.MutableJsonLocalizer;
@@ -403,6 +404,9 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 	
 	private boolean validateProject(final LoggerFacade logger, final SubstitutableProperties props, final Map<String, Object> parts) {
+//		for(int index = 0; index < 100; index++) {
+//			logger.message(Severity.error, "text "+index);
+//		}
 		return true;
 	}
 

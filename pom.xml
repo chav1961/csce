@@ -183,6 +183,9 @@
 							<classpathPrefix>./</classpathPrefix>
                             <mainClass>chav1961.csce.Application</mainClass>
 						</manifest>
+                       <manifestEntries>
+                           <SplashScreen-Image>chav1961/csce/snap.png</SplashScreen-Image>
+                       </manifestEntries>
 					</archive>
 				</configuration>
             </plugin>
