@@ -3,6 +3,8 @@ package chav1961.csce.project;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +29,7 @@ import javax.imageio.ImageIO;
 
 import chav1961.csce.Application;
 import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
+import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.StringLoggerFacade;
@@ -232,6 +235,70 @@ public class ProjectContainer implements LocalizerOwner {
 		else {
 			content.put(partName, data);
 			notifyContentChanges(partName);
+		}
+	}
+
+	public long addProjectPart(final long navigatorNodeId, final ItemType type, final File content) throws IOException {
+		if (!getProjectNavigator().hasItemId(navigatorNodeId)) {
+			throw new IllegalArgumentException("Navigation node id ["+navigatorNodeId+"] is not exists"); 
+		}
+		else if (getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Root && getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Subtree) {
+			throw new IllegalArgumentException("Navigation node id ["+navigatorNodeId+"] has type ["+getProjectNavigator().getItem(navigatorNodeId).type+"], but only Subtree and Root are available here"); 
+		}
+		else if (type == null || !(type == ItemType.DocumentRef || type == ItemType.ImageRef)) {
+			throw new IllegalArgumentException("Item type can be DocumentRef or ImageRef only"); 
+		}
+		else if (content == null) {
+			throw new IllegalArgumentException("File content can't be null"); 
+		}
+		else {
+			try(final InputStream	is = new FileInputStream(content)) {
+				return addProjectPart(navigatorNodeId, type, content.getName(), is);
+			}
+		}
+	}
+	
+	public long addProjectPart(final long navigatorNodeId, final ItemType type, final String itemName, final InputStream content) throws IOException {
+		if (!getProjectNavigator().hasItemId(navigatorNodeId)) {
+			throw new IllegalArgumentException("Navigation node id ["+navigatorNodeId+"] is not exists"); 
+		}
+		else if (getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Root && getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Subtree) {
+			throw new IllegalArgumentException("Navigation node id ["+navigatorNodeId+"] has type ["+getProjectNavigator().getItem(navigatorNodeId).type+"], but only Subtree and Root are available here"); 
+		}
+		else if (type == null || !(type == ItemType.DocumentRef || type == ItemType.ImageRef)) {
+			throw new IllegalArgumentException("Item type can be DocumentRef or ImageRef only"); 
+		}
+		else if (content == null) {
+			throw new IllegalArgumentException("File content can't be null"); 
+		}
+		else {
+			final long					unique = getProjectNavigator().getUniqueId();
+			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
+													, navigatorNodeId
+													, type.getPartNamePrefix()+unique
+													, type
+													, type.getPartNamePrefix()+' '+itemName
+													, createUniqueLocalizationString()
+													, -1);
+			getProjectNavigator().addItem(toAdd);
+			
+			final String	partName = getPartNameById(unique);
+			
+			switch (type) {
+				case DocumentRef	:
+					try(final ByteArrayOutputStream	baos = new ByteArrayOutputStream()) {
+						
+						Utils.copyStream(content, baos);
+						addProjectPartContent(partName, baos.toByteArray());
+					}
+					break;
+				case ImageRef		:
+					addProjectPartContent(partName, ImageIO.read(content));
+					break;
+				default:
+					throw new UnsupportedOperationException("Item type ["+type+"] is not supported yet");
+			}
+			return unique;
 		}
 	}
 	

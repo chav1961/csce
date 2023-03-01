@@ -95,6 +95,16 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		DEFAULT_ARG_PROPFILE_LOCATION = "./.csce.properties";
 	public static final String		PROP_AUTOMATIC_PASTE = "automaticPaste";
 
+	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
+	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
+	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
+	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
+	
+	public static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
+	public static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
+	public static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
+	public static final FilterCallback		ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
+	
 	static final String				PROJECT_SUFFIX = "csc";
 	
 	private static final String		LRU_PREFIX = "lru";
@@ -122,10 +132,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_APPLICATION_MESSAGE_VALIDATION_FAILED = "chav1961.csce.Application.message.validation.failed";
 	public static final String		KEY_APPLICATION_MESSAGE_DESKTOP_IS_NOT_SUPPORTED = "chav1961.csce.Application.message.desktop.is.not.supported";
 
-	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
-	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
-	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
-	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
 	
 	private static final String		MENU_FILE_LRU = "menu.main.file.lru";
 	private static final String		MENU_FILE_SAVE = "menu.main.file.save";
@@ -168,10 +174,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final long 		TOOLS_BUILD_INDEX = 1L << 10;
 	private static final long 		FILE_EXPORT_LRU = 1L << 11;
 
-	private static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
-	private static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
-	private static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
-	private static final FilterCallback		ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
 
 	private static enum ExportFormat {
 		AS_WAR(EXPORT_WAR_FILTER),
@@ -452,16 +454,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			boolean		wasSelected = false;
 			
 			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, PDF_FILTER, DJVU_FILTER)) {
-					final long					unique = project.getProjectNavigator().getUniqueId();
-					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
-															, pni.id
-															, "Document"+unique
-															, ItemType.DocumentRef
-															, "Document "+item
-															, project.createUniqueLocalizationString()
-															, -1);
-					project.getProjectNavigator().addItem(toAdd);
-					wasSelected = true;
+					try(final FileSystemInterface  	fsi = repo.clone().open(item);
+						final InputStream			is = fsi.read()) {
+						project.addProjectPart(pni.id, ItemType.DocumentRef, fsi.getName(), is);
+						wasSelected = true;
+					}
 				}
 				if (wasSelected) {
 					fcm.setModificationFlag();
@@ -479,16 +476,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			boolean		wasSelected = false;
 			
 			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, IMAGE_FILTER)) {
-					final long					unique = project.getProjectNavigator().getUniqueId();
-					final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
-															, pni.id
-															, "Image"+unique
-															, ItemType.ImageRef
-															, "Image "+item
-															, project.createUniqueLocalizationString()
-															, -1);
-					project.getProjectNavigator().addItem(toAdd);
-					project.addProjectPartContent(project.getPartNameById(toAdd.id), ImageIO.read(new File(item)));
+					try(final FileSystemInterface  	fsi = repo.clone().open(item);
+						final InputStream			is = fsi.read()) {
+						project.addProjectPart(pni.id, ItemType.ImageRef, fsi.getName(), is);
+						wasSelected = true;
+					}
 					wasSelected = true;
 				}
 				if (wasSelected) {

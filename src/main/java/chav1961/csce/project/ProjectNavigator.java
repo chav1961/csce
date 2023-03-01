@@ -59,19 +59,21 @@ public class ProjectNavigator {
 	}
 	
 	public static enum ItemType {
-		Root("favicon16x16.png", false, false),
-		CreoleRef("favicon16x16.png", true, true),
-		DocumentRef("favicon16x16.png", true, false),
-		ImageRef("favicon16x16.png", true, false),
-		Subtree("favicon16x16.png", false, true);
+		Root("favicon16x16.png", "", false, false),
+		CreoleRef("favicon16x16.png", "Creole", true, true),
+		DocumentRef("favicon16x16.png", "Document", true, false),
+		ImageRef("favicon16x16.png", "Image", true, false),
+		Subtree("favicon16x16.png", "", false, true);
 		
 		private final URI		icon;
 		private final boolean	isLeaf;
 		private final boolean	isEditingSupported;
+		private final String	partNamePrefix;
 		
-		private ItemType(final String icon, final boolean isLeaf, final boolean isEditingSupported) {
+		private ItemType(final String icon, final String partNamePrefix, final boolean isLeaf, final boolean isEditingSupported) {
 			try {
 				this.icon = getClass().getResource(icon).toURI();
+				this.partNamePrefix = partNamePrefix;
 				this.isLeaf = isLeaf;
 				this.isEditingSupported = isEditingSupported;
 			} catch (URISyntaxException e) {
@@ -83,11 +85,15 @@ public class ProjectNavigator {
 			return icon;
 		}
 		
+		public String getPartNamePrefix() {
+			return partNamePrefix;
+		}
+		
 		public boolean isLeafItem() {
 			return isLeaf;
 		}
 		
-		public boolean isEditingSipported() {
+		public boolean isEditingSupported() {
 			return isEditingSupported;
 		}
 	}
