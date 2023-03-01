@@ -3,9 +3,11 @@ package chav1961.csce.swing;
 import java.awt.BorderLayout;
 import java.util.Locale;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.exceptions.LocalizationException;
@@ -24,6 +26,8 @@ public class ProjectVariablesEditor extends JPanel implements LocaleChangeListen
 	
 	public ProjectVariablesEditor(final Localizer localizer, final SubstitutableProperties props) {
 		super(new BorderLayout(5, 5));
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		
 		if (localizer == null) {
 			throw new NullPointerException("Localizer can't be null");
 		}
@@ -36,10 +40,18 @@ public class ProjectVariablesEditor extends JPanel implements LocaleChangeListen
 			
 			add(tooltip, BorderLayout.NORTH);
 			add(new JScrollPane(table), BorderLayout.CENTER);
+			
 			fillLocalizationStrings();
 		}
 	}
 
+	
+	@Override
+	public void setVisible(final boolean aFlag) {
+		SwingUtilities.invokeLater(()->table.requestFocusInWindow());
+		super.setVisible(aFlag);
+	}
+	
 	public void storeProperties(final SubstitutableProperties props) throws PrintingException {
 		if (props == null) {
 			throw new NullPointerException("Propertis to set can't be null");

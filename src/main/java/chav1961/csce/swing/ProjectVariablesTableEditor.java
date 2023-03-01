@@ -12,6 +12,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -19,11 +21,13 @@ import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PrintingException;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
+import chav1961.purelib.model.FieldFormat;
 import chav1961.purelib.ui.swing.SwingUtils;
 
 class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener {
 	private static final long serialVersionUID = 3429107053592752877L;
 	private static final Pattern			SUBST_PATTERN = Pattern.compile("subst\\.*");
+	private static final FieldFormat		CELL_FORMAT = new FieldFormat(String.class, "30ms"); 
 
 	private final Localizer					localizer;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
@@ -44,19 +48,18 @@ class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener
 			}
 			setModel(this.model = new InnerTableModel(this.props));
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			setCellSelectionEnabled(false);
+			setRowSelectionAllowed(true);
+			setRowHeight(20);
+			setDefaultRenderer(String.class, SwingUtils.getCellRenderer(String.class, CELL_FORMAT, TableCellRenderer.class));
+			setDefaultEditor(String.class, SwingUtils.getCellEditor(String.class, CELL_FORMAT, TableCellEditor.class));
 
+			SwingUtils.assignActionKey(this, SwingUtils.KS_INSERT, (e)->insert(), SwingUtils.ACTION_INSERT);
+			SwingUtils.assignActionKey(this, SwingUtils.KS_DELETE, (e)->delete(), SwingUtils.ACTION_DELETE);
+			
 			final TableRowSorter<InnerTableModel> sorter = new TableRowSorter<>(model);
 
             sorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(0, SortOrder.ASCENDING)));			
 			setRowSorter(sorter);
-			
-			SwingUtils.assignActionKey(this, SwingUtils.KS_INSERT, (e)->model.insert(), SwingUtils.ACTION_INSERT);
-			SwingUtils.assignActionKey(this, SwingUtils.KS_DELETE, (e)->{
-				if (!getSelectionModel().isSelectionEmpty()) {
-					model.delete(getSelectedRow());
-				}
-			}, SwingUtils.ACTION_DELETE);
 		}
 	}
 
@@ -64,6 +67,16 @@ class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener
 	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 		model.fireTableStructureChanged();		
 	}
+
+	public void insert() {
+		model.insert();
+	}
+	
+	public void delete() {
+		if (!getSelectionModel().isSelectionEmpty()) {
+			model.delete(getRowSorter().convertRowIndexToModel(getSelectedRow()));
+		}
+	}	
 	
 	public void storeProperties(final SubstitutableProperties props) throws PrintingException {
 		if (props == null) {

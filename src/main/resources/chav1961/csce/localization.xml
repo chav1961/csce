@@ -19,6 +19,7 @@
 		<key name="chav1961.csce.Application.confirm.replace.title">Confirm replacement</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">File to export [%1$s] already exists. Replace it?</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
+		<key name="chav1961.csce.Application.project.variables.title">Project variables</key>		
 		<key name="chav1961.csce.Application.filter.creole.file">Creole files</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU files</key>
@@ -181,6 +182,7 @@
 		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
 		<key name="chav1961.csce.Application.confirm.replace.title">Подтвердите замену</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">Файл экспорта [%1$s] уже существует. Заменить его?</key>
+		<key name="chav1961.csce.Application.project.variables.title">Переменные проекта</key>		
 		<key name="chav1961.csce.Application.filter.creole.file">Creole файлы</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU файлы</key>

@@ -42,6 +42,7 @@ public class ProjectItemEditor implements FormManager<Object, ProjectItemEditor>
 		}
 		else {
 			this.logger = logger;
+			this.name = pni.name;
 			this.desc = pni.desc;
 			this.pni = pni;
 			this.titleId = project.getLocalizationString(pni.titleId);

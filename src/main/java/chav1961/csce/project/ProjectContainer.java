@@ -112,9 +112,9 @@ public class ProjectContainer implements LocalizerOwner {
 											"style.css",
 											"utils.js",
 										};
-	private static final Pattern	CREOLE_PATTERN = Pattern.compile("creole(\\d+)\\.cre");
-	private static final Pattern	DOCUMENT_PATTERN = Pattern.compile("document(\\d+)\\.doc");
-	private static final Pattern	IMAGE_PATTERN = Pattern.compile("image(\\d+)\\.png");
+	private static final Pattern	CREOLE_PATTERN = Pattern.compile(ItemType.CreoleRef.getPartNamePrefix()+"(\\d+)\\.cre");
+	private static final Pattern	DOCUMENT_PATTERN = Pattern.compile(ItemType.DocumentRef.getPartNamePrefix()+"(\\d+)\\.doc");
+	private static final Pattern	IMAGE_PATTERN = Pattern.compile(ItemType.ImageRef.getPartNamePrefix()+"(\\d+)\\.png");
 	private static final Pattern[]	PATTERNS = {CREOLE_PATTERN, DOCUMENT_PATTERN, IMAGE_PATTERN};
 	
 	private final Application				app;
@@ -333,11 +333,11 @@ public class ProjectContainer implements LocalizerOwner {
 		
 		switch (item.type) {
 			case CreoleRef		:
-				return "creole"+id+".cre";
+				return item.type.getPartNamePrefix()+id+".cre";
 			case DocumentRef	:
-				return "document"+id+".doc";
+				return item.type.getPartNamePrefix()+id+".doc";
 			case ImageRef		:
-				return "image"+id+".png";
+				return item.type.getPartNamePrefix()+id+".png";
 			case Root : case Subtree :
 				throw new IllegalArgumentException("Item type ["+item.type+"] can't have part name");
 			default :

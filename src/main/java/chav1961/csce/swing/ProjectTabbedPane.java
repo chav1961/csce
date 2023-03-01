@@ -74,26 +74,26 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			throw new IllegalArgumentException("Project item type ["+item.type+"] is not a Creole item");
 		}
 		else {
-			final String	partName = project.getPartNameById(item.id);
+			final String	projectPartName = project.getPartNameById(item.id);
 			
 			for(int index = 0; index < getTabCount(); index++) {
 				final JPanel	component = (JPanel)getComponentAt(index);
 				
 				if (component instanceof CreoleTab) {
-					if (((CreoleTab)component).partName.equals(partName)) {
+					if (((CreoleTab)component).projectPartName.equals(projectPartName)) {
 						setSelectedIndex(index);
 						return;
 					}
 				}
 			}
 			
-			final CreoleTab	tab = new CreoleTab(parent.getLocalizer(), item.name, partName, item.titleId);
+			final CreoleTab	tab = new CreoleTab(project.getLocalizer(), item.name, projectPartName, item.titleId);
 			
 			tab.getTabLabel().associate(this, tab);
 			addTab("", tab);
 			setTabComponentAt(getTabCount()-1, tab.getTabLabel());
 			setSelectedIndex(getTabCount()-1);
-			tab.setText(project.getProjectPartContent(partName));
+			tab.setText(project.getProjectPartContent(projectPartName));
 			tab.getTabLabel().setToolTipText(item.desc);
 			tab.setModified(false);
 		}
@@ -107,25 +107,25 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			throw new IllegalArgumentException("Project item type ["+item.type+"] is not a Image item");
 		}
 		else {
-			final String	partName = project.getPartNameById(item.id);
+			final String	projectPartName = project.getPartNameById(item.id);
 			
 			for(int index = 0; index < getTabCount(); index++) {
 				final JPanel	component = (JPanel)getComponentAt(index);
 				
 				if (component instanceof ImageTab) {
-					if (((ImageTab)component).partName.equals(partName)) {
+					if (((ImageTab)component).projectPartName.equals(projectPartName)) {
 						setSelectedIndex(index);
 						return;
 					}
 				}
 			}
-			final ImageTab	tab = new ImageTab(parent.getLocalizer(), item.name, partName, item.titleId);
+			final ImageTab	tab = new ImageTab(project.getLocalizer(), item.name, projectPartName, item.titleId);
 			
 			tab.getTabLabel().associate(this, tab);
 			addTab("", tab);
 			setTabComponentAt(getTabCount()-1, tab.getTabLabel());
 			setSelectedIndex(getTabCount()-1);
-			tab.setImage(project.getProjectPartContent(partName));
+			tab.setImage(project.getProjectPartContent(projectPartName));
 			tab.getTabLabel().setToolTipText(item.desc);
 			tab.setModified(false);
 		}
@@ -214,11 +214,14 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private class CreoleTab extends JPanelWithLabel {
 		private static final long 	serialVersionUID = 7675426768332709976L;
 		private final JCreoleEditor	editor = new JCreoleEditor();
+
+		private final String				projectPartName;
 		
 		private CreoleTab(final Localizer localizer, final String partName, final String projectPartName, final String titleId) {
 			super(localizer, partName, titleId);
 			setLayout(new BorderLayout());
-			
+
+			this.projectPartName = projectPartName;
 			this.editor.setText(project.getProjectPartContent(projectPartName));
 			SwingUtils.assignActionKey(editor, SwingUtils.KS_SAVE, (e)->saveContent(), SwingUtils.ACTION_SAVE);
 			
@@ -248,7 +251,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@Override
 		public void saveContent() {
-			project.setProjectPartContent(partName, getText());
+			project.setProjectPartContent(projectPartName, getText());
 			setModified(false);
 		}
 	}
@@ -257,11 +260,13 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		private static final long 	serialVersionUID = 7675426768332709976L;
 
 		private final JBackgroundComponent	bc;
+		private final String				projectPartName;
 		
 		private ImageTab(final Localizer localizer, final String partName, final String projectPartName, final String titleId) {
 			super(localizer, partName, titleId);
 			setLayout(new BorderLayout());
 
+			this.projectPartName = projectPartName;
 			this.bc = new JBackgroundComponent(localizer);
 			this.bc.setFocusable(true);
 			this.bc.setFillMode(FillMode.ORIGINAL);
@@ -288,7 +293,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@Override
 		public void saveContent() {
-			project.setProjectPartContent(partName, getImage());
+			project.setProjectPartContent(projectPartName, getImage());
 			setModified(false);
 		}
 		

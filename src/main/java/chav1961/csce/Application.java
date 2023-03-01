@@ -79,6 +79,7 @@ import chav1961.purelib.ui.interfaces.LRUPersistence;
 import chav1961.purelib.ui.swing.AutoBuiltForm;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
+import chav1961.purelib.ui.swing.useful.JDialogContainer;
 import chav1961.purelib.ui.swing.useful.JEnableMaskManipulator;
 import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
@@ -132,6 +133,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_TITLE = "chav1961.csce.Application.confirm.replace.title";
 	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_MESSAGE = "chav1961.csce.Application.confirm.replace.message";
+
+	public static final String		KEY_APPLICATION_PROJECT_VARIABLES_TITLE = "chav1961.csce.Application.project.variables.title";
 	
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
 	public static final String		KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS = "chav1961.csce.Application.message.file.not.exists";
@@ -258,7 +261,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
         getContentPane().add(firstScreen = new FirstScreen(this), BorderLayout.CENTER);
         getContentPane().add(state, BorderLayout.SOUTH);
 
-        Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener((e)->refreshPasteMenu(e));         
+        Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener((e)->refreshPasteMenu());
+        refreshPasteMenu();
         
         SwingUtils.assignActionListeners(menuBar, this);
 		SwingUtils.assignExitMethod4MainWindow(this,()->exit());
@@ -416,7 +420,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void variables() throws ContentException {
 		final ProjectVariablesEditor	pve = new ProjectVariablesEditor(getLocalizer(), project.getProperties());
 		
-		if (ask(pve, getLocalizer(), 500, 250)) {
+		if (new JDialogContainer<>(getLocalizer(), this, KEY_APPLICATION_PROJECT_VARIABLES_TITLE, pve).showDialog()) {
 			pve.storeProperties(project.getProperties());
 			fcm.setModificationFlag();
 		}
@@ -885,7 +889,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 
-	private void refreshPasteMenu(final FlavorEvent e) {
+	private void refreshPasteMenu() {
 		boolean	imageFlavor = false;
 		
 		for(DataFlavor item : Toolkit.getDefaultToolkit().getSystemClipboard().getAvailableDataFlavors()) {
