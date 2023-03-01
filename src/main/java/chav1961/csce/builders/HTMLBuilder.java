@@ -169,36 +169,42 @@ public class HTMLBuilder implements Closeable {
 		final List<String>	path = new ArrayList<>();
 		
 		navigator.walkDown((mode, node)->{
-			if (mode == NodeEnterMode.ENTER) {
-				switch (node.type) {
-					case Subtree	:
-						path.add(node.name);
-						for (int index = 0; index < path.size(); index++) {
-							sb.append('*');
-						}
-						sb.append(' ').append(node.desc).append('\n');
-						break; 
-					case DocumentRef:
-						for (int index = 0; index < path.size(); index++) {
-							sb.append('*');
-						}
-						sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
-						break;
-					case CreoleRef: 
-						for (int index = 0; index < path.size(); index++) {
-							sb.append('*');
-						}
-						sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(CREOLE_PAGE_SUFFIX, "")+'_'+lang.name())
-										.append(HTML_PAGE_SUFFIX).append('|').append(project.getLocalizer().getValue4Locale(lang.getLocale(), node.titleId)).append("]]\n");
-						break;
-					case ImageRef : case Root : 
-						break;
-					default:
-						throw new UnsupportedOperationException("Node type ["+node.type+"] is not supported yet"); 
-				}
-			}
-			else if (node.type == ItemType.Subtree) {
-				path.remove(path.size()-1);
+			switch (mode) {
+				case ENTER	:
+					switch (node.type) {
+						case Subtree	:
+							path.add(node.name);
+							for (int index = 0; index < path.size(); index++) {
+								sb.append('*');
+							}
+							sb.append('*').append(' ').append(node.desc).append('\n');
+							break; 
+						case DocumentRef:
+							for (int index = 0; index < path.size(); index++) {
+								sb.append('*');
+							}
+							sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
+							break;
+						case CreoleRef: 
+							for (int index = 0; index < path.size(); index++) {
+								sb.append('*');
+							}
+							sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(CREOLE_PAGE_SUFFIX, "")+'_'+lang.name())
+											.append(HTML_PAGE_SUFFIX).append('|').append(project.getLocalizer().getValue4Locale(lang.getLocale(), node.titleId)).append("]]\n");
+							break;
+						case ImageRef : case Root : 
+							break;
+						default:
+							throw new UnsupportedOperationException("Node type ["+node.type+"] is not supported yet"); 
+					}
+					break;
+				case EXIT	:
+					if (node.type == ItemType.Subtree) {
+						path.remove(path.size()-1);
+					}
+					break;
+				default:
+					throw new UnsupportedOperationException("Mode ["+mode+"] is not supported yet");
 			}
 			return ContinueMode.CONTINUE;
 		});

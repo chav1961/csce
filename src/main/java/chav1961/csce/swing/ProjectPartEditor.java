@@ -19,8 +19,6 @@ public class ProjectPartEditor implements FormManager<Object, ProjectPartEditor>
 	private final LoggerFacade			logger;
 	private final ProjectNavigatorItem	pni;
 
-	@LocaleResource(value="ProjectPartEditor.name",tooltip="ProjectPartEditor.name.tt")
-	@Format("20m")
 	public String			name;
 
 	@LocaleResource(value="ProjectPartEditor.title",tooltip="ProjectPartEditor.title.tt")

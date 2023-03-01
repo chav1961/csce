@@ -19,6 +19,7 @@
 		<key name="chav1961.csce.Application.confirm.replace.title">Confirm replacement</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">File to export [%1$s] already exists. Replace it?</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
+		<key name="chav1961.csce.Application.filter.creole.file">Creole files</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU files</key>
 		<key name="chav1961.csce.Application.filter.image.file">Image files</key>
@@ -59,18 +60,24 @@
 		<key name="menu.main.edit.find.tt">Find</key>
 		<key name="menu.main.edit.findAndGo">Find and go</key>
 		<key name="menu.main.edit.findAndGo.tt">Find and go</key>
-		<key name="menu.main.edit.properties">Properties</key>
-		<key name="menu.main.edit.properties.tt">Properties</key>
+		<key name="menu.main.edit.properties">Project properties</key>
+		<key name="menu.main.edit.properties.tt">Project properties</key>
+		<key name="menu.main.edit.variables">Project variables</key>
+		<key name="menu.main.edit.variables.tt">Project variables</key>
 		<key name="menu.main.insert">Insert</key>
 		<key name="menu.main.insert.tt">Insert</key>
 		<key name="menu.main.insert.part">New part</key>
 		<key name="menu.main.insert.part.tt">New part</key>
-		<key name="menu.main.insert.page">Page</key>
-		<key name="menu.main.insert.page.tt">Page</key>
-		<key name="menu.main.insert.document">Document</key>
-		<key name="menu.main.insert.document.tt">Document</key>
-		<key name="menu.main.insert.image">Image</key>
-		<key name="menu.main.insert.image.tt">Image</key>
+		<key name="menu.main.insert.blankPage">New empty page</key>
+		<key name="menu.main.insert.blankPage.tt">New empty page</key>		
+		<key name="menu.main.insert.page">Page from file</key>
+		<key name="menu.main.insert.page.tt">Page from file</key>
+		<key name="menu.main.insert.document">Document from file</key>
+		<key name="menu.main.insert.document.tt">Document from file</key>
+		<key name="menu.main.insert.image">Image from file</key>
+		<key name="menu.main.insert.image.tt">Image from file</key>
+		<key name="menu.main.insert.image.from.clipboard">Image from clipboard</key>
+		<key name="menu.main.insert.image.from.clipboard.tt">Image from clipboard</key>		
 		<key name="menu.main.insert.uri">Link</key>
 		<key name="menu.main.insert.uri.tt">Link</key>
 		<key name="menu.main.tools">Tools</key>
@@ -109,8 +116,6 @@
 		<key name="ProjectPartEditor.caption">Part properties</key>
 		<key name="ProjectPartEditor.caption.tt">Part properties</key>
 		<key name="ProjectPartEditor.caption.help">Part properties</key>
-		<key name="ProjectPartEditor.name">Part name</key>
-		<key name="ProjectPartEditor.name.tt">Unique part name in the project tree</key>
 		<key name="ProjectPartEditor.desc">Description</key>
 		<key name="ProjectPartEditor.desc.tt">Part description</key>
 		<key name="ProjectPartEditor.title">Part title</key>
@@ -120,8 +125,6 @@
 		<key name="ProjectItemEditor.caption">Page properties</key>
 		<key name="ProjectItemEditor.caption.tt">Page properties</key>
 		<key name="ProjectItemEditor.caption.help">Page properties</key>
-		<key name="ProjectItemEditor.name">Page name</key>
-		<key name="ProjectItemEditor.name.tt">Page name</key>
 		<key name="ProjectItemEditor.desc">Description</key>
 		<key name="ProjectItemEditor.desc.tt">Page description</key>
 		<key name="ProjectItemEditor.title">Page title</key>
@@ -150,6 +153,13 @@
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">File %1$s was modified. Save changes?</key>
+
+<!-- ProjectVariablesEditor class localization -->
+		<key name="ProjectVariablesEditor.tooltip">Use INSERT key to add new variables and DELEET key to remove existent one</key>
+
+<!-- ProjectVariablesTableEditor.InnerTableModel class localization  -->
+		<key name="ProjectVariablesTableEditor.InnerTableModel.column.name">Variable name</key>
+		<key name="ProjectVariablesTableEditor.InnerTableModel.column.value">Variable value</key>
 		
  	</lang>
 	<lang name="ru">
@@ -171,6 +181,7 @@
 		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
 		<key name="chav1961.csce.Application.confirm.replace.title">Подтвердите замену</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">Файл экспорта [%1$s] уже существует. Заменить его?</key>
+		<key name="chav1961.csce.Application.filter.creole.file">Creole файлы</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
 		<key name="chav1961.csce.Application.filter.djvu.file">DJVU файлы</key>
 		<key name="chav1961.csce.Application.filter.image.file">Файлы изображений</key>
@@ -213,16 +224,22 @@
 		<key name="menu.main.edit.findAndGo.tt">Поиск и переход</key>
 		<key name="menu.main.edit.properties">Свойства</key>
 		<key name="menu.main.edit.properties.tt">Свойства проекта</key>
+		<key name="menu.main.edit.variables">Переменные проекта</key>
+		<key name="menu.main.edit.variables.tt">Переменные проекта</key>
 		<key name="menu.main.insert">Вставить</key>
 		<key name="menu.main.insert.tt">Вставить</key>
 		<key name="menu.main.insert.part">Раздел</key>
 		<key name="menu.main.insert.part.tt">Раздел</key>
-		<key name="menu.main.insert.page">Страницу</key>
-		<key name="menu.main.insert.page.tt">Страницу</key>
-		<key name="menu.main.insert.document">Документ</key>
-		<key name="menu.main.insert.document.tt">Документ</key>
-		<key name="menu.main.insert.image">Изображение</key>
-		<key name="menu.main.insert.image.tt">Изображение</key>
+		<key name="menu.main.insert.blankPage">Новую страницу</key>
+		<key name="menu.main.insert.blankPage.tt">Новую страницу</key>		
+		<key name="menu.main.insert.page">Страницу из файла</key>
+		<key name="menu.main.insert.page.tt">Страницу из файла</key>
+		<key name="menu.main.insert.document">Документ из файла</key>
+		<key name="menu.main.insert.document.tt">Документ из файла</key>
+		<key name="menu.main.insert.image">Изображение из файла</key>
+		<key name="menu.main.insert.image.tt">Изображение из файла</key>
+		<key name="menu.main.insert.image.from.clipboard">Изображение из буфера обмена</key>
+		<key name="menu.main.insert.image.from.clipboard.tt">Изображение из буфера обмена</key>		
 		<key name="menu.main.insert.uri">Ссылку</key>
 		<key name="menu.main.insert.uri.tt">Ссылку</key>
 		<key name="menu.main.tools">Инструменты</key>
@@ -261,8 +278,6 @@
 		<key name="ProjectPartEditor.caption">Свойства раздела</key>
 		<key name="ProjectPartEditor.caption.tt">Свойства раздела</key>
 		<key name="ProjectPartEditor.caption.help">Свойства раздела</key>
-		<key name="ProjectPartEditor.name">Имя раздела</key>
-		<key name="ProjectPartEditor.name.tt">Уникальное имя в поддереве проекта</key>
 		<key name="ProjectPartEditor.desc">Описание</key>
 		<key name="ProjectPartEditor.desc.tt">Описание раздела</key>
 		<key name="ProjectPartEditor.title">Заголовок раздела</key>
@@ -272,8 +287,6 @@
 		<key name="ProjectItemEditor.caption">Свойства страницы</key>
 		<key name="ProjectItemEditor.caption.tt">Свойства страницы</key>
 		<key name="ProjectItemEditor.caption.help">Свойства страницы</key>
-		<key name="ProjectItemEditor.name">Имя страницы</key>
-		<key name="ProjectItemEditor.name.tt">Уникальное имя в поддереве проекта</key>
 		<key name="ProjectItemEditor.desc">Описание</key>
 		<key name="ProjectItemEditor.desc.tt">Описание страницы</key>
 		<key name="ProjectItemEditor.title">Заголовок страницы</key>
@@ -302,7 +315,13 @@
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">Файл %1$s содержит несохраненные изменения. Сохранить их?</key>
+
+<!-- Локализация класса ProjectVariablesEditor -->
+		<key name="ProjectVariablesEditor.tooltip">Используйте клавишу INSERT для добавления новых переменных и DELETE для удаления существующих</key>
 		
+<!-- Локализация класса ProjectVariablesTableEditor.InnerTableModel -->
+		<key name="ProjectVariablesTableEditor.InnerTableModel.column.name">Имя переменной</key>
+		<key name="ProjectVariablesTableEditor.InnerTableModel.column.value">Значение</key>
 		
 	</lang>	
 </localization>

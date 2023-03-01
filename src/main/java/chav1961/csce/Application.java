@@ -3,9 +3,14 @@ package chav1961.csce;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,7 +28,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -42,6 +46,7 @@ import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.swing.ProjectItemEditor;
 import chav1961.csce.swing.ProjectPartEditor;
 import chav1961.csce.swing.ProjectPropertiesEditor;
+import chav1961.csce.swing.ProjectVariablesEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.csce.swing.ProjectViewerChangeEvent;
 import chav1961.csce.swing.SettingsEditor;
@@ -95,11 +100,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		DEFAULT_ARG_PROPFILE_LOCATION = "./.csce.properties";
 	public static final String		PROP_AUTOMATIC_PASTE = "automaticPaste";
 
+	public static final String		KEY_FILTER_CREOLE_FILE = "chav1961.csce.Application.filter.creole.file";
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
 	public static final String		KEY_FILTER_DJVU_FILE = "chav1961.csce.Application.filter.djvu.file";
 	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
 	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
 	
+	public static final FilterCallback		CREOLE_FILTER = FilterCallback.of(KEY_FILTER_CREOLE_FILE, "*.cre"); 	
 	public static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
 	public static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
 	public static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
@@ -145,6 +152,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final String		MENU_TOOLS_PREVIEW = "menu.main.tools.preview";
 	private static final String		MENU_TOOLS_BUILD_INDEX = "menu.main.tools.buildIndex";
 	private static final String		MENU_FILE_EXPORT_LRU = "menu.main.file.export.lru";
+	private static final String		MENU_INSERT_IMAGE_FROM_CLIPBOARD = "menu.main.insert.image.from.clipboard";
+	
 
 	private static final String[]	MENUS = {
 										MENU_FILE_LRU,
@@ -158,7 +167,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 										MENU_TOOLS_VALIDATE,
 										MENU_TOOLS_PREVIEW,
 										MENU_TOOLS_BUILD_INDEX,
-										MENU_FILE_EXPORT_LRU
+										MENU_FILE_EXPORT_LRU,
+										MENU_INSERT_IMAGE_FROM_CLIPBOARD
 									};
 	
 	private static final long 		FILE_LRU = 1L << 0;
@@ -173,7 +183,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final long 		TOOLS_PREVIEW = 1L << 9;
 	private static final long 		TOOLS_BUILD_INDEX = 1L << 10;
 	private static final long 		FILE_EXPORT_LRU = 1L << 11;
-
+	private static final long 		INSERT_IMAGE_FROM_CLIPBOARD = 1L << 12;
 
 	private static enum ExportFormat {
 		AS_WAR(EXPORT_WAR_FILTER),
@@ -247,6 +257,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		setJMenuBar(menuBar);		
         getContentPane().add(firstScreen = new FirstScreen(this), BorderLayout.CENTER);
         getContentPane().add(state, BorderLayout.SOUTH);
+
+        Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener((e)->refreshPasteMenu(e));         
         
         SwingUtils.assignActionListeners(menuBar, this);
 		SwingUtils.assignExitMethod4MainWindow(this,()->exit());
@@ -399,6 +411,16 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			fcm.setModificationFlag();
 		}
 	}
+
+	@OnAction("action:/variables")
+	public void variables() throws ContentException {
+		final ProjectVariablesEditor	pve = new ProjectVariablesEditor(getLocalizer(), project.getProperties());
+		
+		if (ask(pve, getLocalizer(), 500, 250)) {
+			pve.storeProperties(project.getProperties());
+			fcm.setModificationFlag();
+		}
+	}
 	
 	@OnAction("action:/insertPart")
 	public void insertPart() {
@@ -423,8 +445,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 	
-	@OnAction("action:/insertPage")
-	public void insertPage() {
+	@OnAction("action:/insertBlankPage")
+	public void insertBlankPage() {
 		if (viewer.isProjectNavigatorItemSelected()) {
 			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
 			final long					unique = project.getProjectNavigator().getUniqueId();
@@ -447,50 +469,46 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 
+	@OnAction("action:/insertPage")
+	public void insertPage() {
+		insertSomething(ItemType.CreoleRef, CREOLE_FILTER);
+	}	
+	
 	@OnAction("action:/insertDocument")
 	public void insertDocument() {
+		insertSomething(ItemType.DocumentRef, PDF_FILTER, DJVU_FILTER);
+	}
+	
+	@OnAction("action:/insertImage")
+	public void insertImage() {
+		insertSomething(ItemType.ImageRef, PDF_FILTER, IMAGE_FILTER);
+	}
+	
+	@OnAction("action:/insertImageFromClipboard")	
+	public void insertImageFromClipboard() {
 		if (viewer.isProjectNavigatorItemSelected()) {
-			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
-			boolean		wasSelected = false;
+			try{final Image					image = (Image)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.imageFlavor);
+				final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+				final long					unique = project.getProjectNavigator().getUniqueId();
+				final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
+																	, pni.id
+																	, "ImageContent"+unique
+																	, ItemType.ImageRef
+																	, "Image content"
+																	, project.createUniqueLocalizationString()
+																	, pni.id);
+				final ProjectItemEditor		pie = new ProjectItemEditor(getLogger(), project, toAdd);
 			
-			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, PDF_FILTER, DJVU_FILTER)) {
-					try(final FileSystemInterface  	fsi = repo.clone().open(item);
-						final InputStream			is = fsi.read()) {
-						project.addProjectPart(pni.id, ItemType.DocumentRef, fsi.getName(), is);
-						wasSelected = true;
-					}
+				if (ask(pie, getLocalizer(), 400, 180)) {
+					project.getProjectNavigator().addItem(pie.getNavigatorItem());
+					project.addProjectPartContent(project.getPartNameById(toAdd.id), image);
 				}
-				if (wasSelected) {
-					fcm.setModificationFlag();
-				}
-			} catch (IOException e) {
+			} catch (ContentException | HeadlessException | UnsupportedFlavorException | IOException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());
 			}
 		}
 	}
 	
-	@OnAction("action:/insertImage")
-	public void insertImage() {
-		if (viewer.isProjectNavigatorItemSelected()) {
-			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
-			boolean		wasSelected = false;
-			
-			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, IMAGE_FILTER)) {
-					try(final FileSystemInterface  	fsi = repo.clone().open(item);
-						final InputStream			is = fsi.read()) {
-						project.addProjectPart(pni.id, ItemType.ImageRef, fsi.getName(), is);
-						wasSelected = true;
-					}
-					wasSelected = true;
-				}
-				if (wasSelected) {
-					fcm.setModificationFlag();
-				}
-			} catch (IOException e) {
-				getLogger().message(Severity.error, e, e.getLocalizedMessage());
-			}
-		}
-	}
 	
 	@OnAction("action:/insertUri")
 	public void insertUri() {
@@ -810,6 +828,26 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 	
+	private final void insertSomething(final ItemType type, final FilterCallback... filters) {
+		if (viewer.isProjectNavigatorItemSelected()) {
+			final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
+			boolean		wasSelected = false;
+			
+			try{for (String item : JFileSelectionDialog.select(this, getLocalizer(), repo, JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_CAN_MULTIPLE_SELECT | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS | JFileSelectionDialog.OPTIONS_FOR_OPEN, filters)) {
+					try(final FileSystemInterface  	fsi = repo.clone().open(item);
+						final InputStream			is = fsi.read()) {
+						project.addProjectPart(pni.id, type, fsi.getName(), is);
+						wasSelected = true;
+					}
+				}
+				if (wasSelected) {
+					fcm.setModificationFlag();
+				}
+			} catch (IOException e) {
+				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+	}
 	
 	private void fillLocalizationStrings() {
 		fillTitle();
@@ -847,6 +885,17 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 
+	private void refreshPasteMenu(final FlavorEvent e) {
+		boolean	imageFlavor = false;
+		
+		for(DataFlavor item : Toolkit.getDefaultToolkit().getSystemClipboard().getAvailableDataFlavors()) {
+			if (item.equals(DataFlavor.imageFlavor)) {
+				imageFlavor = true;
+			}
+		}
+		getEnableMaskManipulator().setEnableMaskTo(INSERT_IMAGE_FROM_CLIPBOARD, imageFlavor);
+	}
+	
 	public static void main(String[] args) {
 		final ArgParser	parser = new ApplicationArgParser();
 		int				retcode = 0;	
