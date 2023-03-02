@@ -1,15 +1,25 @@
 package chav1961.csce.utils;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import chav1961.purelib.basic.AndOrTree;
 import chav1961.purelib.basic.CharUtils;
+import chav1961.purelib.basic.LineByLineProcessor;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.SyntaxException;
+import chav1961.purelib.basic.interfaces.SyntaxTreeInterface;
 
 public class SearchUtils {
+	private static final SyntaxTreeInterface<Object>	STOP_WORDS = new AndOrTree<>();
+	
+	static {
+		
+	}
+	
 	public static enum CreoleLinkType {
 		CreoleLink,
 		ImageLink,
@@ -94,7 +104,25 @@ public class SearchUtils {
 			return links.toArray(new CreoleLink[links.size()]);
 		}
 	}
-
+	
+	public static <T> Iterable<CreoleToken<T>> extractCreoleTokens(final String source, final T cargo) throws SyntaxException {
+		if (Utils.checkEmptyOrNullString(source)) {
+			throw new IllegalArgumentException("Source string can't be null");
+		}
+		else {
+			final List<CreoleToken<T>>	tokens = new ArrayList<>();
+			
+			try(final LineByLineProcessor	lblp = new LineByLineProcessor((displacement, lineNo, data, from, length)
+															->processLine(cargo, lineNo, data, from, length, tokens))) {
+				
+				lblp.write(source.toCharArray(), 0, source.length());
+			} catch (IOException e) {
+				throw new SyntaxException(0, 0, e.getLocalizedMessage());
+			}
+			return tokens;
+		}
+	}
+	
 	private static int skipNonBlank(final String line, final int col) {
 		for(int index = col; index < line.length(); index++) {
 			if (Character.isWhitespace(line.charAt(index))) {
@@ -104,6 +132,29 @@ public class SearchUtils {
 		return line.length()-1;
 	}
 
+	private static <T> void processLine(final T cargo, final int lineNo, final char[] data, int from, final int length, final List<CreoleToken<T>> tokens) throws IOException, SyntaxException {
+		final int	begin = from;
+		int			tokenStart, tokenEnd;
+		
+		while(data[from] != '\n') {
+			from = CharUtils.skipBlank(data, from, true);
+
+			tokenStart = from;
+			while (Character.isLetter(data[from])) {
+				from++;
+			}
+			tokenEnd = from;
+			if (tokenEnd > tokenStart + 3) {
+				if (STOP_WORDS.seekName(data, tokenStart, tokenEnd) < 0) {
+					tokens.add(new CreoleToken(cargo, lineNo, from - begin, new String(data, tokenStart, tokenEnd - tokenStart)));
+				}
+			}
+			while (!Character.isWhitespace(data[from])) {
+				from++;
+			}
+		}
+	}	
+	
 	public static class CreoleLink {
 		public final int			row;
 		public final int			col;
@@ -163,4 +214,51 @@ public class SearchUtils {
 			return "CreoleLink [row=" + row + ", col=" + col + ", type=" + type + ", ref=" + ref + ", title=" + title + "]";
 		}
 	}
+	
+	public static class CreoleToken<T> {
+		public final int			row;
+		public final int			col;
+		public final T				part;
+		public final String			token;
+		
+		public CreoleToken(final T part, final int row, final int col, final String token) {
+			this.part = part;
+			this.row = row;
+			this.col = col;
+			this.token = token;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + col;
+			result = prime * result + ((part == null) ? 0 : part.hashCode());
+			result = prime * result + row;
+			result = prime * result + ((token == null) ? 0 : token.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			CreoleToken<?> other = (CreoleToken<?>) obj;
+			if (col != other.col) return false;
+			if (part == null) {
+				if (other.part != null) return false;
+			} else if (!part.equals(other.part)) return false;
+			if (row != other.row) return false;
+			if (token == null) {
+				if (other.token != null) return false;
+			} else if (!token.equals(other.token)) return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "CreoleToken [row=" + row + ", col=" + col + ", part=" + part + ", token=" + token + "]";
+		}
+	}	
 }
