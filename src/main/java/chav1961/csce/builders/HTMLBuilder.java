@@ -177,19 +177,19 @@ public class HTMLBuilder implements Closeable {
 							for (int index = 0; index < path.size(); index++) {
 								sb.append('*');
 							}
-							sb.append('*').append(' ').append(node.desc).append('\n');
+							sb.append(' ').append(node.desc).append('\n');
 							break; 
 						case DocumentRef:
 							for (int index = 0; index < path.size(); index++) {
 								sb.append('*');
 							}
-							sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
+							sb.append("* [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id)).append('|').append(node.desc).append("]]\n");
 							break;
 						case CreoleRef: 
 							for (int index = 0; index < path.size(); index++) {
 								sb.append('*');
 							}
-							sb.append(" [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(CREOLE_PAGE_SUFFIX, "")+'_'+lang.name())
+							sb.append("* [[").append(relativize(toPath(path),currentPath)).append(project.getPartNameById(node.id).replace(CREOLE_PAGE_SUFFIX, "")+'_'+lang.name())
 											.append(HTML_PAGE_SUFFIX).append('|').append(project.getLocalizer().getValue4Locale(lang.getLocale(), node.titleId)).append("]]\n");
 							break;
 						case ImageRef : case Root : 

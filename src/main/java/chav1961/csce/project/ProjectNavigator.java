@@ -59,11 +59,11 @@ public class ProjectNavigator {
 	}
 	
 	public static enum ItemType {
-		Root("favicon16x16.png", "", false, false),
-		CreoleRef("favicon16x16.png", "Creole", true, true),
-		DocumentRef("favicon16x16.png", "Document", true, false),
-		ImageRef("favicon16x16.png", "Image", true, false),
-		Subtree("favicon16x16.png", "", false, true);
+		Root("settings16x16.png", "", false, false),
+		CreoleRef("page16x16.png", "Creole", true, true),
+		DocumentRef("document16x16.png", "Document", true, false),
+		ImageRef("image16x16.png", "Image", true, false),
+		Subtree("chapter16x16.png", "", false, true);
 		
 		private final URI		icon;
 		private final boolean	isLeaf;
