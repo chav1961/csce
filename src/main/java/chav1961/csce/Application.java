@@ -8,7 +8,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.ByteArrayInputStream;
@@ -100,6 +99,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		ARG_PROPFILE_LOCATION = "prop";
 	public static final String		DEFAULT_ARG_PROPFILE_LOCATION = "./.csce.properties";
 	public static final String		PROP_AUTOMATIC_PASTE = "automaticPaste";
+	public static final String		PROP_CHECK_EXTERNAL_LINKS = "checkExternalLinks";
 
 	public static final String		KEY_FILTER_CREOLE_FILE = "chav1961.csce.Application.filter.creole.file";
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
@@ -107,11 +107,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
 	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
 	
-	public static final FilterCallback		CREOLE_FILTER = FilterCallback.of(KEY_FILTER_CREOLE_FILE, "*.cre"); 	
-	public static final FilterCallback		PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
-	public static final FilterCallback		DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
-	public static final FilterCallback		IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
-	public static final FilterCallback		ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
+	public static final FilterCallback	CREOLE_FILTER = FilterCallback.of(KEY_FILTER_CREOLE_FILE, "*.cre"); 	
+	public static final FilterCallback	PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
+	public static final FilterCallback	DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
+	public static final FilterCallback	IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
+	public static final FilterCallback	ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
 	
 	static final String				PROJECT_SUFFIX = "csc";
 	
@@ -384,7 +384,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	@OnAction("action:/exit")
 	public void exit() throws IOException {
 		if (fcm.commit()) {
-			fcm.close();
 			exportFcm.close();
 			latch.countDown();
 		}
@@ -485,7 +484,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/insertImage")
 	public void insertImage() {
-		insertSomething(ItemType.ImageRef, PDF_FILTER, IMAGE_FILTER);
+		insertSomething(ItemType.ImageRef, IMAGE_FILTER);
 	}
 	
 	@OnAction("action:/insertImageFromClipboard")	
@@ -513,11 +512,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 	
-	
-	@OnAction("action:/insertUri")
-	public void insertUri() {
-	}
-
 	public void copyCreoleLink2Clipboard(final String partName, final String link) {
 		final Clipboard 		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		
@@ -892,10 +886,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private void refreshPasteMenu() {
 		boolean	imageFlavor = false;
 		
-		for(DataFlavor item : Toolkit.getDefaultToolkit().getSystemClipboard().getAvailableDataFlavors()) {
-			if (item.equals(DataFlavor.imageFlavor)) {
-				imageFlavor = true;
+		try{	// Clipboard artifact!!!
+			for(DataFlavor item : Toolkit.getDefaultToolkit().getSystemClipboard().getAvailableDataFlavors()) {
+				if (item.equals(DataFlavor.imageFlavor)) {
+					imageFlavor = true;
+				}
 			}
+		} catch (IllegalStateException exc) {
 		}
 		getEnableMaskManipulator().setEnableMaskTo(INSERT_IMAGE_FROM_CLIPBOARD, imageFlavor);
 	}

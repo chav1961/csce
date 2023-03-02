@@ -51,6 +51,7 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.csce.utils.SearchUtils;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
@@ -442,14 +443,12 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 		boolean	found = false;
 		
 		menu.removeAll();
-		for (String item : content.split("\n")) {
-			if (item.trim().startsWith("=")) {
-				final JMenuItem	mi = new JMenuItem(item.trim());
-				
-				menu.add(mi);
-				mi.addActionListener((e)->((Application)SwingUtils.getNearestOwner(viewer, Application.class)).copyCreoleLink2Clipboard(partName, item));
-				found = true;
-			}
+		for (String item : SearchUtils.extractCreoleAnchors(content)) {
+			final JMenuItem	mi = new JMenuItem(item.trim());
+			
+			menu.add(mi);
+			mi.addActionListener((e)->((Application)SwingUtils.getNearestOwner(viewer, Application.class)).copyCreoleLink2Clipboard(partName, item));
+			found = true;
 		}
 		return found;
 	}

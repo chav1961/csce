@@ -14,10 +14,15 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +36,8 @@ import chav1961.csce.Application;
 import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.csce.utils.SearchUtils;
+import chav1961.csce.utils.SearchUtils.CreoleLink;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.StringLoggerFacade;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -99,6 +106,14 @@ public class ProjectContainer implements LocalizerOwner {
 	public static final String		PROJECT_LOCALIZATION = "project.localization";
 	public static final String		PROJECT_EXTERNALS = "project.externals";
 	
+	public static final String		LINK_ALIAS = "link.alias";
+	public static final String		LINK_IS_EXTERNAL = "link.isExternal";
+	public static final String		LINK_BASE = "link.base";
+	public static final String		LINK_EXTERNAL_URI = "link.externalURI";
+
+	public static final String		SUBST_PREFIX = "subst.";
+	public static final Pattern		SUBST_PATTERN = Pattern.compile("subst\\..*");
+	
 	private static final String		PART_DESCRIPTION = ".project.properties";	
 	private static final String		CREOLE_EXT = ".cre";	
 	private static final String		IMAGE_EXT = ".png";	
@@ -112,6 +127,7 @@ public class ProjectContainer implements LocalizerOwner {
 											"style.css",
 											"utils.js",
 										};
+	
 	private static final Pattern	CREOLE_PATTERN = Pattern.compile(ItemType.CreoleRef.getPartNamePrefix()+"(\\d+)\\.cre");
 	private static final Pattern	DOCUMENT_PATTERN = Pattern.compile(ItemType.DocumentRef.getPartNamePrefix()+"(\\d+)\\.doc");
 	private static final Pattern	IMAGE_PATTERN = Pattern.compile(ItemType.ImageRef.getPartNamePrefix()+"(\\d+)\\.png");
@@ -265,8 +281,8 @@ public class ProjectContainer implements LocalizerOwner {
 		else if (getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Root && getProjectNavigator().getItem(navigatorNodeId).type != ItemType.Subtree) {
 			throw new IllegalArgumentException("Navigation node id ["+navigatorNodeId+"] has type ["+getProjectNavigator().getItem(navigatorNodeId).type+"], but only Subtree and Root are available here"); 
 		}
-		else if (type == null || !(type == ItemType.DocumentRef || type == ItemType.ImageRef)) {
-			throw new IllegalArgumentException("Item type can be DocumentRef or ImageRef only"); 
+		else if (type == null || !(type == ItemType.DocumentRef || type == ItemType.ImageRef || type == ItemType.CreoleRef)) {
+			throw new IllegalArgumentException("Item type can be CreoleRef, DocumentRef or ImageRef only"); 
 		}
 		else if (content == null) {
 			throw new IllegalArgumentException("File content can't be null"); 
@@ -294,6 +310,14 @@ public class ProjectContainer implements LocalizerOwner {
 					break;
 				case ImageRef		:
 					addProjectPartContent(partName, ImageIO.read(content));
+					break;
+				case CreoleRef		:
+					try(final Reader	rdr = new InputStreamReader(content, PureLibSettings.DEFAULT_CONTENT_ENCODING);
+						final Writer	wr = new StringWriter()) {
+						
+						Utils.copyStream(rdr, wr);
+						addProjectPartContent(partName, wr.toString());
+					}
 					break;
 				default:
 					throw new UnsupportedOperationException("Item type ["+type+"] is not supported yet");
@@ -471,12 +495,84 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 	
 	private boolean validateProject(final LoggerFacade logger, final SubstitutableProperties props, final Map<String, Object> parts) {
-//		for(int index = 0; index < 100; index++) {
-//			logger.message(Severity.error, "text "+index);
-//		}
-		return true;
+		final SubstitutableProperties	subst = new SubstitutableProperties(); 
+		final Map<String, Set<String>>	anchors = new HashMap<>();
+		boolean 						result = true;
+		
+		for(String item : props.availableKeys(SUBST_PATTERN)) {
+			subst.setProperty(item.substring(item.indexOf('.')+1), props.getPropertyAsIs(item));
+		}
+		
+		for(Entry<String, Object> entry : parts.entrySet()) {	// Collect anchors
+			for (ItemType item : ItemType.values()) {
+				if (entry.getKey().startsWith(item.getPartNamePrefix())) {
+					switch (item) {
+						case CreoleRef		:
+							anchors.put(entry.getKey(), new HashSet<>(Arrays.asList(SearchUtils.extractCreoleAnchors((String)entry.getValue()))));
+							break;
+						case DocumentRef		:
+							anchors.put(entry.getKey(), new HashSet<>());
+							break;
+						case ImageRef		:
+							anchors.put(entry.getKey(), new HashSet<>());
+							break;
+						default :
+					}
+				}
+			}
+		}
+		
+		for(Entry<String, Object> entry : parts.entrySet()) {	// Collect and check links anchors
+			for (ItemType item : ItemType.values()) {
+				if (entry.getKey().startsWith(item.getPartNamePrefix())) {
+					switch (item) {
+						case CreoleRef		:
+							try {
+								for (CreoleLink link : SearchUtils.extractCreoleLinks((String)entry.getValue())) {
+									final URI	uri = link.toURI(subst);
+									
+									switch(link.type) {
+										case CreoleLink		:
+											final String	path = uri.getPath(), fragment = uri.getFragment();
+											
+											if (!anchors.containsKey(path)) {
+												logger.message(Severity.warning, buildHyperlink(entry.getKey(),link) + "missing ref "+path);
+												result = false;
+											}
+											else if (fragment != null && !anchors.get(path).contains(fragment)) {
+												logger.message(Severity.warning, buildHyperlink(entry.getKey(),link) + "missing fragment "+fragment+" inside ref "+path);
+												result = false;
+											}											
+											break;
+										case ExternalLink	:
+											break;
+										case ImageLink		:
+											if (!anchors.containsKey(link.ref)) {
+												logger.message(Severity.warning, buildHyperlink(entry.getKey(),link) + "missing ref "+link.ref);
+												result = false;
+											}
+											break;
+										default :
+											throw new UnsupportedOperationException("Link type ["+link.type+"] is not supported yet"); 
+									}
+								}
+							} catch (IllegalArgumentException | SyntaxException exc) {
+								logger.message(Severity.error, exc, exc.getLocalizedMessage());
+								result = false;
+							}
+							break;
+						default :
+					}
+				}
+			}
+		}
+		return result;
 	}
 
+	private String buildHyperlink(final String partName, final CreoleLink link) {
+		return "<a href=\""+partName+"?row="+link.row+"&col="+link.col+"\">"+partName+"["+link.row+","+link.col+"]</a>";
+	}
+	
 	private void loadPart(final String name, final InputStream is, final SubstitutableProperties props, final Map<String, Object> target) throws IOException {
 		if (name.equals(LOCALIZATION_PART)) {
 			final ByteArrayOutputStream	baos = new ByteArrayOutputStream();

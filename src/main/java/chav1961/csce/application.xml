@@ -41,7 +41,6 @@
 			<app:item name="menu.main.insert.document" caption="menu.main.insert.document" tooltip="menu.main.insert.document.tt" action="insertDocument"/>
 			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
 			<app:item name="menu.main.insert.image.from.clipboard" caption="menu.main.insert.image.from.clipboard" tooltip="menu.main.insert.image.from.clipboard.tt" action="insertImageFromClipboard"/>
-			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
 		</app:submenu>
 		<app:submenu name="menu.main.tools" caption="menu.main.tools" tooltip="menu.main.tools.tt">
 			<app:item name="menu.main.tools.validate" caption="menu.main.tools.validate" tooltip="menu.main.tools.validate.tt" action="validateProject"/>
@@ -74,7 +73,6 @@
 			<app:item name="menu.main.insert.document" caption="menu.main.insert.document" tooltip="menu.main.insert.document.tt" action="insertDocument"/>
 			<app:item name="menu.main.insert.image" caption="menu.main.insert.image" tooltip="menu.main.insert.image.tt" action="insertImage"/>
 			<app:item name="menu.main.insert.image.from.clipboard" caption="menu.main.insert.image.from.clipboard" tooltip="menu.main.insert.image.from.clipboard.tt" action="insertImageFromClipboard"/>
-			<app:item name="menu.main.insert.uri" caption="menu.main.insert.uri" tooltip="menu.main.insert.uri.tt" action="insertUri"/>
 		</app:submenu>
 		<app:separator/>
 		<app:submenu name="treemenu.copyLinkList" caption="treemenu.copyLinkList" tooltip="treemenu.copyLinkList.tt">

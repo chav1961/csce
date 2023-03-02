@@ -79,8 +79,6 @@
 		<key name="menu.main.insert.image.tt">Image from file</key>
 		<key name="menu.main.insert.image.from.clipboard">Image from clipboard</key>
 		<key name="menu.main.insert.image.from.clipboard.tt">Image from clipboard</key>		
-		<key name="menu.main.insert.uri">Link</key>
-		<key name="menu.main.insert.uri.tt">Link</key>
 		<key name="menu.main.tools">Tools</key>
 		<key name="menu.main.tools.tt">Tools</key>
 		<key name="menu.main.tools.validate">Validate</key>
@@ -150,7 +148,9 @@
 		<key name="SettingsEditor.caption.help">Application settings</key>
 		<key name="SettingsEditor.automaticPaste">Automatic Paste</key>
 		<key name="SettingsEditor.automaticPaste.tt">When copy any link to clipboard, also paste it automatically at the caret position inside Creole editor</key>
- 
+		<key name="SettingsEditor.checkExternalLinks">Check external links</key>
+		<key name="SettingsEditor.checkExternalLinks.tt">Check existence of external links during project validation</key>
+
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">File %1$s was modified. Save changes?</key>
@@ -242,8 +242,6 @@
 		<key name="menu.main.insert.image.tt">Изображение из файла</key>
 		<key name="menu.main.insert.image.from.clipboard">Изображение из буфера обмена</key>
 		<key name="menu.main.insert.image.from.clipboard.tt">Изображение из буфера обмена</key>		
-		<key name="menu.main.insert.uri">Ссылку</key>
-		<key name="menu.main.insert.uri.tt">Ссылку</key>
 		<key name="menu.main.tools">Инструменты</key>
 		<key name="menu.main.tools.tt">Инструменты</key>
 		<key name="menu.main.tools.validate">Валидация</key>
@@ -313,6 +311,8 @@
 		<key name="SettingsEditor.caption.help">Настройки приложения</key>
 		<key name="SettingsEditor.automaticPaste">Автоматический Paste</key>
 		<key name="SettingsEditor.automaticPaste.tt">При копировании любых ссылок в буфер обмена они также автоматически вставляются в текст Creole-редактора по текущему местоположению курсора</key>
+ 		<key name="SettingsEditor.checkExternalLinks">Проверять внешние ссылки</key>
+		<key name="SettingsEditor.checkExternalLinks.tt">Проверять доступность внешних ссылок при валидации проекта</key>
  
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>

@@ -26,7 +26,8 @@ import chav1961.purelib.ui.swing.SwingUtils;
 
 class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener {
 	private static final long serialVersionUID = 3429107053592752877L;
-	private static final Pattern			SUBST_PATTERN = Pattern.compile("subst\\.*");
+	private static final String				SUBST_PREFIX = "subst.";
+	private static final Pattern			SUBST_PATTERN = Pattern.compile("subst\\..*");
 	private static final FieldFormat		CELL_FORMAT = new FieldFormat(String.class, "30ms"); 
 
 	private final Localizer					localizer;
@@ -44,7 +45,7 @@ class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener
 			this.localizer = localizer;
 			
 			for(String key : props.availableKeys(SUBST_PATTERN)) {
-				this.props.setProperty(key, props.getPropertyAsIs(key));
+				this.props.setProperty(key.substring(key.indexOf('.')+1), props.getPropertyAsIs(key));
 			}
 			setModel(this.model = new InnerTableModel(this.props));
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -85,7 +86,7 @@ class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener
 		else {
 			props.remove(SUBST_PATTERN);
 			for (String[] item : model.content) {
-				props.setProperty("subst."+item[0], item[1]);
+				props.setProperty(SUBST_PREFIX+item[0], item[1]);
 			}
 		}
 	}
@@ -147,7 +148,7 @@ class ProjectVariablesTableEditor extends JTable implements LocaleChangeListener
 		}
 		
 		private void insert() {
-			content.add(new String[]{DEFAULT_COL_NAME, DEFAULT_COL_VALUE});
+			content.add(new String[]{DEFAULT_COL_NAME+(content.size()+1), DEFAULT_COL_VALUE});
 			fireTableRowsInserted(content.size()-1, content.size()-1);
 		}
 		

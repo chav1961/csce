@@ -22,6 +22,10 @@ public class SettingsEditor implements FormManager<Object, SettingsEditor>, Modu
 	@LocaleResource(value="SettingsEditor.automaticPaste",tooltip="SettingsEditor.automaticPaste.tt")
 	@Format("20m")
 	public boolean		automaticPaste;
+
+	@LocaleResource(value="SettingsEditor.checkExternalLinks",tooltip="SettingsEditor.checkExternalLinks.tt")
+	@Format("20m")
+	public boolean		checkExternalLinks;
 	
 	public SettingsEditor(final LoggerFacade logger, final SubstitutableProperties props) throws SyntaxException {
 		if (logger == null) {
@@ -59,9 +63,11 @@ public class SettingsEditor implements FormManager<Object, SettingsEditor>, Modu
 	
 	public void storeProperties(final SubstitutableProperties props) throws PrintingException {
 		props.setProperty(Application.PROP_AUTOMATIC_PASTE, String.valueOf(automaticPaste));
+		props.setProperty(Application.PROP_CHECK_EXTERNAL_LINKS, String.valueOf(checkExternalLinks));
 	}
 	
 	private void loadPropertiesInternal(final SubstitutableProperties props) {
 		this.automaticPaste = props.getProperty(Application.PROP_AUTOMATIC_PASTE, boolean.class, "false"); 
+		this.checkExternalLinks = props.getProperty(Application.PROP_CHECK_EXTERNAL_LINKS, boolean.class, "false"); 
 	}
 }
