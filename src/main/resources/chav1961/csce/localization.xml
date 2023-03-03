@@ -19,6 +19,7 @@
 		<key name="chav1961.csce.Application.confirm.replace.title">Confirm replacement</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">File to export [%1$s] already exists. Replace it?</key>
 		<key name="chav1961.csce.Application.confirm.delete.message">Project part [%1$s] will be deleted with the all its children. Are you sure?</key>
+		<key name="chav1961.csce.Application.project.properties.title">Project settings</key>
 		<key name="chav1961.csce.Application.project.variables.title">Project variables</key>		
 		<key name="chav1961.csce.Application.filter.creole.file">Creole files</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF files</key>
@@ -61,16 +62,10 @@
 		<key name="menu.main.edit.find.tt">Find</key>
 		<key name="menu.main.edit.findAndGo">Find and go</key>
 		<key name="menu.main.edit.findAndGo.tt">Find and go</key>
-		<key name="menu.main.edit.settings">Project settings</key>
-		<key name="menu.main.edit.settings.tt">Project settings</key>		
-		<key name="menu.main.edit.settings.properties">Project properties</key>
-		<key name="menu.main.edit.settings.properties.tt">Project properties</key>
-		<key name="menu.main.edit.settings.variables">Project variables</key>
-		<key name="menu.main.edit.settings.variables.tt">Project variables</key>
-		<key name="menu.main.edit.settings.war.export">WAR export settings</key>
-		<key name="menu.main.edit.settings.war.export.tt">WAR export settings</key>
-		<key name="menu.main.edit.settings.scorm2004.export">SCORM 2004 export settings</key>
-		<key name="menu.main.edit.settings.scorm2004.export.tt">SCORM 2004 export settings</key>
+		<key name="menu.main.edit.properties">Project properties</key>
+		<key name="menu.main.edit.properties.tt">Project properties</key>
+		<key name="menu.main.edit.variables">Project variables</key>
+		<key name="menu.main.edit.variables.tt">Project variables</key>
 		<key name="menu.main.insert">Insert</key>
 		<key name="menu.main.insert.tt">Insert</key>
 		<key name="menu.main.insert.part">New part</key>
@@ -216,6 +211,7 @@
 		<key name="chav1961.csce.Application.confirm.delete.message">Часть проекта [%1$s] будет удалена вместе со всеми подчиненными элементами. Вы уверены?</key>
 		<key name="chav1961.csce.Application.confirm.replace.title">Подтвердите замену</key>
 		<key name="chav1961.csce.Application.confirm.replace.message">Файл экспорта [%1$s] уже существует. Заменить его?</key>
+		<key name="chav1961.csce.Application.project.properties.title">Параметры проекта</key>
 		<key name="chav1961.csce.Application.project.variables.title">Переменные проекта</key>		
 		<key name="chav1961.csce.Application.filter.creole.file">Creole файлы</key>
 		<key name="chav1961.csce.Application.filter.pdf.file">PDF файлы</key>
@@ -258,16 +254,10 @@
 		<key name="menu.main.edit.find.tt">Найти</key>
 		<key name="menu.main.edit.findAndGo">Поиск и переход</key>
 		<key name="menu.main.edit.findAndGo.tt">Поиск и переход</key>
-		<key name="menu.main.edit.settings">Настройки проекта</key>
-		<key name="menu.main.edit.settings.tt">Настройки проекта</key>		
-		<key name="menu.main.edit.settings.properties">Свойства</key>
-		<key name="menu.main.edit.settings.properties.tt">Свойства проекта</key>
-		<key name="menu.main.edit.settings.variables">Переменные проекта</key>
-		<key name="menu.main.edit.settings.variables.tt">Переменные проекта</key>
-		<key name="menu.main.edit.settings.war.export">Настройки экспорта в WAR</key>
-		<key name="menu.main.edit.settings.war.export.tt">Настройки экспорта в WAR</key>
-		<key name="menu.main.edit.settings.scorm2004.export">Настройки экспорта в SCORM 2004</key>
-		<key name="menu.main.edit.settings.scorm2004.export.tt">Настройки экспорта в SCORM 2004</key>
+		<key name="menu.main.edit.properties">Свойства</key>
+		<key name="menu.main.edit.properties.tt">Свойства проекта</key>
+		<key name="menu.main.edit.variables">Переменные проекта</key>
+		<key name="menu.main.edit.variables.tt">Переменные проекта</key>
 		<key name="menu.main.insert">Вставить</key>
 		<key name="menu.main.insert.tt">Вставить</key>
 		<key name="menu.main.insert.part">Раздел</key>
@@ -370,15 +360,15 @@
 		<key name="WarSettingsEditor.preferredLang.tt">Предпочитаемый язык</key>
 
 <!-- Локализация класса Scorm2004SettingsEditor -->
-		<key name="Scorm2004SettingsEditor.caption">Настройки сервлета</key>
-		<key name="Scorm2004SettingsEditor.caption.tt">Настройки сервлета</key>
-		<key name="Scorm2004SettingsEditor.caption.help">Настройки сервлета</key>
-		<key name="Scorm2004SettingsEditor.name">Имя сервлета</key>
-		<key name="Scorm2004SettingsEditor.name.tt">Имя сервлета</key>
+		<key name="Scorm2004SettingsEditor.caption">Настройки SCORM 2004</key>
+		<key name="Scorm2004SettingsEditor.caption.tt">Настройки SCORM 2004</key>
+		<key name="Scorm2004SettingsEditor.caption.help">Настройки SCORM 2004</key>
+		<key name="Scorm2004SettingsEditor.name">Имя учебного модуля</key>
+		<key name="Scorm2004SettingsEditor.name.tt">Имя учебного модуля</key>
 		<key name="Scorm2004SettingsEditor.description">Описание</key>
 		<key name="Scorm2004SettingsEditor.description.tt">Описание</key>
-		<key name="Scorm2004SettingsEditor.servletPath">URI сервлета на сервере</key>
-		<key name="Scorm2004SettingsEditor.servletPath.tt">URI сервлета на сервере</key>
+		<key name="Scorm2004SettingsEditor.servletPath">URI учебного модуля</key>
+		<key name="Scorm2004SettingsEditor.servletPath.tt">URI учебного модуля</key>
 		<key name="Scorm2004SettingsEditor.preferredLang">Предпочитаемый язык</key>
 		<key name="Scorm2004SettingsEditor.preferredLang.tt">Предпочитаемый язык</key>
  

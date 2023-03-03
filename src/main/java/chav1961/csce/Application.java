@@ -1,5 +1,6 @@
 package chav1961.csce;
 
+
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -81,6 +82,7 @@ import chav1961.purelib.ui.swing.AutoBuiltForm;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
 import chav1961.purelib.ui.swing.useful.JDialogContainer;
+import chav1961.purelib.ui.swing.useful.JDialogContainer.JDialogContainerOption;
 import chav1961.purelib.ui.swing.useful.JEnableMaskManipulator;
 import chav1961.purelib.ui.swing.useful.JFileContentManipulator;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
@@ -88,6 +90,7 @@ import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JSimpleSplash;
 import chav1961.purelib.ui.swing.useful.JStateString;
+import chav1961.purelib.ui.swing.useful.JTabbedEditor;
 import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 import chav1961.purelib.ui.swing.useful.interfaces.FileContentChangedEvent;
 
@@ -137,6 +140,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_TITLE = "chav1961.csce.Application.confirm.replace.title";
 	public static final String		KEY_APPLICATION_CONFIRM_REPLACE_MESSAGE = "chav1961.csce.Application.confirm.replace.message";
 
+	public static final String		KEY_APPLICATION_PROJECT_PROPERTIES_TITLE = "chav1961.csce.Application.project.properties.title";
 	public static final String		KEY_APPLICATION_PROJECT_VARIABLES_TITLE = "chav1961.csce.Application.project.variables.title";
 	
 	public static final String		KEY_APPLICATION_MESSAGE_READY = "chav1961.csce.Application.message.ready";
@@ -412,11 +416,21 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/properties")
 	public void properties() throws ContentException {
-		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), project.getProperties());
-		
-		if (ask(ppe, getLocalizer(), 500, 250)) {
-			ppe.storeProperties(project.getProperties());
-			fcm.setModificationFlag();
+		final SubstitutableProperties	props = project.getProperties();
+		final ProjectPropertiesEditor	ppe = new ProjectPropertiesEditor(getLogger(), props);
+		final WarSettingsEditor			wse = new WarSettingsEditor(getLogger(), props);
+		final Scorm2004SettingsEditor	s2004se = new Scorm2004SettingsEditor(getLogger(), props);
+
+		try (final JTabbedEditor	jte = new JTabbedEditor(localizer, ppe, wse, s2004se)) {
+			jte.setPreferredSize(new Dimension(500,300));
+			jte.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			
+			if (new JDialogContainer<>(getLocalizer(), this, KEY_APPLICATION_PROJECT_PROPERTIES_TITLE, jte).showDialog(JDialogContainerOption.DONT_USE_ENTER_AS_OK)) {
+				ppe.storeProperties(props);
+				wse.storeProperties(props);
+				s2004se.storeProperties(props);
+				fcm.setModificationFlag();
+			}			
 		}
 	}
 
@@ -426,26 +440,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		
 		if (new JDialogContainer<>(getLocalizer(), this, KEY_APPLICATION_PROJECT_VARIABLES_TITLE, pve).showDialog()) {
 			pve.storeProperties(project.getProperties());
-			fcm.setModificationFlag();
-		}
-	}
-	
-	@OnAction("action:/warExportSettings")
-	public void warExportSettings() throws ContentException {
-		final WarSettingsEditor	wse = new WarSettingsEditor(getLogger(), project.getProperties());
-		
-		if (ask(wse, getLocalizer(), 500, 250)) {
-			wse.storeProperties(project.getProperties());
-			fcm.setModificationFlag();
-		}
-	}
-	
-	@OnAction("action:/scorm2004ExportSettings")
-	public void scorm2004ExportSettings() throws ContentException {
-		final Scorm2004SettingsEditor	s2004se = new Scorm2004SettingsEditor(getLogger(), project.getProperties());
-		
-		if (ask(s2004se, getLocalizer(), 500, 250)) {
-			s2004se.storeProperties(project.getProperties());
 			fcm.setModificationFlag();
 		}
 	}
