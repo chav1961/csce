@@ -52,6 +52,7 @@ import chav1961.csce.project.ProjectNavigator;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.utils.SearchUtils;
+import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
@@ -379,13 +380,20 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			
 			if (path != null) {
 				final ProjectItemTreeNode	pitn = (ProjectItemTreeNode)path.getLastPathComponent();
-				final int	row = getRowForPath(path);
+				final int					row = getRowForPath(path);
+				final StringBuilder			sb = new StringBuilder();
+				
+				for (Object item : path.getPath()) {
+					if (((ProjectItemTreeNode)item).getUserObject().type == ItemType.Subtree) {
+						sb.append('/').append(((ProjectItemTreeNode)item).getUserObject().name);
+					}
+				}
 				
 				switch (pitn.getUserObject().type) {
 					case CreoleRef		:
 						final String	partName = project.getPartNameById(pitn.getUserObject().id);
 						final String	content = project.getProjectPartContent(partName);
-						final boolean	linksPresent = fillCreoleLinks(partName, content, (JMenu)SwingUtils.findComponentByName(popup, "treemenu.copyLinkList"));
+						final boolean	linksPresent = fillCreoleLinks((sb.isEmpty() ? "" : sb.append('/').toString()) + partName, content, (JMenu)SwingUtils.findComponentByName(popup, "treemenu.copyLinkList"));
 						
 						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setVisible(true);
 						SwingUtils.findComponentByName(popup, "treemenu.copyLinkList").setEnabled(linksPresent);
@@ -443,12 +451,14 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 		boolean	found = false;
 		
 		menu.removeAll();
-		for (String item : SearchUtils.extractCreoleAnchors(content)) {
-			final JMenuItem	mi = new JMenuItem(item.trim());
-			
-			menu.add(mi);
-			mi.addActionListener((e)->((Application)SwingUtils.getNearestOwner(viewer, Application.class)).copyCreoleLink2Clipboard(partName, item));
-			found = true;
+		if (!Utils.checkEmptyOrNullString(content)) {
+			for (String item : SearchUtils.extractCreoleAnchors(content)) {
+				final JMenuItem	mi = new JMenuItem(item.trim());
+				
+				menu.add(mi);
+				mi.addActionListener((e)->((Application)SwingUtils.getNearestOwner(viewer, Application.class)).copyCreoleLink2Clipboard(partName, item));
+				found = true;
+			}
 		}
 		return found;
 	}

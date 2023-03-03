@@ -334,7 +334,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProject")
 	public void saveProject() {
-		try{fcm.saveFile();
+		try{fixProject();
+			fcm.saveFile();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -342,7 +343,8 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	
 	@OnAction("action:/saveProjectAs")
 	public void saveProjectAs() {
-		try{fcm.saveFileAs();
+		try{fixProject();
+			fcm.saveFileAs();
 		} catch (IOException e) {
 			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
@@ -513,9 +515,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	}
 	
 	public void copyCreoleLink2Clipboard(final String partName, final String link) {
-		final Clipboard 		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		final Clipboard 	clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		final String		trimmedLink = link.replace('=', ' ').trim(); 
 		
-		clipboard.setContents(new StringSelection("[["+partName+"#"+link+"|"+link+"]]"), null);
+		clipboard.setContents(new StringSelection("[["+partName+"#"+trimmedLink+"|"+trimmedLink+"]]"), null);
 	}	
 
 	@OnAction("action:/copyLink")
@@ -866,6 +869,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
         ((JComponent)getContentPane()).revalidate();
 		viewer.refreshProject(new ProjectChangeEvent(project, ProjectChangeType.PROJECT_LOADED));
         viewer.addProjectViewerChangeListener((e)->refreshProjectMenu(e));
+	}
+
+	private void fixProject() {
+		viewer.fixProject();
 	}
 	
 	private void refreshProjectMenu(final ProjectViewerChangeEvent e) {

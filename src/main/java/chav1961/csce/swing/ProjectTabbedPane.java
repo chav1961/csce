@@ -130,7 +130,15 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			tab.setModified(false);
 		}
 	}
-
+	
+	public void fixProject() {
+		for(int index = 0; index < getTabCount(); index++) {
+			final JPanelWithLabel	component = (JPanelWithLabel)getComponentAt(index);
+			
+			component.saveContent();
+		}
+	}
+	
 	private abstract class JPanelWithLabel extends JPanel implements LocaleChangeListener {
 		private static final long serialVersionUID = 8580069110763696367L;
 

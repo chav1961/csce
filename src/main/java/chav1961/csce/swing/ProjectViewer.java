@@ -111,6 +111,10 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 	public void refreshProject(final ProjectChangeEvent event) {
 		tree.refreshTree(event);
 	}
+	
+	public void fixProject() {
+		getProjectTabbedPane().fixProject();
+	}
 
 	private void treeSelectionChanged(final TreeSelectionEvent e) {
 		if (!recursionProtector) {
