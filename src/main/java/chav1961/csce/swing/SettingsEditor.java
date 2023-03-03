@@ -20,6 +20,10 @@ import chav1961.purelib.ui.interfaces.RefreshMode;
 public class SettingsEditor implements FormManager<Object, SettingsEditor>, ModuleAccessor {
 	private final LoggerFacade	logger;
 
+	@LocaleResource(value="SettingsEditor.preferredLang",tooltip="SettingsEditor.preferredLang.tt")
+	@Format("20m")
+	public SupportedLanguages	lang;
+	
 	@LocaleResource(value="SettingsEditor.automaticPaste",tooltip="SettingsEditor.automaticPaste.tt")
 	@Format("20m")
 	public boolean		automaticPaste;
@@ -28,10 +32,6 @@ public class SettingsEditor implements FormManager<Object, SettingsEditor>, Modu
 	@Format("20m")
 	public boolean		checkExternalLinks;
 
-	@LocaleResource(value="SettingsEditor.preferredLang",tooltip="SettingsEditor.preferredLang.tt")
-	@Format("20m")
-	public SupportedLanguages	lang;
-	
 	public SettingsEditor(final LoggerFacade logger, final SubstitutableProperties props) throws SyntaxException {
 		if (logger == null) {
 			throw new NullPointerException("Logger can't be null"); 

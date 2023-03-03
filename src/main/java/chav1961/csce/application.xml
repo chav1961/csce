@@ -30,8 +30,13 @@
 			<app:item name="menu.main.edit.find" caption="menu.main.edit.find" tooltip="menu.main.edit.find.tt" action="find"/>
 			<app:item name="menu.main.edit.findAndGo" caption="menu.main.edit.findAndGo" tooltip="menu.main.edit.findAndGo.tt" action="findAndGo"/>
 			<app:separator/>
-			<app:item name="menu.main.edit.properties" caption="menu.main.edit.properties" tooltip="menu.main.edit.properties.tt" action="properties"/>
-			<app:item name="menu.main.edit.variables" caption="menu.main.edit.variables" tooltip="menu.main.edit.variables.tt" action="variables"/>
+			<app:submenu name="menu.main.edit.settings" caption="menu.main.edit.settings" tooltip="menu.main.edit.settings.tt">
+				<app:item name="menu.main.edit.settings.properties" caption="menu.main.edit.settings.properties" tooltip="menu.main.edit.settings.properties.tt" action="properties"/>
+				<app:item name="menu.main.edit.settings.variables" caption="menu.main.edit.settings.variables" tooltip="menu.main.edit.settings.variables.tt" action="variables"/>
+				<app:separator/>
+				<app:item name="menu.main.edit.settings.war.export" caption="menu.main.edit.settings.war.export" tooltip="menu.main.edit.settings.war.export.tt" action="warExportSettings"/>
+				<app:item name="menu.main.edit.settings.scorm2004.export" caption="menu.main.edit.settings.scorm2004.export" tooltip="menu.main.edit.settings.scorm2004.export.tt" action="scorm2004ExportSettings"/>
+			</app:submenu>
 		</app:submenu>
 		<app:submenu name="menu.main.insert" caption="menu.main.insert" tooltip="menu.main.insert.tt">
 			<app:item name="menu.main.insert.part" caption="menu.main.insert.part" tooltip="menu.main.insert.part.tt" action="insertPart"/>

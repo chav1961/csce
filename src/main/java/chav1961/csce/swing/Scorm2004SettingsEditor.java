@@ -68,7 +68,7 @@ public class Scorm2004SettingsEditor implements FormManager<Object, Scorm2004Set
 		}
 	}
 
-	public void storeSettings(final SubstitutableProperties settings) throws PrintingException {
+	public void storeProperties(final SubstitutableProperties settings) throws PrintingException {
 		settings.setProperty(ProjectContainer.SCORM2004_NAME, name); 			
 		settings.setProperty(ProjectContainer.SCORM2004_DESCRIPTOR,description.replace("\n","\\n")); 			
 		settings.setProperty(ProjectContainer.SCORM2004_PATH, servletPath); 			

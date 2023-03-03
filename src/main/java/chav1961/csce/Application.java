@@ -430,6 +430,26 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		}
 	}
 	
+	@OnAction("action:/warExportSettings")
+	public void warExportSettings() throws ContentException {
+		final WarSettingsEditor	wse = new WarSettingsEditor(getLogger(), project.getProperties());
+		
+		if (ask(wse, getLocalizer(), 500, 250)) {
+			wse.storeProperties(project.getProperties());
+			fcm.setModificationFlag();
+		}
+	}
+	
+	@OnAction("action:/scorm2004ExportSettings")
+	public void scorm2004ExportSettings() throws ContentException {
+		final Scorm2004SettingsEditor	s2004se = new Scorm2004SettingsEditor(getLogger(), project.getProperties());
+		
+		if (ask(s2004se, getLocalizer(), 500, 250)) {
+			s2004se.storeProperties(project.getProperties());
+			fcm.setModificationFlag();
+		}
+	}
+	
 	@OnAction("action:/insertPart")
 	public void insertPart() {
 		if (viewer.isProjectNavigatorItemSelected()) {
@@ -823,15 +843,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 					}
 					return new ByteArrayInputStream(os.toByteArray());
 				case AS_WAR			:
-					if (!project.getProperties().containsKey(ProjectContainer.WAR_LANGUAGE)) {
-						project.getProperties().setProperty(ProjectContainer.WAR_LANGUAGE, se.lang.name());
-					}
-					
-					final WarSettingsEditor	wse = new WarSettingsEditor(getLogger(), project.getProperties());
-					
-					if (ask(wse, getLocalizer(), 500, 250)) {
-						wse.storeSettings(project.getProperties());
-					}
 					try(final ZipOutputStream	zos = new ZipOutputStream(os);
 						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
 						
@@ -840,15 +851,6 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 					}
 					return new ByteArrayInputStream(os.toByteArray());
 				case AS_SCORM_2004	:
-					if (!project.getProperties().containsKey(ProjectContainer.SCORM2004_LANGUAGE)) {
-						project.getProperties().setProperty(ProjectContainer.SCORM2004_LANGUAGE, se.lang.name());
-					}
-					
-					final Scorm2004SettingsEditor	s2004se = new Scorm2004SettingsEditor(getLogger(), project.getProperties());
-					
-					if (ask(s2004se, getLocalizer(), 500, 250)) {
-						s2004se.storeSettings(project.getProperties());
-					}
 					try(final ZipOutputStream	zos = new ZipOutputStream(os);
 						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
 						

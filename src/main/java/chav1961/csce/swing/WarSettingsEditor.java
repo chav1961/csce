@@ -72,7 +72,7 @@ public class WarSettingsEditor implements FormManager<Object, WarSettingsEditor>
 		}
 	}
 
-	public void storeSettings(final SubstitutableProperties settings) throws PrintingException {
+	public void storeProperties(final SubstitutableProperties settings) throws PrintingException {
 		settings.setProperty(ProjectContainer.WAR_NAME, name); 			
 		settings.setProperty(ProjectContainer.WAR_DESCRIPTOR,description.replace("\n","\\n")); 			
 		settings.setProperty(ProjectContainer.WAR_PATH, servletPath); 			
