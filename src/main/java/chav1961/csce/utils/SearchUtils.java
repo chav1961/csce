@@ -44,6 +44,10 @@ public class SearchUtils {
 		}
 	}
 	
+	public static String anchorToLink(final String path, final String partName, final String anchorName) {
+		return null;
+	}
+	
 	public static CreoleLink[] extractCreoleLinks(final String source) throws SyntaxException {
 		if (Utils.checkEmptyOrNullString(source)) {
 			throw new IllegalArgumentException("Source string can't be null");

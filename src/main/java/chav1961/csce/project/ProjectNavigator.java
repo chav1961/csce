@@ -227,6 +227,22 @@ public class ProjectNavigator {
 		}
 	}
 	
+	public ProjectNavigatorItem[] getPath2Root(final long id) {
+		if (!hasItemId(id)) {
+			throw new IllegalArgumentException("Navigator node id ["+id+"] is not exists"); 
+		}
+		else {
+			final List<ProjectNavigatorItem>	result = new ArrayList<>();
+			ProjectNavigatorItem 	current = getItem(id);
+			
+			do {result.add(0,current);
+				current = getItem(current.parent);
+			} while (current.type != ItemType.Root) ;
+			
+			return result.toArray(new ProjectNavigatorItem[result.size()]);
+		}
+	}
+	
 	public void addItem(final ProjectNavigatorItem item) {
 		if (item == null) {
 			throw new NullPointerException("Item to add can't be null"); 

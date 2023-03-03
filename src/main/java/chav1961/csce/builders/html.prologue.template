@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		${base}
 		<link rel="stylesheet" href="${path}style.css">
 		<link rel="script" href="${path}utils.js">
 		<title>${comment}</title>

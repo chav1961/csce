@@ -353,6 +353,9 @@ public class HTMLBuilder implements Closeable {
 						return getLocalizedValue(s, comment);
 					case "navigator":
 						return navigatorTree;
+					case "base":
+						// 		<base href="../">
+						return "";
 					default :
 						if (project.getProperties().containsKey(s)) {
 							return  getLocalizedValue(s, project.getProperties().getProperty(s));
