@@ -48,7 +48,9 @@ import chav1961.csce.swing.ProjectPropertiesEditor;
 import chav1961.csce.swing.ProjectVariablesEditor;
 import chav1961.csce.swing.ProjectViewer;
 import chav1961.csce.swing.ProjectViewerChangeEvent;
+import chav1961.csce.swing.Scorm2004SettingsEditor;
 import chav1961.csce.swing.SettingsEditor;
+import chav1961.csce.swing.WarSettingsEditor;
 import chav1961.purelib.basic.ArgParser;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -100,6 +102,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		DEFAULT_ARG_PROPFILE_LOCATION = "./.csce.properties";
 	public static final String		PROP_AUTOMATIC_PASTE = "automaticPaste";
 	public static final String		PROP_CHECK_EXTERNAL_LINKS = "checkExternalLinks";
+	public static final String		PROP_PREFERRED_LANG = "preferredLanguage";
 
 	public static final String		KEY_FILTER_CREOLE_FILE = "chav1961.csce.Application.filter.creole.file";
 	public static final String		KEY_FILTER_PDF_FILE = "chav1961.csce.Application.filter.pdf.file";
@@ -811,7 +814,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private InputStream toInputStream(final ExportFormat format) throws IOException {
 		try(final ByteArrayOutputStream	os = new ByteArrayOutputStream()) {
 			switch (format) {
-				case AS_DIRECTORY:
+				case AS_DIRECTORY	:
 					try(final ZipOutputStream	zos = new ZipOutputStream(os);
 						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
 						
@@ -819,8 +822,40 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 						zos.flush();
 					}
 					return new ByteArrayInputStream(os.toByteArray());
-				case AS_SCORM_2004:
-				case AS_WAR:
+				case AS_WAR			:
+					if (!project.getProperties().containsKey(ProjectContainer.WAR_LANGUAGE)) {
+						project.getProperties().setProperty(ProjectContainer.WAR_LANGUAGE, se.lang.name());
+					}
+					
+					final WarSettingsEditor	wse = new WarSettingsEditor(getLogger(), project.getProperties());
+					
+					if (ask(wse, getLocalizer(), 500, 250)) {
+						wse.storeSettings(project.getProperties());
+					}
+					try(final ZipOutputStream	zos = new ZipOutputStream(os);
+						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
+						
+						builder.upload(zos);
+						zos.flush();
+					}
+					return new ByteArrayInputStream(os.toByteArray());
+				case AS_SCORM_2004	:
+					if (!project.getProperties().containsKey(ProjectContainer.SCORM2004_LANGUAGE)) {
+						project.getProperties().setProperty(ProjectContainer.SCORM2004_LANGUAGE, se.lang.name());
+					}
+					
+					final Scorm2004SettingsEditor	s2004se = new Scorm2004SettingsEditor(getLogger(), project.getProperties());
+					
+					if (ask(s2004se, getLocalizer(), 500, 250)) {
+						s2004se.storeSettings(project.getProperties());
+					}
+					try(final ZipOutputStream	zos = new ZipOutputStream(os);
+						final HTMLBuilder		builder = new HTMLBuilder(getLocalizer(), project)) {
+						
+						builder.upload(zos);
+						zos.flush();
+					}
+					return new ByteArrayInputStream(os.toByteArray());
 				default:
 					throw new UnsupportedOperationException("Export format ["+format+"] is not supported yet"); 
 			}

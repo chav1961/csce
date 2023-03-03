@@ -150,6 +150,34 @@
 		<key name="SettingsEditor.automaticPaste.tt">When copy any link to clipboard, also paste it automatically at the caret position inside Creole editor</key>
 		<key name="SettingsEditor.checkExternalLinks">Check external links</key>
 		<key name="SettingsEditor.checkExternalLinks.tt">Check existence of external links during project validation</key>
+		<key name="SettingsEditor.preferredLang">Preferred language</key>
+		<key name="SettingsEditor.preferredLang.tt">Preferred language</key>
+
+<!-- WarSettingsEditor class localization -->
+		<key name="WarSettingsEditor.caption">Servlet settings</key>
+		<key name="WarSettingsEditor.caption.tt">Servlet settings</key>
+		<key name="WarSettingsEditor.caption.help">Servlet settings</key>
+		<key name="WarSettingsEditor.name">Servlet name</key>
+		<key name="WarSettingsEditor.name.tt">Servlet name</key>
+		<key name="WarSettingsEditor.description">Description</key>
+		<key name="WarSettingsEditor.description.tt">Description</key>
+		<key name="WarSettingsEditor.servletPath">Servlet URI</key>
+		<key name="WarSettingsEditor.servletPath.tt">Servlet URI</key>
+		<key name="WarSettingsEditor.preferredLang">Preferred language</key>
+		<key name="WarSettingsEditor.preferredLang.tt">Preferred language</key>
+
+<!-- Scorm2004SettingsEditor class localization -->
+		<key name="Scorm2004SettingsEditor.caption">Servlet settings</key>
+		<key name="Scorm2004SettingsEditor.caption.tt">Servlet settings</key>
+		<key name="Scorm2004SettingsEditor.caption.help">Servlet settings</key>
+		<key name="Scorm2004SettingsEditor.name">Servlet name</key>
+		<key name="Scorm2004SettingsEditor.name.tt">Servlet name</key>
+		<key name="Scorm2004SettingsEditor.description">Description</key>
+		<key name="Scorm2004SettingsEditor.description.tt">Description</key>
+		<key name="Scorm2004SettingsEditor.servletPath">Servlet URI</key>
+		<key name="Scorm2004SettingsEditor.servletPath.tt">Servlet URI</key>
+		<key name="Scorm2004SettingsEditor.preferredLang">Preferred language</key>
+		<key name="Scorm2004SettingsEditor.preferredLang.tt">Preferred language</key>
 
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
@@ -313,6 +341,34 @@
 		<key name="SettingsEditor.automaticPaste.tt">При копировании любых ссылок в буфер обмена они также автоматически вставляются в текст Creole-редактора по текущему местоположению курсора</key>
  		<key name="SettingsEditor.checkExternalLinks">Проверять внешние ссылки</key>
 		<key name="SettingsEditor.checkExternalLinks.tt">Проверять доступность внешних ссылок при валидации проекта</key>
+		<key name="SettingsEditor.preferredLang">Предпочитаемый язык</key>
+		<key name="SettingsEditor.preferredLang.tt">Предпочитаемый язык</key>
+ 
+<!-- Локализация класса WarSettingsEditor -->
+		<key name="WarSettingsEditor.caption">Настройки сервлета</key>
+		<key name="WarSettingsEditor.caption.tt">Настройки сервлета</key>
+		<key name="WarSettingsEditor.caption.help">Настройки сервлета</key>
+		<key name="WarSettingsEditor.name">Имя сервлета</key>
+		<key name="WarSettingsEditor.name.tt">Имя сервлета</key>
+		<key name="WarSettingsEditor.description">Описание</key>
+		<key name="WarSettingsEditor.description.tt">Описание</key>
+		<key name="WarSettingsEditor.servletPath">URI сервлета на сервере</key>
+		<key name="WarSettingsEditor.servletPath.tt">URI сервлета на сервере</key>
+		<key name="WarSettingsEditor.preferredLang">Предпочитаемый язык</key>
+		<key name="WarSettingsEditor.preferredLang.tt">Предпочитаемый язык</key>
+
+<!-- Локализация класса Scorm2004SettingsEditor -->
+		<key name="Scorm2004SettingsEditor.caption">Настройки сервлета</key>
+		<key name="Scorm2004SettingsEditor.caption.tt">Настройки сервлета</key>
+		<key name="Scorm2004SettingsEditor.caption.help">Настройки сервлета</key>
+		<key name="Scorm2004SettingsEditor.name">Имя сервлета</key>
+		<key name="Scorm2004SettingsEditor.name.tt">Имя сервлета</key>
+		<key name="Scorm2004SettingsEditor.description">Описание</key>
+		<key name="Scorm2004SettingsEditor.description.tt">Описание</key>
+		<key name="Scorm2004SettingsEditor.servletPath">URI сервлета на сервере</key>
+		<key name="Scorm2004SettingsEditor.servletPath.tt">URI сервлета на сервере</key>
+		<key name="Scorm2004SettingsEditor.preferredLang">Предпочитаемый язык</key>
+		<key name="Scorm2004SettingsEditor.preferredLang.tt">Предпочитаемый язык</key>
  
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>

@@ -105,6 +105,16 @@ public class ProjectContainer implements LocalizerOwner {
 	public static final String		PROJECT_LANG = "project.lang";
 	public static final String		PROJECT_LOCALIZATION = "project.localization";
 	public static final String		PROJECT_EXTERNALS = "project.externals";
+
+	public static final String		WAR_NAME = "war.name";
+	public static final String		WAR_DESCRIPTOR = "war.descriptor";
+	public static final String		WAR_PATH = "war.path";
+	public static final String		WAR_LANGUAGE = "war.language";	
+
+	public static final String		SCORM2004_NAME = "scorm2004.name";
+	public static final String		SCORM2004_DESCRIPTOR = "scorm2004.descriptor";
+	public static final String		SCORM2004_PATH = "scorm2004.path";
+	public static final String		SCORM2004_LANGUAGE = "scorm2004.language";	
 	
 	public static final String		LINK_ALIAS = "link.alias";
 	public static final String		LINK_IS_EXTERNAL = "link.isExternal";
