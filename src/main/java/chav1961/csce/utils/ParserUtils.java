@@ -9,6 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import chav1961.csce.project.ProjectContainer;
+import chav1961.csce.utils.interfaces.SyntaxGroup;
 import chav1961.csce.utils.interfaces.SyntaxNodeType;
 import chav1961.purelib.basic.AndOrTree;
 import chav1961.purelib.basic.CharUtils;
@@ -32,7 +33,6 @@ public class ParserUtils {
 		SINGLE_TERM,
 		WILDCARD_TERM,
 		PHRASE,
-		FIELD,
 		COLON,
 		FUZZY,
 		NUMBER,
@@ -52,6 +52,7 @@ public class ParserUtils {
 		EOF,
 		ERROR;
 	}
+	
 	
 	public static void parseProjectContent(final ProjectContainer container, final SupportedLanguages lang, final ZipOutputStream zos) throws IOException {
 		if (container == null) {
@@ -181,7 +182,7 @@ loop:		for(;;) {
 			return null;
 		}
 	}
-	
+
 	private static int parseAsTerm(final char[] content, final int from, final int[] forPosition) {
 		forPosition[0] = from;
 		
@@ -202,6 +203,80 @@ loop:		for(;;) {
 		}
 		return false;
 	}
+
+	public static int parseQuery(final Lexema[] lex, int from, final SyntaxGroup group, final SyntaxNode<SyntaxNodeType, SyntaxNode> node) throws SyntaxException {
+		switch (group) {
+			case OR	: case AND :
+				from = parseQuery(lex, from, group.prev(), node);
+				if (lex[from].type == null) {
+					return from;
+				}
+				else {
+					return from;
+				}
+			case NOT		:
+				if (lex[from].type == LexType.NOT) {
+					final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+					
+					node.type = SyntaxNodeType.NOT;
+					node.cargo = lex[from];
+					node.children = new SyntaxNode[]{clone};
+					return parseQuery(lex, from + 1, group.prev(), clone);
+				}
+				else {
+					return parseQuery(lex, from, group.prev(), node);
+				}
+			case WEIGHT		:
+				from = parseQuery(lex, from, group.prev(), node);
+				if (lex[from].type == null) {
+					return from;
+				}
+				else {
+				}
+			case FIELD		:
+				if (lex[from].type == LexType.SINGLE_TERM && lex[from+1].type == LexType.COLON) {
+					final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+					
+					node.type = SyntaxNodeType.FIELD;
+					node.cargo = lex[from];
+					node.children = new SyntaxNode[]{clone};
+					return parseQuery(lex, from + 2, group.prev(), clone);
+				}
+				else {
+					return parseQuery(lex, from, group.prev(), node);
+				}
+			case TERM		:
+				switch (lex[from].type) {
+					case OPEN			:
+						break;
+					case OPENB			:
+						break;
+					case OPENF			:
+						break;
+					case PHRASE			:
+						node.type = SyntaxNodeType.EQUALS;
+						node.cargo = lex[from];
+						return from + 1;
+					case PLUS			:
+						break;
+					case MINUS			:
+						break;
+					case SINGLE_TERM	:
+						node.type = SyntaxNodeType.EQUALS;
+						node.cargo = lex[from];
+						return from + 1;
+					case WILDCARD_TERM	:
+						node.type = SyntaxNodeType.MATCH;
+						node.cargo = lex[from];
+						return from + 1;
+					default:
+						break;
+				}
+				break;
+			default :
+				throw new UnsupportedOperationException("Syntax group ["+group+"] is not supported yet");
+		}
+	}	
 	
 	private static <T> void parseProjectContent(final String part, final T content, final OutputStream os) throws IOException {
 		// TODO Auto-generated method stub
