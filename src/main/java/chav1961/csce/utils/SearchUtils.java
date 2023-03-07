@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import chav1961.csce.utils.ParserUtils.Lexema;
+import chav1961.csce.utils.interfaces.SyntaxNodeType;
 import chav1961.purelib.basic.AndOrTree;
 import chav1961.purelib.basic.CharUtils;
 import chav1961.purelib.basic.LineByLineProcessor;
@@ -12,6 +14,7 @@ import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.SyntaxTreeInterface;
+import chav1961.purelib.cdb.SyntaxNode;
 
 public class SearchUtils {
 	private static final SyntaxTreeInterface<Object>	STOP_WORDS = new AndOrTree<>();
@@ -126,7 +129,21 @@ public class SearchUtils {
 			return tokens;
 		}
 	}
+
+	public static Iterable<String> search(final String expression, final SimpleSearchIndex<?> index) throws SyntaxException {
+		final SyntaxNode<SyntaxNodeType, SyntaxNode>	root = new SyntaxNode<SyntaxNodeType, SyntaxNode>(0, 0, SyntaxNodeType.ROOT, 0, null);
+		final List<String>	result = new ArrayList<>();
+		
+		ParserUtils.parseQuery(ParserUtils.parseQuery(expression), root);
+		
+		search(root, index, result);
+		return result;
+	}	
 	
+	private static void search(final SyntaxNode<SyntaxNodeType, SyntaxNode> root, final SimpleSearchIndex<?> index, final List<String> result) {
+		// TODO Auto-generated method stub
+	}
+
 	private static int skipNonBlank(final String line, final int col) {
 		for(int index = col; index < line.length(); index++) {
 			if (Character.isWhitespace(line.charAt(index))) {

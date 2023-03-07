@@ -7,7 +7,8 @@ public enum SyntaxGroup {
 	WEIGHT,
 	NOT,
 	AND, 
-	OR;
+	OR,
+	ROOT;
 	
 	public SyntaxGroup prev() {
 		return values()[ordinal()-1];

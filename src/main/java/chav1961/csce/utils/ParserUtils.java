@@ -23,13 +23,13 @@ public class ParserUtils {
 	private static final SyntaxTreeInterface<LexType>	KEYWORDS = new AndOrTree<LexType>();
 	
 	static {
-		KEYWORDS.placeName((CharSequence)"AND ", LexType.AND);
-		KEYWORDS.placeName((CharSequence)"OR ", LexType.OR);
-		KEYWORDS.placeName((CharSequence)"NOT ", LexType.NOT);
-		KEYWORDS.placeName((CharSequence)"TO ", LexType.TO);
+		KEYWORDS.placeName((CharSequence)"AND", LexType.AND);
+		KEYWORDS.placeName((CharSequence)"OR", LexType.OR);
+		KEYWORDS.placeName((CharSequence)"NOT", LexType.NOT);
+		KEYWORDS.placeName((CharSequence)"TO", LexType.TO);
 	}
 	
-	private static enum LexType {
+	public static enum LexType {
 		SINGLE_TERM,
 		WILDCARD_TERM,
 		PHRASE,
@@ -88,7 +88,7 @@ public class ParserUtils {
 	}
 
 	// https://lucene.apache.org/core/2_9_4/queryparsersyntax.html
-	public static SyntaxNode<SyntaxNodeType, SyntaxNode> parseQuery(final String query) throws SyntaxException {
+	public static Lexema[] parseQuery(final String query) throws SyntaxException {
 		if (Utils.checkEmptyOrNullString(query)) {
 			throw new IllegalArgumentException("Query string can't be null or empty");
 		}
@@ -179,10 +179,22 @@ loop:		for(;;) {
 				}
 			}
 
-			return null;
+			return lex.toArray(new Lexema[lex.size()]);
 		}
 	}
 
+	public static int parseQuery(final Lexema[] lex, final SyntaxNode<SyntaxNodeType, SyntaxNode> node) throws SyntaxException {
+		if (lex == null || lex.length == 0) {
+			throw new IllegalArgumentException("Lexema can't be null or empty array");
+		}
+		else if (node == null) {
+			throw new NullPointerException("Node can't be null");
+		}
+		else {
+			return parseQuery(lex, 0, SyntaxGroup.OR, node);
+		}
+	}	
+	
 	private static int parseAsTerm(final char[] content, final int from, final int[] forPosition) {
 		forPosition[0] = from;
 		
@@ -204,7 +216,7 @@ loop:		for(;;) {
 		return false;
 	}
 
-	public static int parseQuery(final Lexema[] lex, int from, final SyntaxGroup group, final SyntaxNode<SyntaxNodeType, SyntaxNode> node) throws SyntaxException {
+	private static int parseQuery(final Lexema[] lex, int from, final SyntaxGroup group, final SyntaxNode<SyntaxNodeType, SyntaxNode> node) throws SyntaxException {
 		switch (group) {
 			case OR	: 
 				from = parseQuery(lex, from, group.prev(), node);
@@ -384,7 +396,6 @@ loop:		for(;;) {
 					default :
 						throw new SyntaxException(0, lex[from].col, "Unwaited lex");
 				}
-				break;
 			default :
 				throw new UnsupportedOperationException("Syntax group ["+group+"] is not supported yet");
 		}
@@ -395,7 +406,7 @@ loop:		for(;;) {
 	}
 	
 	
-	private static class Lexema {
+	public static class Lexema {
 		private final int		col;
 		private final LexType	type;
 		private final double	value;

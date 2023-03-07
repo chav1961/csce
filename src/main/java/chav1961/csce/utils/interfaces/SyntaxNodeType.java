@@ -1,6 +1,7 @@
 package chav1961.csce.utils.interfaces;
 
 public enum SyntaxNodeType {
+	ROOT(SyntaxGroup.OR),
 	OR(SyntaxGroup.OR),
 	AND(SyntaxGroup.AND), 
 	NOT(SyntaxGroup.NOT),
