@@ -206,9 +206,41 @@ loop:		for(;;) {
 
 	public static int parseQuery(final Lexema[] lex, int from, final SyntaxGroup group, final SyntaxNode<SyntaxNodeType, SyntaxNode> node) throws SyntaxException {
 		switch (group) {
-			case OR	: case AND :
+			case OR	: 
 				from = parseQuery(lex, from, group.prev(), node);
-				if (lex[from].type == null) {
+				
+				if (lex[from].type == LexType.OR) {
+					final List<SyntaxNode<SyntaxNodeType, SyntaxNode>>	children = new ArrayList<>();
+					
+					children.add((SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone());
+					while (lex[from].type == LexType.OR) {
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	child = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						
+						from = parseQuery(lex, from, group.prev(), child);
+						children.add(child);
+					}
+					node.type = SyntaxNodeType.OR;
+					node.children = children.toArray(new SyntaxNode[children.size()]);
+					return from;
+				}
+				else {
+					return from;
+				}
+			case AND :
+				from = parseQuery(lex, from, group.prev(), node);
+				
+				if (lex[from].type == LexType.AND) {
+					final List<SyntaxNode<SyntaxNodeType, SyntaxNode>>	children = new ArrayList<>();
+					
+					children.add((SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone());
+					while (lex[from].type == LexType.AND) {
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	child = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						
+						from = parseQuery(lex, from, group.prev(), child);
+						children.add(child);
+					}
+					node.type = SyntaxNodeType.AND;
+					node.children = children.toArray(new SyntaxNode[children.size()]);
 					return from;
 				}
 				else {
@@ -228,10 +260,24 @@ loop:		for(;;) {
 				}
 			case WEIGHT		:
 				from = parseQuery(lex, from, group.prev(), node);
-				if (lex[from].type == null) {
-					return from;
+				if (lex[from].type == LexType.BOOST && lex[from+1].type == LexType.NUMBER) {
+					final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+					
+					node.type = SyntaxNodeType.BOOSTS;
+					node.value = Double.doubleToLongBits(lex[from].value);
+					node.children = new SyntaxNode[]{clone};
+					return from + 2;
+				}
+				else if (lex[from].type == LexType.FUZZY && lex[from+1].type == LexType.NUMBER) {
+					final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+					
+					node.type = SyntaxNodeType.PROXIMITY;
+					node.value = Double.doubleToLongBits(lex[from].value);
+					node.children = new SyntaxNode[]{clone};
+					return from + 2;
 				}
 				else {
+					return from;
 				}
 			case FIELD		:
 				if (lex[from].type == LexType.SINGLE_TERM && lex[from+1].type == LexType.COLON) {
@@ -245,22 +291,88 @@ loop:		for(;;) {
 				else {
 					return parseQuery(lex, from, group.prev(), node);
 				}
+			case UNARY		:
+				if (lex[from].type == LexType.PLUS) {
+					return parseQuery(lex, from + 1, group.prev(), node);
+				}
+				else if (lex[from].type == LexType.MINUS) {
+					final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+					
+					node.type = SyntaxNodeType.EXCLUDE;
+					node.cargo = lex[from];
+					node.children = new SyntaxNode[]{clone};
+					return parseQuery(lex, from + 1, group.prev(), clone);
+				}
+				else {
+					return parseQuery(lex, from, group.prev(), node);
+				}
 			case TERM		:
 				switch (lex[from].type) {
 					case OPEN			:
-						break;
+						final List<SyntaxNode<SyntaxNodeType, SyntaxNode>>	items = new ArrayList<>();
+
+						from++;
+						for (;;) {
+							if (lex[from].type == LexType.CLOSE || lex[from].type == LexType.EOF) {
+								break;
+							}
+							else {
+								final SyntaxNode<SyntaxNodeType, SyntaxNode>	clone = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+								
+								from = parseQuery(lex, from + 1, SyntaxGroup.UNARY, clone);
+								items.add(clone);
+							}
+						}
+						if (lex[from].type == LexType.CLOSE) {
+							node.type = SyntaxNodeType.GROUP;
+							node.children = items.toArray(new SyntaxNode[items.size()]);
+							return from + 1;
+						}
+						else {
+							throw new SyntaxException(0, lex[from].col, "missing ')'");
+						}
 					case OPENB			:
-						break;
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	betweenFrom = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	betweenTo = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						
+						from = parseQuery(lex, from+1, group, betweenFrom);
+						if (lex[from].type == LexType.TO) {
+							from = parseQuery(lex, from+1, group, betweenTo);
+							if (lex[from].type == LexType.CLOSEB) {
+								node.type = SyntaxNodeType.BETWEEN;
+								node.children = new SyntaxNode[] {betweenFrom, betweenTo};
+								return from + 1;
+							}
+							else {
+								throw new SyntaxException(0, lex[from].col, "missing ']'");
+							}
+						}
+						else {
+							throw new SyntaxException(0, lex[from].col, "missing 'TO'");
+						}
 					case OPENF			:
-						break;
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	insideFrom = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						final SyntaxNode<SyntaxNodeType, SyntaxNode>	insideTo = (SyntaxNode<SyntaxNodeType, SyntaxNode>) node.clone();
+						
+						from = parseQuery(lex, from+1, group, insideFrom);
+						if (lex[from].type == LexType.TO) {
+							from = parseQuery(lex, from+1, group, insideTo);
+							if (lex[from].type == LexType.CLOSEF) {
+								node.type = SyntaxNodeType.INSIDE;
+								node.children = new SyntaxNode[] {insideFrom, insideTo};
+								return from + 1;
+							}
+							else {
+								throw new SyntaxException(0, lex[from].col, "missing '}'");
+							}
+						}
+						else {
+							throw new SyntaxException(0, lex[from].col, "missing 'TO'");
+						}
 					case PHRASE			:
 						node.type = SyntaxNodeType.EQUALS;
 						node.cargo = lex[from];
-						return from + 1;
-					case PLUS			:
-						break;
-					case MINUS			:
-						break;
+						return from + 1;						
 					case SINGLE_TERM	:
 						node.type = SyntaxNodeType.EQUALS;
 						node.cargo = lex[from];
@@ -269,8 +381,8 @@ loop:		for(;;) {
 						node.type = SyntaxNodeType.MATCH;
 						node.cargo = lex[from];
 						return from + 1;
-					default:
-						break;
+					default :
+						throw new SyntaxException(0, lex[from].col, "Unwaited lex");
 				}
 				break;
 			default :

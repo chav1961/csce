@@ -6,9 +6,11 @@ public enum SyntaxNodeType {
 	NOT(SyntaxGroup.NOT),
 	FIELD(SyntaxGroup.FIELD),
 	EQUALS(SyntaxGroup.TERM),
+	EXCLUDE(SyntaxGroup.TERM),
 	MATCH(SyntaxGroup.TERM),
 	BETWEEN(SyntaxGroup.TERM),
 	INSIDE(SyntaxGroup.TERM),
+	GROUP(SyntaxGroup.TERM),
 	PROXIMITY(SyntaxGroup.WEIGHT),
 	BOOSTS(SyntaxGroup.WEIGHT);
 	

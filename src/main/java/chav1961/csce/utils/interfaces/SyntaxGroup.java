@@ -1,12 +1,13 @@
 package chav1961.csce.utils.interfaces;
 
 public enum SyntaxGroup {
-	OR,
-	AND, 
-	NOT,
-	WEIGHT,
+	TERM,
+	UNARY,
 	FIELD,
-	TERM;
+	WEIGHT,
+	NOT,
+	AND, 
+	OR;
 	
 	public SyntaxGroup prev() {
 		return values()[ordinal()-1];
