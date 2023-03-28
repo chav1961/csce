@@ -109,6 +109,43 @@
 		<key name="treemenu.delete">Delete</key>
 		<key name="treemenu.delete.tt">Delete item</key>
 
+<!-- Localization for Creole editor toolbar -->
+		<key name="menu.main.edit.undo">Undo</key>
+		<key name="menu.main.edit.undo.tt">Undo last operations</key>
+		<key name="menu.main.edit.redo">Redo</key>
+		<key name="menu.main.edit.redo.tt">Redo last operations</key>
+		<key name="menu.main.edit.cut">Cut</key>
+		<key name="menu.main.edit.cut.tt">Cut selected area into clipboard</key>
+		<key name="menu.main.edit.copy">Copy</key>
+		<key name="menu.main.edit.copy.tt">Copy selected area into clipboard</key>
+		<key name="menu.main.edit.paste">Paste</key>
+		<key name="menu.main.edit.paste.tt">Paste selected area from clipboard</key>
+		<key name="menu.main.edit.find">Find</key>
+		<key name="menu.main.edit.find.tt">Find string</key>
+		<key name="menu.main.edit.findreplace">Find &amp; Replace</key>
+		<key name="menu.main.edit.findreplace.tt">Find and replace string</key>
+		<key name="menu.main.edit.pasteLink">Insert link</key>
+		<key name="menu.main.edit.pasteLink.tt">Insert link</key>
+		<key name="menu.main.edit.pasteImage">Insert image</key>
+		<key name="menu.main.edit.pasteImage.tt">Insert image</key>
+		<key name="menu.main.edit.captionUp">Caption up</key>
+		<key name="menu.main.edit.captionUp.tt">Caption up</key>
+		<key name="menu.main.edit.captionDown">Caption down</key>
+		<key name="menu.main.edit.captionDown.tt">Caption down</key>
+		<key name="menu.main.edit.listUp">Unordered list up</key>
+		<key name="menu.main.edit.listUp.tt">Unordered list up</key>
+		<key name="menu.main.edit.listDown">Unordered list down</key>
+		<key name="menu.main.edit.listDown.tt">Unordered list down</key>
+		<key name="menu.main.edit.orderedListUp">Ordered list up</key>
+		<key name="menu.main.edit.orderedListUp.tt">Ordered list up</key>
+		<key name="menu.main.edit.orderedListDown">Ordered list down</key>
+		<key name="menu.main.edit.orderedListDown.tt">Ordered list down</key>
+		<key name="menu.main.edit.bold">Bold</key>
+		<key name="menu.main.edit.bold.tt">Bold</key>
+		<key name="menu.main.edit.italic">Italic</key>
+		<key name="menu.main.edit.italic.tt">Italic</key>
+
+
 <!-- FirstScreen class localization -->
 		<key name="chav1961.csce.FirstScreen.title">Drag project file *.csc here to start editing it</key>
 
@@ -300,6 +337,43 @@
 		<key name="treemenu.properties.tt">Редактировать элемент</key>
 		<key name="treemenu.delete">Удалить</key>
 		<key name="treemenu.delete.tt">Удалить элемент</key>
+
+<!-- Локализация панели интсрументов редактора Creole -->
+		<key name="menu.main.edit.undo">Отмена</key>
+		<key name="menu.main.edit.undo.tt">Отмена последних операций</key>
+		<key name="menu.main.edit.redo">Восстановить</key>
+		<key name="menu.main.edit.redo.tt">Восстановить последние отмененные операции</key>
+		<key name="menu.main.edit.cut">Вырезать</key>
+		<key name="menu.main.edit.cut.tt">Вырезать выделенный участок изображения</key>
+		<key name="menu.main.edit.copy">Копировать</key>
+		<key name="menu.main.edit.copy.tt">Копировать выделенный участок изображения</key>
+		<key name="menu.main.edit.paste">Вставить</key>
+		<key name="menu.main.edit.paste.tt">Вставить изображение из буфера обмена в выделенную область</key>
+		<key name="menu.main.edit.find">Найти</key>
+		<key name="menu.main.edit.find.tt">Найти строку</key>
+		<key name="menu.main.edit.findreplace">Найти и заменить</key>
+		<key name="menu.main.edit.findreplace.tt">Найти и заменить строки</key>
+		<key name="menu.main.edit.pasteLink">Вставить ссылку</key>
+		<key name="menu.main.edit.pasteLink.tt">Вставить ссылку</key>
+		<key name="menu.main.edit.pasteImage">Вставить изображение</key>
+		<key name="menu.main.edit.pasteImage.tt">Вставить изображение</key>
+		<key name="menu.main.edit.captionUp">Повысить заголовок</key>
+		<key name="menu.main.edit.captionUp.tt">Повысить заголовок</key>
+		<key name="menu.main.edit.captionDown">Понизить заголовок</key>
+		<key name="menu.main.edit.captionDown.tt">Понизить заголовок</key>
+		<key name="menu.main.edit.listUp">Повысить список</key>
+		<key name="menu.main.edit.listUp.tt">Повысить список</key>
+		<key name="menu.main.edit.listDown">Понизить список</key>
+		<key name="menu.main.edit.listDown.tt">Понизить список</key>
+		<key name="menu.main.edit.orderedListUp">Повысить список</key>
+		<key name="menu.main.edit.orderedListUp.tt">Повысить список</key>
+		<key name="menu.main.edit.orderedListDown">Понизить список</key>
+		<key name="menu.main.edit.orderedListDown.tt">Понизить список</key>
+		<key name="menu.main.edit.bold">Жирный шрифт</key>
+		<key name="menu.main.edit.bold.tt">Жирный шрифт</key>
+		<key name="menu.main.edit.italic">Наклонный шрифт</key>
+		<key name="menu.main.edit.italic.tt">Наклонный шрифт</key>
+
 
 <!-- Локализация класса FirstScreen -->
 		<key name="chav1961.csce.FirstScreen.title">Перетащите сюда файл проекта *.csc чтобы начать работу с ним</key>

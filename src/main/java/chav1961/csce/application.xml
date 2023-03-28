@@ -82,4 +82,35 @@
 		<app:item name="treemenu.properties" caption="treemenu.properties" tooltip="treemenu.properties.tt" action="editItem"/>
 		<app:item name="treemenu.delete" caption="treemenu.delete" tooltip="treemenu.delete.tt" action="deleteItem"/>
 	</app:menu>
+ 	<app:menu id="toolbarmenu">
+		<app:item name="menu.main.edit.cut" caption="menu.main.edit.cut" tooltip="menu.main.edit.cut.tt" icon="root://chav1961.csce.Application/chav1961/csce/cut.png" action="cut"/>
+		<app:item name="menu.main.edit.copy" caption="menu.main.edit.copy" tooltip="menu.main.edit.copy.tt" icon="root://chav1961.csce.Application/chav1961/csce/copy.png" action="copy"/>
+		<app:item name="menu.main.edit.paste" caption="menu.main.edit.paste" tooltip="menu.main.edit.paste.tt" icon="root://chav1961.csce.Application/chav1961/csce/paste.png" action="paste"/>
+		<app:item name="menu.main.edit.pasteLink" caption="menu.main.edit.pasteLink" tooltip="menu.main.edit.pasteLink.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertLink.png" action="pasteLink"/>
+		<app:item name="menu.main.edit.pasteImage" caption="menu.main.edit.pasteImage" tooltip="menu.main.edit.pasteImage.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertImage.png" action="pasteImage"/>
+		<app:separator/>
+		<app:item name="menu.main.edit.find" caption="menu.main.edit.find" tooltip="menu.main.edit.find.tt" icon="root://chav1961.csce.Application/chav1961/csce/find.png" action="find"/>
+		<app:item name="menu.main.edit.findreplace" caption="menu.main.edit.findreplace" tooltip="menu.main.edit.findreplace.tt" icon="root://chav1961.csce.Application/chav1961/csce/findreplace.png" action="findreplace"/>
+		<app:separator/>
+		<app:item name="menu.main.edit.captionUp" caption="menu.main.edit.captionUp" tooltip="menu.main.edit.captionUp.tt" icon="root://chav1961.csce.Application/chav1961/csce/caption.png" action="paragraphCaptionUp"/>
+		<app:item name="menu.main.edit.captionDown" caption="menu.main.edit.captionDown" tooltip="menu.main.edit.captionDown.tt" icon="root://chav1961.csce.Application/chav1961/csce/caption.png" action="paragraphCaptionDown"/>
+		<app:item name="menu.main.edit.listUp" caption="menu.main.edit.listUp" tooltip="menu.main.edit.listUp.tt" icon="root://chav1961.csce.Application/chav1961/csce/bulletList.png" action="paragraphListUp"/>
+		<app:item name="menu.main.edit.listDown" caption="menu.main.edit.listDown" tooltip="menu.main.edit.listDown.tt" icon="root://chav1961.csce.Application/chav1961/csce/bulletList.png" action="paragraphListDown"/>
+		<app:item name="menu.main.edit.orderedListUp" caption="menu.main.edit.orderedListUp" tooltip="menu.main.edit.orderedListUp.tt" icon="root://chav1961.csce.Application/chav1961/csce/numberedList.png" action="paragraphOrderedListUp"/>
+		<app:item name="menu.main.edit.orderedListDown" caption="menu.main.edit.orderedListDown" tooltip="menu.main.edit.orderedListDown.tt" icon="root://chav1961.csce.Application/chav1961/csce/numberedList.png" action="paragraphOrderedListDown"/>
+		<app:item name="menu.main.edit.bold" caption="menu.main.edit.bold" tooltip="menu.main.edit.bold.tt" icon="root://chav1961.csce.Application/chav1961/csce/bold.png" action="fontBold"/>
+		<app:item name="menu.main.edit.italic" caption="menu.main.edit.italic" tooltip="menu.main.edit.italic.tt" icon="root://chav1961.csce.Application/chav1961/csce/italic.png" action="fontItalic"/>
+		<app:separator/>
+		<app:item name="menu.main.tools.preview" caption="menu.main.tools.preview" tooltip="menu.main.tools.preview.tt" checkable="true" icon="root://chav1961.csce.Application/chav1961/csce/preview.png" action="previewProject"/>
+	</app:menu>
+	<app:keyset id="toolbarmenu.keyset">
+		<app:key code="X" ctrl="true" action="cut"/>
+		<app:key code="C" ctrl="true" action="copy"/>
+		<app:key code="V" ctrl="true" action="paste"/>
+		<app:key code="F" ctrl="true" action="find"/>
+		<app:key code="H" ctrl="true" action="findreplace"/>
+		<app:key code="B" ctrl="true" action="fontBold"/>
+		<app:key code="I" ctrl="true" action="fontItalic"/>
+		<app:key code="P" ctrl="true" action="previewProject"/>
+	</app:keyset>
 </app:root>
