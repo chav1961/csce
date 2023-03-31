@@ -7,7 +7,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -23,28 +22,29 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.undo.UndoManager;
 
 import chav1961.csce.Application;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.purelib.basic.SimpleTimerTask;
-import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
-import chav1961.purelib.basic.interfaces.ModuleAccessor;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
-import chav1961.purelib.enumerations.MarkupOutputFormat;
+import chav1961.purelib.basic.interfaces.ModuleAccessor;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
-import chav1961.purelib.streams.char2char.CreoleWriter;
 import chav1961.purelib.ui.swing.JToolBarWithMeta;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
 import chav1961.purelib.ui.swing.useful.JBackgroundComponent;
 import chav1961.purelib.ui.swing.useful.JBackgroundComponent.FillMode;
+import chav1961.purelib.ui.swing.useful.JFileSelectionDialog.FilterCallback;
 import chav1961.purelib.ui.swing.useful.JCloseableTab;
 import chav1961.purelib.ui.swing.useful.JCreoleEditor;
 import chav1961.purelib.ui.swing.useful.JEnableMaskManipulator;
+import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 
@@ -53,6 +53,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 
 	private static final Icon		SAVE_ICON = new ImageIcon(ProjectTabbedPane.class.getResource("icon_save_16.png"));
 	private static final Icon		GRAY_SAVE_ICON = new ImageIcon(GrayFilter.createDisabledImage(((ImageIcon)SAVE_ICON).getImage()));
+	private static final String		MENU_EDIT_UNDO = "menu.main.edit.undo";
+	private static final String		MENU_EDIT_REDO = "menu.main.edit.redo";
 	private static final String		MENU_EDIT_CUT = "menu.main.edit.cut";
 	private static final String		MENU_EDIT_COPY = "menu.main.edit.copy";
 	private static final String		MENU_EDIT_PASTE = "menu.main.edit.paste";
@@ -71,6 +73,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private static final String		MENU_TOOLS_PREVIEW = "menu.main.tools.preview";
 
 	private static final String[]	MENUS = {
+										MENU_EDIT_UNDO,
+										MENU_EDIT_REDO,
 										MENU_EDIT_CUT,
 										MENU_EDIT_COPY,
 										MENU_EDIT_PASTE,
@@ -89,24 +93,27 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 										MENU_TOOLS_PREVIEW
 									};
 
-	private static final long 		EDIT_CUT = 1L << 0;
-	private static final long 		EDIT_COPY = 1L << 1;
-	private static final long 		EDIT_PASTE = 1L << 2;
-	private static final long 		EDIT_PASTE_LINK = 1L << 3;
-	private static final long 		EDIT_PASTE_IMAGE = 1L << 4;
-	private static final long 		EDIT_FIND = 1L << 5;
-	private static final long 		EDIT_FIND_REPLACE = 1L << 6;
-	private static final long 		EDIT_CAPTION_UP = 1L << 7;
-	private static final long 		EDIT_CAPTION_DOWN = 1L << 8;
-	private static final long 		EDIT_LIST_UP = 1L << 9;
-	private static final long 		EDIT_LIST_DOWN = 1L << 10;
-	private static final long 		EDIT_ORDERED_LIST_UP = 1L << 11;
-	private static final long 		EDIT_ORDERED_LIST_DOWN = 1L << 12;
-	private static final long 		EDIT_ORDERED_BOLD = 1L << 13;
-	private static final long 		EDIT_ORDERED_ITALIC = 1L << 14;	
+	private static final long 		EDIT_UNDO = 1L << 0;
+	private static final long 		EDIT_REDO = 1L << 1;
+	private static final long 		EDIT_CUT = 1L << 2;
+	private static final long 		EDIT_COPY = 1L << 3;
+	private static final long 		EDIT_PASTE = 1L << 4;
+	private static final long 		EDIT_PASTE_LINK = 1L << 5;
+	private static final long 		EDIT_PASTE_IMAGE = 1L << 6;
+	private static final long 		EDIT_FIND = 1L << 7;
+	private static final long 		EDIT_FIND_REPLACE = 1L << 8;
+	private static final long 		EDIT_CAPTION_UP = 1L << 9;
+	private static final long 		EDIT_CAPTION_DOWN = 1L << 10;
+	private static final long 		EDIT_LIST_UP = 1L << 11;
+	private static final long 		EDIT_LIST_DOWN = 1L << 12;
+	private static final long 		EDIT_ORDERED_LIST_UP = 1L << 13;
+	private static final long 		EDIT_ORDERED_LIST_DOWN = 1L << 14;
+	private static final long 		EDIT_ORDERED_BOLD = 1L << 15;
+	private static final long 		EDIT_ORDERED_ITALIC = 1L << 16;	
 	private static final long 		TOTAL_EDIT = EDIT_PASTE | EDIT_PASTE_LINK | EDIT_PASTE_IMAGE | EDIT_FIND_REPLACE |  EDIT_CAPTION_UP | EDIT_CAPTION_DOWN | EDIT_LIST_UP | EDIT_LIST_DOWN | EDIT_ORDERED_LIST_UP | EDIT_ORDERED_LIST_DOWN | EDIT_ORDERED_BOLD | EDIT_ORDERED_ITALIC;	
 	private static final long 		TOTAL_EDIT_SELECTION = EDIT_CUT | EDIT_COPY | EDIT_CAPTION_UP | EDIT_CAPTION_DOWN | EDIT_LIST_UP | EDIT_LIST_DOWN | EDIT_ORDERED_LIST_UP | EDIT_ORDERED_LIST_DOWN | EDIT_ORDERED_BOLD | EDIT_ORDERED_ITALIC;	
 	
+	private static final FilterCallback	IMAGE_FILTER = FilterCallback.of("Image files", "*.png", "*.jpg");
 	
 	private final Application		parent;
 	private final ProjectContainer	project;
@@ -288,6 +295,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		private static final long 		serialVersionUID = 7675426768332709976L;
 		
 		private final JCreoleEditor	editor = new JCreoleEditor();
+		private final UndoManager	undoMgr = new UndoManager();
 		private final JToolBar		toolbar;
 		private final String		projectPartName;
 		private final JEnableMaskManipulator	emm;
@@ -318,16 +326,23 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			add(new JScrollPane(editor), BorderLayout.CENTER);
 			
 			editor.addCaretListener((e)->refreshSelection());
+			editor.getDocument().addUndoableEditListener((e)->processUndo(e));
 		}
 		
 		@OnAction("action:/undo")
 		public void undo() {
-//			editor.undo();
+			if (undoMgr.canUndo()) {
+				undoMgr.undo();
+				refreshUndoMenu();
+			}
 		}
 		
 		@OnAction("action:/redo")
 		public void redo() {
-//			editor.redo();
+			if (undoMgr.canRedo()) {
+				undoMgr.redo();
+				refreshUndoMenu();
+			}
 		}
 
 		
@@ -352,6 +367,14 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@OnAction("action:/pasteImage")
 		public void pasteImage() {
+			try{for(String item : JFileSelectionDialog.select(this, localizer, fsi, JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {
+					final String	lastComponent = item.substring(item.lastIndexOf('/')+1);
+					
+					editor.replaceSelection(" {{file:"+item+"|"+lastComponent+"}} ");
+				}
+			} catch (IOException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
+			}		
 		}
 		
 		@OnAction("action:/find")
@@ -565,6 +588,18 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			}
 		}
 
+		private void processUndo(final UndoableEditEvent e) {
+			if (!editor.isHighlightingLocked()) {
+				undoMgr.addEdit(e.getEdit());
+				refreshUndoMenu();
+			}
+		}
+		
+		private void refreshUndoMenu() {
+			emm.setCheckMaskTo(EDIT_UNDO, undoMgr.canUndo());
+			emm.setCheckMaskTo(EDIT_REDO, undoMgr.canRedo());
+		}
+		
 		private void refreshSelection() {
 			if (editor.getSelectedText().isEmpty()) {
 				emm.setEnableMaskOff(TOTAL_EDIT_SELECTION);

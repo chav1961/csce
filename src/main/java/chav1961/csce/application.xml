@@ -83,6 +83,9 @@
 		<app:item name="treemenu.delete" caption="treemenu.delete" tooltip="treemenu.delete.tt" action="deleteItem"/>
 	</app:menu>
  	<app:menu id="toolbarmenu">
+		<app:item name="menu.main.edit.undo" caption="menu.main.edit.undo" tooltip="menu.main.edit.undo.tt" action="undo"/>
+		<app:item name="menu.main.edit.redo" caption="menu.main.edit.redo" tooltip="menu.main.edit.redo.tt" action="redo"/>
+		<app:separator/>
 		<app:item name="menu.main.edit.cut" caption="menu.main.edit.cut" tooltip="menu.main.edit.cut.tt" icon="root://chav1961.csce.Application/chav1961/csce/cut.png" action="cut"/>
 		<app:item name="menu.main.edit.copy" caption="menu.main.edit.copy" tooltip="menu.main.edit.copy.tt" icon="root://chav1961.csce.Application/chav1961/csce/copy.png" action="copy"/>
 		<app:item name="menu.main.edit.paste" caption="menu.main.edit.paste" tooltip="menu.main.edit.paste.tt" icon="root://chav1961.csce.Application/chav1961/csce/paste.png" action="paste"/>
