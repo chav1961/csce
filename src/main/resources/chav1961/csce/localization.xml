@@ -227,6 +227,39 @@
 <!-- ProjectVariablesTableEditor.InnerTableModel class localization  -->
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.name">Variable name</key>
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.value">Variable value</key>
+
+<!-- FindPanel class localization -->
+		<key name="FindPanel.find.caption">Find: </key>
+		<key name="FindPanel.ignore.case">Ignore case</key>
+		<key name="FindPanel.ignore.case.tt">Ignore case</key>
+		<key name="FindPanel.whole.words">Whole word</key>
+		<key name="FindPanel.whole.words.tt">String found must be the word, not the part of it</key>
+		<key name="FindPanel.use.regex">Use regex</key>
+		<key name="FindPanel.use.regex.tt">Treat string to find as regular expression</key>
+		<key name="FindPanel.forward">Forward &gt;&gt;</key>
+		<key name="FindPanel.forward.tt">Forward search</key>
+		<key name="FindPanel.backward">&lt;&lt; Backward</key>
+		<key name="FindPanel.backward.tt">Backward search</key>
+		<key name="FindPanel.close">Close find panel</key>
+
+<!-- ReplacePanel class localization -->
+		<key name="ReplacePanel.find.caption">Find: </key>
+		<key name="ReplacePanel.replace.caption">Replace to: </key>
+		<key name="ReplacePanel.ignore.case">Ignore case</key>
+		<key name="ReplacePanel.ignore.case.tt">Ignore case</key>
+		<key name="ReplacePanel.whole.words">Whole word</key>
+		<key name="ReplacePanel.whole.words.tt">String found must be the word, not the part of it</key>
+		<key name="ReplacePanel.use.regex">Use regex</key>
+		<key name="ReplacePanel.use.regex.tt">Treat string to find as regular expression</key>
+		<key name="ReplacePanel.backward">Backward</key>
+		<key name="ReplacePanel.backward.tt">Backward search</key>
+		<key name="ReplacePanel.find">Find</key>
+		<key name="ReplacePanel.find.tt">Find string</key>
+		<key name="ReplacePanel.replace">Replace</key>
+		<key name="ReplacePanel.replace.tt">Replace highlighted</key>
+		<key name="ReplacePanel.replaceAll.tt">Replace all</key>
+		<key name="ReplacePanel.replaceAll.tt">Replace all found</key>
+		<key name="ReplacePanel.close">Close replace panel</key>
 		
  	</lang>
 	<lang name="ru">
@@ -456,6 +489,39 @@
 <!-- Локализация класса ProjectVariablesTableEditor.InnerTableModel -->
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.name">Имя переменной</key>
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.value">Значение</key>
+		
+<!-- Локализация класса FindPanel -->
+		<key name="FindPanel.find.caption">Найти: </key>
+		<key name="FindPanel.ignore.case">Без регистра</key>
+		<key name="FindPanel.ignore.case.tt">Не учитывать регистр символов при поиске</key>
+		<key name="FindPanel.whole.words">Слова целиком</key>
+		<key name="FindPanel.whole.words.tt">Найденное значение должно быть словом, а не его частью</key>
+		<key name="FindPanel.use.regex">Рег. выражение</key>
+		<key name="FindPanel.use.regex.tt">Рассматривать строку поиска как регуляроное выражение</key>
+		<key name="FindPanel.forward">Вперед &gt;&gt;</key>
+		<key name="FindPanel.forward.tt">Направление поиска - вперед от текущего положения</key>
+		<key name="FindPanel.backward">&lt;&lt; Назад</key>
+		<key name="FindPanel.backward.tt">Направление поиска - назад от текущего положения</key>
+		<key name="FindPanel.close">Закрыть окно поиска</key>
+		
+<!-- Локализация класса ReplacePanel -->
+		<key name="ReplacePanel.find.caption">Найти: </key>
+		<key name="ReplacePanel.replace.caption">Заменить на: </key>
+		<key name="ReplacePanel.ignore.case">Без регистра</key>
+		<key name="ReplacePanel.ignore.case.tt">Не учитывать регистр символов при поиске</key>
+		<key name="ReplacePanel.whole.words">Слова целиком</key>
+		<key name="ReplacePanel.whole.words.tt">Найденное значение должно быть словом, а не его частью</key>
+		<key name="ReplacePanel.use.regex">Рег. выражение</key>
+		<key name="ReplacePanel.use.regex.tt">Рассматривать строку поиска как регуляроное выражение</key>
+		<key name="ReplacePanel.backward">Поиск назад</key>
+		<key name="ReplacePanel.backward.tt">Поиск в обратном напрявлениии от текущего места</key>
+		<key name="ReplacePanel.find">Найти</key>
+		<key name="ReplacePanel.find.tt">Найти строку</key>
+		<key name="ReplacePanel.replace">Заменить</key>
+		<key name="ReplacePanel.replace.tt">Заменить выделенное</key>
+		<key name="ReplacePanel.replaceAll.tt">Заменить все</key>
+		<key name="ReplacePanel.replaceAll.tt">Заменить все найденные</key>
+		<key name="ReplacePanel.close">Закрыть окно замены</key>
 		
 	</lang>	
 </localization>

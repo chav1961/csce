@@ -14,6 +14,7 @@ import java.util.Locale;
 import javax.swing.GrayFilter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -110,7 +111,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private static final long 		EDIT_ORDERED_LIST_DOWN = 1L << 14;
 	private static final long 		EDIT_ORDERED_BOLD = 1L << 15;
 	private static final long 		EDIT_ORDERED_ITALIC = 1L << 16;	
-	private static final long 		TOTAL_EDIT = EDIT_PASTE | EDIT_PASTE_LINK | EDIT_PASTE_IMAGE | EDIT_FIND_REPLACE |  EDIT_CAPTION_UP | EDIT_CAPTION_DOWN | EDIT_LIST_UP | EDIT_LIST_DOWN | EDIT_ORDERED_LIST_UP | EDIT_ORDERED_LIST_DOWN | EDIT_ORDERED_BOLD | EDIT_ORDERED_ITALIC;	
+	private static final long 		TOOLS_PREVIEW = 1L << 17;	
+	private static final long 		TOTAL_EDIT = EDIT_PASTE_LINK | EDIT_PASTE_IMAGE | EDIT_FIND | EDIT_FIND_REPLACE | TOOLS_PREVIEW;	
 	private static final long 		TOTAL_EDIT_SELECTION = EDIT_CUT | EDIT_COPY | EDIT_CAPTION_UP | EDIT_CAPTION_DOWN | EDIT_LIST_UP | EDIT_LIST_DOWN | EDIT_ORDERED_LIST_UP | EDIT_ORDERED_LIST_DOWN | EDIT_ORDERED_BOLD | EDIT_ORDERED_ITALIC;	
 	
 	private static final FilterCallback	IMAGE_FILTER = FilterCallback.of("Image files", "*.png", "*.jpg");
@@ -290,6 +292,12 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			this.tab.setText(localizer.getValue(titleId));
 		}
 	}
+
+	private enum CreoleSouthPanel {
+		NONE,
+		FIND,
+		FIND_REPLACE
+	}
 	
 	private class CreoleTab extends JPanelWithLabel implements ModuleAccessor {
 		private static final long 		serialVersionUID = 7675426768332709976L;
@@ -299,6 +307,10 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		private final JToolBar		toolbar;
 		private final String		projectPartName;
 		private final JEnableMaskManipulator	emm;
+		private final FindPanel		findPanel;
+		private final ReplacePanel	replacePanel;
+		
+		private CreoleSouthPanel	southPanel = CreoleSouthPanel.NONE;  
 		
 		private CreoleTab(final Localizer localizer, final String partName, final String projectPartName, final String titleId) {
 			super(localizer, partName, titleId);
@@ -307,6 +319,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			this.projectPartName = projectPartName;
 			this.editor.setText(project.getProjectPartContent(projectPartName));
 			this.toolbar = SwingUtils.toJComponent(parent.getNodeMetadata().getOwner().byUIPath(URI.create("ui:/model/navigation.top.toolbarmenu")), JToolBar.class);
+			this.findPanel = new FindPanel(localizer, editor, (p)->setSouthPanelState(CreoleSouthPanel.NONE));
+			this.replacePanel = new ReplacePanel(localizer, editor, (p)->setSouthPanelState(CreoleSouthPanel.NONE));
 			this.emm = new JEnableMaskManipulator(MENUS, toolbar);
 			
 			this.toolbar.setFloatable(false);
@@ -324,11 +338,20 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 
 			add(toolbar, BorderLayout.NORTH);
 			add(new JScrollPane(editor), BorderLayout.CENTER);
+			emm.setEnableMaskOn(TOTAL_EDIT);
+			refreshUndoMenu();
 			
 			editor.addCaretListener((e)->refreshSelection());
 			editor.getDocument().addUndoableEditListener((e)->processUndo(e));
 		}
 		
+		@Override
+		public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
+			super.localeChanged(oldLocale, newLocale);
+			findPanel.localeChanged(oldLocale, newLocale);
+			replacePanel.localeChanged(oldLocale, newLocale);
+		}
+			
 		@OnAction("action:/undo")
 		public void undo() {
 			if (undoMgr.canUndo()) {
@@ -367,7 +390,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@OnAction("action:/pasteImage")
 		public void pasteImage() {
-			try{for(String item : JFileSelectionDialog.select(this, localizer, fsi, JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {
+			try{for(String item : JFileSelectionDialog.select(parent, localizer, parent.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {
 					final String	lastComponent = item.substring(item.lastIndexOf('/')+1);
 					
 					editor.replaceSelection(" {{file:"+item+"|"+lastComponent+"}} ");
@@ -379,10 +402,12 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@OnAction("action:/find")
 		public void find() {
+			setSouthPanelState(CreoleSouthPanel.FIND);
 		}
 		
 		@OnAction("action:/findreplace")
 		public void findReplace() {
+			setSouthPanelState(CreoleSouthPanel.FIND_REPLACE);
 		}
 
 		@OnAction("action:/paragraphCaptionUp")
@@ -601,11 +626,43 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		}
 		
 		private void refreshSelection() {
-			if (editor.getSelectedText().isEmpty()) {
+			if (editor.getSelectedText() == null || editor.getSelectedText().isEmpty()) {
 				emm.setEnableMaskOff(TOTAL_EDIT_SELECTION);
 			}
 			else {
 				emm.setEnableMaskOn(TOTAL_EDIT_SELECTION);
+			}
+		}
+		
+		private void setSouthPanelState(final CreoleSouthPanel newState) {
+			if (southPanel != newState) {
+				switch (southPanel) {
+					case FIND			:
+						remove(findPanel);
+						break;
+					case FIND_REPLACE	:
+						remove(replacePanel);
+						break;
+					case NONE			:
+						break;
+					default :
+						throw new UnsupportedOperationException("Panel state ["+southPanel+"] is not supported yet"); 
+				}
+				southPanel = newState;
+				switch (southPanel) {
+					case FIND			:
+						add(findPanel, BorderLayout.SOUTH);
+						break;
+					case FIND_REPLACE	:
+						add(replacePanel, BorderLayout.SOUTH);
+						break;
+					case NONE			:
+						break;
+					default :
+						throw new UnsupportedOperationException("Panel state ["+southPanel+"] is not supported yet"); 
+				}
+				revalidate();
+				repaint();
 			}
 		}
 	}
