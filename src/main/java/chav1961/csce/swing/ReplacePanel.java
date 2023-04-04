@@ -1,13 +1,16 @@
 package chav1961.csce.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.Locale;
 import java.util.function.Consumer;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,6 +23,7 @@ import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.ui.swing.useful.JCreoleEditor;
+import chav1961.purelib.ui.swing.useful.LabelledLayout;
 
 class ReplacePanel extends JPanel implements LocaleChangeListener {
 	private static final long serialVersionUID = -1785401640185755817L;
@@ -83,35 +87,63 @@ class ReplacePanel extends JPanel implements LocaleChangeListener {
 		close.setIcon(ICON_CLOSE);
 		close.setPreferredSize(new Dimension(20,20));
 		close.addActionListener((e)->onClose.accept(ReplacePanel.this));
-		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		final JPanel	captions = new JPanel(new GridLayout(2, 1));
-		final JPanel	strings = new JPanel(new GridLayout(2, 1));
-		final JPanel	buttons = new JPanel(new GridLayout(2, 2));
-		final JPanel	advanced = new JPanel(new GridLayout(2, 2));
-		
-		captions.add(findCaption);
-		captions.add(replaceCaption);
-		add(captions);		
-		add(Box.createHorizontalStrut(5));
-		strings.add(findString);
-		strings.add(replaceString);
-		add(strings);		
-		add(Box.createHorizontalStrut(5));
-		buttons.add(find);
-		buttons.add(backward);
-		buttons.add(replace);
-		buttons.add(replaceAll);
-		add(buttons);		
-		add(Box.createHorizontalStrut(5));
-		advanced.add(ignoreCase);
-		advanced.add(wholeWords);
-		advanced.add(useRegex);
-		add(advanced);		
-		add(Box.createHorizontalStrut(15));
-		add(close);		
-		
-		setPreferredSize(new Dimension(60,60));
+
+		final JPanel		innerContent = new JPanel();
+		final JPanel		innerClose = new JPanel();
+		final GroupLayout	layout = new GroupLayout(innerContent);
+		final JLabel		empty = new JLabel();
+		 
+		innerContent.setLayout(layout);
+		layout.setHorizontalGroup(
+				   layout.createSequentialGroup()
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				           .addComponent(findCaption)
+				           .addComponent(replaceCaption)
+				           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					           .addComponent(findString)
+					           .addComponent(replaceString)
+					           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					           .addComponent(find)
+					           .addComponent(replace)
+					           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					           .addComponent(empty)
+					           .addComponent(replaceAll)
+					           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					           .addComponent(backward)
+					           .addComponent(ignoreCase)
+					           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					           .addComponent(wholeWords)
+					           .addComponent(useRegex)
+					           )
+		);
+		layout.setVerticalGroup(
+				   layout.createSequentialGroup()
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				           .addComponent(findCaption)
+				           .addComponent(findString)
+				           .addComponent(find)
+				           .addComponent(empty)
+				           .addComponent(backward)
+				           .addComponent(wholeWords)
+				           )
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+					           .addComponent(replaceCaption)
+					           .addComponent(replaceString)
+					           .addComponent(replace)
+					           .addComponent(replaceAll)
+					           .addComponent(ignoreCase)
+					           .addComponent(useRegex)
+					           )
+		);
+		innerClose.add(close);
+		setLayout(new BorderLayout(10,0));
+		add(innerContent, BorderLayout.CENTER);
+		add(innerClose, BorderLayout.EAST);
 		fillLocalizedStrings();
 	}	
 	
@@ -120,10 +152,25 @@ class ReplacePanel extends JPanel implements LocaleChangeListener {
 		fillLocalizedStrings();
 	}
 
-	private final void highlightSearchString(final boolean highlight) {
-		findString.setForeground(highlight ? Color.RED : ordinalColor);
-		replace.setEnabled(!highlight);
-		replaceAll.setEnabled(!highlight);
+	@Override
+	public boolean requestFocusInWindow() {
+		return findString.requestFocusInWindow();
+	}
+
+	public void searchForward() {
+		backward.setSelected(false);
+		highlightSearchString(FindPanel.search(editor,findString.getText(),true,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected()));
+	}
+
+	public void searchBackward() {
+		backward.setSelected(true);
+		highlightSearchString(FindPanel.search(editor,findString.getText(),false,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected()));
+	}
+	
+	private final void highlightSearchString(final boolean found) {
+		findString.setForeground(found ? ordinalColor : Color.RED);
+		replace.setEnabled(found);
+		replaceAll.setEnabled(found);
 	}
 	
 	private void fillLocalizedStrings() {

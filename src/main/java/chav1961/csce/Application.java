@@ -488,6 +488,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			try{if (ask(pie, getLocalizer(), 400, 180)) {
 					project.getProjectNavigator().addItem(pie.getNavigatorItem());
 					project.addProjectPartContent(project.getPartNameById(toAdd.id), "");
+					viewer.getProjectTabbedPane().openCreoleTab(pie.getNavigatorItem());
 				}
 			} catch (ContentException e) {
 				getLogger().message(Severity.error, e, e.getLocalizedMessage());

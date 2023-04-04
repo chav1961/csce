@@ -1,5 +1,6 @@
 package chav1961.csce.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Locale;
@@ -8,8 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,7 +17,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SpringLayout;
 
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
@@ -62,25 +61,44 @@ class FindPanel extends JPanel implements LocaleChangeListener {
 		this.editor = editor;
 		this.onClose = onClose;
 		
-		forward.addActionListener((e)->highlightSearchString(search(editor,findString.getText(),true,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected())));
-		backward.addActionListener((e)->highlightSearchString(search(editor,findString.getText(),false,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected())));
+		forward.addActionListener((e)->searchForward());
+		backward.addActionListener((e)->searchBackward());
 		close.setIcon(ICON_CLOSE);
 		close.setPreferredSize(new Dimension(20,20));
 		close.addActionListener((e)->onClose.accept(FindPanel.this));
 		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(findCaption);		add(findString);
-		add(Box.createHorizontalStrut(5));
-		add(backward);			
-		add(Box.createHorizontalStrut(5));
-		add(forward);
-		add(Box.createHorizontalStrut(5));
-		add(ignoreCase);		add(wholeWords);
-		add(useRegex);			
-		add(Box.createHorizontalStrut(15));
-		add(close);
+		final JPanel		innerContent = new JPanel();
+		final JPanel		innerClose = new JPanel();
+		final GroupLayout	layout = new GroupLayout(innerContent);
+		 
+		innerContent.setLayout(layout);
+		layout.setHorizontalGroup(
+				   layout.createSequentialGroup()
+		           		.addComponent(findCaption)
+		           		.addComponent(findString)
+		           		.addComponent(backward)
+		           		.addComponent(forward)
+		           		.addComponent(ignoreCase)
+		           		.addComponent(wholeWords)
+		           		.addComponent(useRegex)
+		);
+		layout.setVerticalGroup(
+				   layout.createSequentialGroup()
+				      .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				           .addComponent(findCaption)
+				           .addComponent(findString)
+				           .addComponent(backward)
+				           .addComponent(forward)
+				           .addComponent(ignoreCase)
+				           .addComponent(wholeWords)
+				           .addComponent(useRegex)
+				           )
+		);
+		innerClose.add(close);
+		setLayout(new BorderLayout(10,0));
+		add(innerContent, BorderLayout.CENTER);
+		add(innerClose, BorderLayout.EAST);
 		
-		setPreferredSize(new Dimension(32,32));
 		fillLocalizedStrings();
 	}
 
@@ -89,8 +107,21 @@ class FindPanel extends JPanel implements LocaleChangeListener {
 		fillLocalizedStrings();
 	}
 
-	private final void highlightSearchString(final boolean highlight) {
-		findString.setForeground(highlight ? Color.RED : ordinalColor);
+	@Override
+	public boolean requestFocusInWindow() {
+		return findString.requestFocusInWindow();
+	}
+	
+	public void searchForward() {
+		highlightSearchString(search(editor,findString.getText(),true,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected()));
+	}
+
+	public void searchBackward() {
+		highlightSearchString(search(editor,findString.getText(),false,ignoreCase.isSelected(),wholeWords.isSelected(),useRegex.isSelected()));
+	}
+	
+	private void highlightSearchString(final boolean highlight) {
+		findString.setForeground(highlight ? ordinalColor : Color.RED);
 	}
 	
 	private void fillLocalizedStrings() {
@@ -111,13 +142,29 @@ class FindPanel extends JPanel implements LocaleChangeListener {
 	static boolean search(final JCreoleEditor editor, final String text, boolean forward, final boolean ignoreCase, final boolean wholeWords, final boolean useRegex) {
 		try{final Pattern	p = Pattern.compile(useRegex ? text : "\\Q"+text+"\\E", Pattern.DOTALL | (ignoreCase ? Pattern.CASE_INSENSITIVE : 0));
 			final int		pos = editor.getCaretPosition();
-			final String	content = forward ? editor.getText().substring(pos) : editor.getText().substring(0, pos);
+			final int		posMin = Math.min(editor.getSelectionStart(), editor.getSelectionEnd());
+			final int		posMax = Math.max(editor.getSelectionStart(), editor.getSelectionEnd());
+			final String	content = forward ? editor.getText().substring(posMax) : (posMin > 0 ? editor.getText().substring(0, posMin) : "");
 			final Matcher	m = p.matcher(content); 
 			
-			if (!forward) {
+			if (content.isEmpty()) {
+				return false;
+			}
+			else if (forward) {
+				if (m.find()) {
+					editor.setSelectionStart(posMax + m.start());
+					editor.setSelectionEnd(posMax + m.end());
+					return true;
+				}
+				else {
+					editor.setCaretPosition(pos);
+					return false;
+				}
+			}
+			else {
 				int	from = -1, to = 0;
 				
-				while (m.find(to + 1)) {
+				while (m.find(from + 1)) {
 					from = m.start();
 					to = m.end();
 				}
@@ -127,22 +174,15 @@ class FindPanel extends JPanel implements LocaleChangeListener {
 					return true;
 				}
 				else {
-					return false;
-				}
-			}
-			else {
-				if (m.find()) {
-					editor.setSelectionStart(pos + m.start());
-					editor.setSelectionEnd(pos + m.end());
-					return true;
-				}
-				else {
+					editor.setCaretPosition(pos);
 					return false;
 				}
 			}
 		} catch (PatternSyntaxException exc) {
 			SwingUtils.getNearestLogger(editor).message(Severity.warning, exc.getLocalizedMessage());
 			return false;
+		} finally {
+			editor.requestFocusInWindow();
 		}
 	}
 }

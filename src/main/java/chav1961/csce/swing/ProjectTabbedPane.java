@@ -170,6 +170,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			tab.setText(project.getProjectPartContent(projectPartName));
 			tab.getTabLabel().setToolTipText(item.desc);
 			tab.setModified(false);
+			SwingUtils.assignActionKey(tab, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, SwingUtils.KS_EXIT, (e)->tab.setSouthPanelState(CreoleSouthPanel.NONE), SwingUtils.ACTION_EXIT);
 		}
 	}
 
@@ -325,6 +326,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			
 			this.toolbar.setFloatable(false);
 			SwingUtils.assignActionKey(editor, SwingUtils.KS_SAVE, (e)->saveContent(), SwingUtils.ACTION_SAVE);
+			SwingUtils.assignActionKey(this, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, SwingUtils.KS_FORWARD, (e)->searchForward(), SwingUtils.ACTION_FORWARD);
+			SwingUtils.assignActionKey(this, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, SwingUtils.KS_BACKWARD, (e)->searchBackward(), SwingUtils.ACTION_BACKWARD);
 			
 			SimpleTimerTask.start(()->{
 				this.editor.getDocument().addDocumentListener(new DocumentListener() {
@@ -613,6 +616,38 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			}
 		}
 
+		private void searchForward() {
+			switch (southPanel) {
+				case FIND			:
+					findPanel.searchForward();
+					break;
+				case FIND_REPLACE	:
+					replacePanel.searchForward();
+					break;
+				case NONE			:
+					break;
+				default:
+					throw new UnsupportedOperationException("Panel state ["+southPanel+"] is not supported yet");
+			}
+		}
+
+		private void searchBackward() {
+			switch (southPanel) {
+				case FIND			:
+					findPanel.searchBackward();
+					break;
+				case FIND_REPLACE	:
+					replacePanel.searchBackward();
+					break;
+				case NONE			:
+					break;
+				default:
+					throw new UnsupportedOperationException("Panel state ["+southPanel+"] is not supported yet");
+			}
+		}
+		
+		
+		
 		private void processUndo(final UndoableEditEvent e) {
 			if (!editor.isHighlightingLocked()) {
 				undoMgr.addEdit(e.getEdit());
@@ -652,11 +687,14 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 				switch (southPanel) {
 					case FIND			:
 						add(findPanel, BorderLayout.SOUTH);
+						findPanel.requestFocusInWindow();
 						break;
 					case FIND_REPLACE	:
 						add(replacePanel, BorderLayout.SOUTH);
+						replacePanel.requestFocusInWindow();
 						break;
 					case NONE			:
+						editor.requestFocusInWindow();
 						break;
 					default :
 						throw new UnsupportedOperationException("Panel state ["+southPanel+"] is not supported yet"); 
