@@ -37,11 +37,13 @@ public class ProjectFileSystem extends AbstractFileSystem {
 	private ReentrantReadWriteLock	lock = null;
 	
 	public ProjectFileSystem(final ProjectContainer container) {
+		super(SERVE);
 		this.container = container;
 		this.parent = null;
 	}
 
-	private ProjectFileSystem(final ProjectFileSystem parent) {
+	private ProjectFileSystem(final URI rootPath, final ProjectFileSystem parent) {
+		super(rootPath);
 		this.container = null;
 		this.parent = parent;
 	}
@@ -62,18 +64,22 @@ public class ProjectFileSystem extends AbstractFileSystem {
 			throw new NullPointerException("URI schema can't be null");
 		}
 		else {
-			return new ProjectFileSystem(this);
+			return new ProjectFileSystem(rootPath, this);
 		}
 	}
 
 	@Override
 	public FileSystemInterface clone() {
-		return new ProjectFileSystem(this);
+		try {
+			return new ProjectFileSystem(URIUtils.appendRelativePath2URI(rootPath, getPath()), this);
+		} catch (IOException e) {
+			throw new IllegalArgumentException("CLone failed: "+e.getLocalizedMessage(), e); 
+		}
 	}
 
 	@Override
 	public DataWrapperInterface createDataWrapper(final URI actualPath) throws IOException {
-		return new ProjectDataWrapper(actualPath);
+		return new ProjectDataWrapper(URIUtils.appendRelativePath2URI(rootPath, getPath()), actualPath);
 	}
 	
 	ProjectContainer getContainer() {
@@ -87,15 +93,17 @@ public class ProjectFileSystem extends AbstractFileSystem {
 	
 	private class ProjectDataWrapper implements DataWrapperInterface {
 		private final URI				rootPath;
+		private final URI				actualPath;
 		private final String			uri;
 		private ProjectNavigatorItem	node;
 		private String					lastName = "";
 		private boolean					exists = true;
 		
-		private ProjectDataWrapper(final URI actualPath) throws IOException {
+		private ProjectDataWrapper(final URI rootPath, final URI actualPath) throws IOException {
 			ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
+			final String			totalPath = rootPath.getPath()+actualPath.getPath(); 
 			
-loop:		for(String item : actualPath.getPath().split("/")) {
+loop:		for(String item : totalPath.split("/")) {
 				if (!item.isEmpty()) {
 					for(ProjectNavigatorItem child : getContainer().getProjectNavigator().getChildren(currentItem.id)) {
 						if (child.name.equals(item)) {
@@ -107,7 +115,8 @@ loop:		for(String item : actualPath.getPath().split("/")) {
 					break loop;
 				}
 			}
-			this.rootPath = actualPath;
+			this.rootPath = rootPath;
+			this.actualPath = actualPath;
 			this.uri = "/";
 			this.node = currentItem;
 		}
@@ -225,8 +234,9 @@ loop:		for(String item : actualPath.getPath().split("/")) {
 			}
 			else {
 				ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
+				final String[]			pathParts = (URIUtils.extractSubURI(rootPath,FileSystemInterface.FILESYSTEM_URI_SCHEME).getPath()+uri).split("/"); 
 				
-loop:			for(String item : uri.split("/")) {
+loop:			for(String item : pathParts) {
 					if (!item.isEmpty()) {
 						for(ProjectNavigatorItem child : getContainer().getProjectNavigator().getChildren(currentItem.id)) {
 							if (child.name.equals(item)) {
@@ -252,7 +262,7 @@ loop:			for(String item : uri.split("/")) {
 			}
 			else {
 				ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
-				final String[]			pathParts = uri.split("/"); 
+				final String[]			pathParts = (URIUtils.extractSubURI(rootPath,FileSystemInterface.FILESYSTEM_URI_SCHEME).getPath()+uri).split("/"); 
 				
 loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 					if (!pathParts[index].isEmpty()) {
