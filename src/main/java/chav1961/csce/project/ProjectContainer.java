@@ -139,7 +139,7 @@ public class ProjectContainer implements LocalizerOwner {
 	private static final Pattern	IMAGE_PATTERN = Pattern.compile(ItemType.ImageRef.getPartNamePrefix()+"(\\d+)\\.png");
 	private static final Pattern[]	PATTERNS = {CREOLE_PATTERN, DOCUMENT_PATTERN, IMAGE_PATTERN};
 	
-	private final LocalizerOwner			app;
+	private final LocalizerOwner			owner;
 	private final ContentMetadataInterface	mdi;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
@@ -149,15 +149,15 @@ public class ProjectContainer implements LocalizerOwner {
 	private String							projectFileName = "";
 	private boolean							prepared = false;
 	
-	public ProjectContainer(final LocalizerOwner app, final ContentMetadataInterface mdi) {
-		if (app == null) {
-			throw new NullPointerException("Application can't be null");
+	public ProjectContainer(final LocalizerOwner owner, final ContentMetadataInterface mdi) {
+		if (owner == null) {
+			throw new NullPointerException("Localizer owner can't be null");
 		}
 		else if (mdi == null) {
 			throw new NullPointerException("Metadata can't be null");
 		}
 		else {
-			this.app = app;
+			this.owner = owner;
 			this.localizer = null;
 			this.mdi = mdi;
 		}
@@ -258,6 +258,9 @@ public class ProjectContainer implements LocalizerOwner {
 		else if (content.containsKey(partName)) {
 			throw new IllegalArgumentException("Part name ["+partName+"] already existst in the project"); 
 		}
+		else if (data == null) {
+			throw new NullPointerException("Data to add can't be null"); 
+		}
 		else {
 			ensurePrepared();
 			content.put(partName, data);
@@ -295,6 +298,9 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 		else if (type == null || !(type == ItemType.DocumentRef || type == ItemType.ImageRef || type == ItemType.CreoleRef)) {
 			throw new IllegalArgumentException("Item type can be CreoleRef, DocumentRef or ImageRef only"); 
+		}
+		else if (Utils.checkEmptyOrNullString(itemName)) {
+			throw new IllegalArgumentException("Item name can't be null or empty"); 
 		}
 		else if (content == null) {
 			throw new IllegalArgumentException("File content can't be null"); 
@@ -347,6 +353,9 @@ public class ProjectContainer implements LocalizerOwner {
 		else if (!content.containsKey(partName)) {
 			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
 		}
+		else if (data == null) {
+			throw new NullPointerException("Data to set can't be null"); 
+		}
 		else {
 			ensurePrepared();
 			content.put(partName, data);
@@ -370,20 +379,24 @@ public class ProjectContainer implements LocalizerOwner {
 	
 	public String getPartNameById(final long id) {
 		ensurePrepared();
-
-		final ProjectNavigatorItem	item = getProjectNavigator().getItem(id);
-		
-		switch (item.type) {
-			case CreoleRef		:
-				return item.type.getPartNamePrefix()+id+".cre";
-			case DocumentRef	:
-				return item.type.getPartNamePrefix()+id+".doc";
-			case ImageRef		:
-				return item.type.getPartNamePrefix()+id+".png";
-			case Root : case Subtree :
-				throw new IllegalArgumentException("Item type ["+item.type+"] can't have part name");
-			default :
-				throw new UnsupportedOperationException("Item type ["+item.type+"] is not supported yet"); 
+		if (!getProjectNavigator().hasItemId(id)) {
+			throw new IllegalArgumentException("Id ["+id+"] doesn't exist in the navigator"); 
+		}
+		else {
+			final ProjectNavigatorItem	item = getProjectNavigator().getItem(id);
+			
+			switch (item.type) {
+				case CreoleRef		:
+					return item.type.getPartNamePrefix()+id+".cre";
+				case DocumentRef	:
+					return item.type.getPartNamePrefix()+id+".doc";
+				case ImageRef		:
+					return item.type.getPartNamePrefix()+id+".png";
+				case Root : case Subtree :
+					throw new IllegalArgumentException("Item type ["+item.type+"] can't have part name");
+				default :
+					throw new UnsupportedOperationException("Item type ["+item.type+"] is not supported yet"); 
+			}
 		}
 	}
 	
@@ -397,7 +410,14 @@ public class ProjectContainer implements LocalizerOwner {
 				final Matcher	m = item.matcher(partName); 
 				
 				if (m.find()) {
-					return Long.valueOf(m.group(1));
+					final long	id = Long.valueOf(m.group(1));
+					
+					if (getProjectNavigator().hasItemId(id)) {
+						return id;
+					}
+					else {
+						throw new IllegalArgumentException("Part name ["+partName+"] doesn't have appropriative item in the navigator");
+					}
 				}
 			}
 			throw new IllegalArgumentException("Part name ["+partName+"] doesn't match any part templates");
@@ -454,14 +474,19 @@ loop:	for(Entry<String, Object> item : content.entrySet()) {
 				ze.setMethod(ZipEntry.DEFLATED);
 				zos.putNextEntry(ze);
 				storePart(item.getKey(), item.getValue(), zos);
-				zos.flush();				
+				zos.flush();
 			}
 			zos.finish();
 			
 			return new ByteArrayInputStream(baos.toByteArray());
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			PureLibSettings.CURRENT_LOGGER.message(Severity.error, e, e.getLocalizedMessage());
+			return new InputStream() {
+				@Override
+				public int read() throws IOException {
+					return -1;
+				}
+			};
 		}
 	}
 
@@ -540,9 +565,9 @@ loop:	for(Entry<String, Object> item : content.entrySet()) {
 									);
 
 		if (localizer != null) {
-			app.getLocalizer().pop(localizer);
+			owner.getLocalizer().pop(localizer);
 		}
-		app.getLocalizer().push(newlocalizer);
+		owner.getLocalizer().push(newlocalizer);
 		return newlocalizer;
 	}
 	

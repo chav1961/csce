@@ -48,6 +48,8 @@ public class ProjectNavigator {
 	public static final String	F_TITLE_ID = "titleId";
 	public static final String	F_REFERENCE = "reference";
 
+	private static final Comparator<ProjectNavigatorItem>	ORDERING = (ProjectNavigatorItem o1,ProjectNavigatorItem o2)->(int)(o1.id - o2.id);
+	
 	@FunctionalInterface
 	public interface WalkDownCallback {
 		ContinueMode process(final NodeEnterMode mode, ProjectNavigatorItem node) throws ContentException, IOException;
@@ -127,7 +129,7 @@ public class ProjectNavigator {
 			this.rootName = rootName;
 			this.items = temp.toArray(new ProjectNavigatorItem[temp.size()]);
 			
-			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			Arrays.sort(items, ORDERING);
 			int	found = -1;
 			
 			for(int index = 0; index < items.length; index++) {
@@ -242,12 +244,15 @@ public class ProjectNavigator {
 		if (item == null) {
 			throw new NullPointerException("Item to add can't be null"); 
 		}
-		else {
+		else if (Arrays.binarySearch(items, item, ORDERING) >= 0) {
+			throw new IllegalArgumentException("Duplicate item id ["+item+"] when add new item"); 
+		}
+		else {	
 			final ProjectChangeEvent	pce;
 			
 			items = Arrays.copyOf(items, items.length + 1);
 			items[items.length - 1] = item;
-			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			Arrays.sort(items, ORDERING);
 			switch (item.type) {
 				case CreoleRef		:
 					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_INSERTED, item.parent, item.id);
@@ -340,7 +345,7 @@ public class ProjectNavigator {
 
 			System.arraycopy(items, index+1, items, index, items.length-index-1);
 			items = Arrays.copyOf(items, items.length - 1); 
-			Arrays.sort(items, (o1,o2)->(int)(o1.id - o2.id));
+			Arrays.sort(items, ORDERING);
 			switch (result.type) {
 				case ImageRef		:
 					pce = new ProjectChangeEvent(container, ProjectChangeType.ITEM_REMOVED, result.parent, result.id);
