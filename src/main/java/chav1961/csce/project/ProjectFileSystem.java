@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class ProjectFileSystem extends AbstractFileSystem {
 
 	@Override
 	public FileSystemInterface clone() {
-		return this;
+		return new ProjectFileSystem(this);
 	}
 
 	@Override
@@ -85,7 +86,8 @@ public class ProjectFileSystem extends AbstractFileSystem {
 	}
 	
 	private class ProjectDataWrapper implements DataWrapperInterface {
-		private final URI				uri;
+		private final URI				rootPath;
+		private final String			uri;
 		private ProjectNavigatorItem	node;
 		private String					lastName = "";
 		private boolean					exists = true;
@@ -105,7 +107,8 @@ loop:		for(String item : actualPath.getPath().split("/")) {
 					break loop;
 				}
 			}
-			this.uri = actualPath;
+			this.rootPath = actualPath;
+			this.uri = "/";
 			this.node = currentItem;
 		}
 		
@@ -206,7 +209,7 @@ loop:		for(String item : actualPath.getPath().split("/")) {
 				final URI[]						result = new URI[children.length];
 				
 				for(int index = 0; index < result.length; index++) {
-					result[index] = URIUtils.appendRelativePath2URI(uri, children[index].name);
+					result[index] = URIUtils.appendRelativePath2URI(rootPath, children[index].name);
 				}
 				return result;
 			}
@@ -223,7 +226,7 @@ loop:		for(String item : actualPath.getPath().split("/")) {
 			else {
 				ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
 				
-loop:			for(String item : uri.getPath().split("/")) {
+loop:			for(String item : uri.split("/")) {
 					if (!item.isEmpty()) {
 						for(ProjectNavigatorItem child : getContainer().getProjectNavigator().getChildren(currentItem.id)) {
 							if (child.name.equals(item)) {
@@ -249,7 +252,7 @@ loop:			for(String item : uri.getPath().split("/")) {
 			}
 			else {
 				ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
-				final String[]			pathParts = uri.getPath().split("/"); 
+				final String[]			pathParts = uri.split("/"); 
 				
 loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 					if (!pathParts[index].isEmpty()) {
@@ -265,7 +268,8 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 						currentItem = pni;
 					}
 				}
-				final ProjectNavigatorItem	pni = new ProjectNavigatorItem(getContainer().getProjectNavigator().getUniqueId(), currentItem.id, pathParts[pathParts.length-1], ItemType.CreoleRef, "new Creole file", getContainer().createUniqueLocalizationString(), -1);
+				final long	unique = getContainer().uncheckedGetIdByPartName(pathParts[pathParts.length-1]);
+				final ProjectNavigatorItem	pni = new ProjectNavigatorItem(unique, currentItem.id, pathParts[pathParts.length-1], ItemType.CreoleRef, "new Creole file", getContainer().createUniqueLocalizationString(), -1);
 				
 				getContainer().getProjectNavigator().addItem(pni);
 				exists = true;
@@ -285,13 +289,16 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 				throw new IOException("Root node can't be renamed"); 
 			}
 			else if (checkDuplicates(name)) {
-				throw new IOException("Name ["+name+"] already exists in the ["+uri.resolve("../")+"]"); 
+				throw new IOException("Name ["+name+"] already exists in the ["+URIUtils.appendRelativePath2URI(rootPath, uri).resolve("../")+"]"); 
 			}
 			else {
 				final ProjectNavigatorItem	pni = new ProjectNavigatorItem(node.id, node.parent, name, node.type, node.desc, node.titleId, node.subtreeRef);
+				final Object	content = getContainer().getProjectPartContent(node.name); 
 				
 				getContainer().getProjectNavigator().removeItem(node.id);
+				getContainer().removeProjectPartContent(node.name);
 				getContainer().getProjectNavigator().addItem(pni);
+				getContainer().addProjectPartContent(name, content);
 			}
 		}
 
@@ -304,8 +311,9 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 				throw new IOException("Entity to remove ["+uri+"] contains children inside");
 			}
 			else {
+				getContainer().removeProjectPartContent(node.name);
 				getContainer().getProjectNavigator().removeItem(node.id);
-				exists = true;
+				exists = false;
 			}
 		}
 
@@ -362,11 +370,11 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 			if (exists) {
 				switch (node.type) {
 					case CreoleRef		:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, ((String)getContainer().getProjectPartContent(node.name)).getBytes(PureLibSettings.DEFAULT_CONTENT_ENCODING).length,
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, getContentLength(node),
 								DataWrapperInterface.ATTR_NAME, node.name, DataWrapperInterface.ATTR_LASTMODIFIED, 0L, DataWrapperInterface.ATTR_DIR, false, 
 								DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
 					case DocumentRef	:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, ((byte[])getContainer().getProjectPartContent(node.name)).length, DataWrapperInterface.ATTR_NAME, node.name, 
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, getContentLength(node), DataWrapperInterface.ATTR_NAME, node.name, 
 								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, DataWrapperInterface.ATTR_DIR, false, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, 
 								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
 					case ImageRef		:
@@ -381,8 +389,8 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, DataWrapperInterface.ATTR_NAME, node.name, DataWrapperInterface.ATTR_LASTMODIFIED, 0L,
 								DataWrapperInterface.ATTR_DIR, true, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true,
 								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
-					default:
-						break;
+					default	:
+						throw new UnsupportedOperationException("Node type ["+node.type+"] is not supported yet");
 				}
 			}
 			else {
@@ -390,7 +398,6 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 								DataWrapperInterface.ATTR_DIR, false, DataWrapperInterface.ATTR_EXIST, false, DataWrapperInterface.ATTR_CANREAD, false, 
 								DataWrapperInterface.ATTR_CANWRITE, false);						
 			}
-			return null;
 		}
 
 		@Override
@@ -419,6 +426,27 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 			}
 			return false;
 		}
+		
+		private long getContentLength(final ProjectNavigatorItem item) throws UnsupportedEncodingException {
+			if (!getContainer().hasProjectPart(item.name)) {
+				return 0;
+			}
+			else {
+				switch (item.type) {
+					case CreoleRef		:
+						return ((String)getContainer().getProjectPartContent(item.name)).getBytes(PureLibSettings.DEFAULT_CONTENT_ENCODING).length;
+					case DocumentRef	:
+						return ((byte[])getContainer().getProjectPartContent(node.name)).length;
+					case ImageRef		:
+						return 0;
+					case Root : case Subtree :
+						return 0;
+					default	:
+						throw new UnsupportedOperationException("Node type ["+node.type+"] is not supported yet");
+				}
+			}
+			
+		}
 	}
 
 	private static class DocumentOutputStream extends ByteArrayOutputStream {
@@ -435,13 +463,28 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 			super.close();
 			switch (node.type) {
 				case CreoleRef		:
-					container.setProjectPartContent(node.name, new String(toByteArray(), PureLibSettings.DEFAULT_CONTENT_ENCODING));
+					if (container.hasProjectPart(node.name)) {
+						container.setProjectPartContent(node.name, new String(toByteArray(), PureLibSettings.DEFAULT_CONTENT_ENCODING));
+					}
+					else {
+						container.addProjectPartContent(node.name, new String(toByteArray(), PureLibSettings.DEFAULT_CONTENT_ENCODING));
+					}
 					break;
 				case DocumentRef	:
-					container.setProjectPartContent(node.name, toByteArray());
+					if (container.hasProjectPart(node.name)) {
+						container.setProjectPartContent(node.name, toByteArray());
+					}
+					else {
+						container.addProjectPartContent(node.name, toByteArray());
+					}
 					break;
 				case ImageRef		:
-					container.setProjectPartContent(node.name, ImageIO.read(new ByteArrayInputStream(toByteArray())));
+					if (container.hasProjectPart(node.name)) {
+						container.setProjectPartContent(node.name, ImageIO.read(new ByteArrayInputStream(toByteArray())));
+					}
+					else {
+						container.addProjectPartContent(node.name, ImageIO.read(new ByteArrayInputStream(toByteArray())));
+					}
 					break;
 				case Root : case Subtree :
 					break;

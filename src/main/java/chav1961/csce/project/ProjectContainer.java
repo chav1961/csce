@@ -424,6 +424,17 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 	}
 
+	long uncheckedGetIdByPartName(final String partName) {
+		for (Pattern item : PATTERNS) {
+			final Matcher	m = item.matcher(partName); 
+			
+			if (m.find()) {
+				return Long.valueOf(m.group(1));
+			}
+		}
+		return -1;
+	}
+	
 	public SubstitutableProperties getProperties() {
 		ensurePrepared();
 		return props;
