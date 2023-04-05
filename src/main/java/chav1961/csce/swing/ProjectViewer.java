@@ -46,7 +46,7 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 		this.tabs = new ProjectTabbedPane(parent, project);
 		this.tree.getSelectionModel().addTreeSelectionListener((e)->treeSelectionChanged(e));
 		
-		parent.getEnableMaskManipulator().addComponent(tree.popup);
+		parent.getEnableMaskManipulator().addComponent(tree.getPopupMenu());
 
 		final JSplitPane	rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tabs, new JScrollPane(screenLogger));
 
@@ -61,6 +61,10 @@ public class ProjectViewer extends JSplitPane implements LocaleChangeListener {
 
 	public ScreenLogger getScreenLogger() {
 		return screenLogger;
+	}
+
+	public Application getApplication() {
+		return parent;
 	}
 	
 	@Override

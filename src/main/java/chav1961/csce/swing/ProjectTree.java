@@ -83,7 +83,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 	private final ProjectContainer			project;
 	private final ContentMetadataInterface	mdi;
 	private ProjectItemTreeNode				rootNode;
-	final JPopupMenu						popup; 
+	private final JPopupMenu					popup; 
 	
 	public ProjectTree(final ProjectViewer viewer, final ProjectContainer project, final ContentMetadataInterface mdi) {
 		super();
@@ -150,7 +150,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 //			dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
 //		    setTransferHandler(new TreeTransferHandler());			
 			
-			SwingUtils.assignActionListeners(popup, project.getApplication());
+			SwingUtils.assignActionListeners(popup, viewer.getApplication());
 			SwingUtils.assignActionKey(this, SwingUtils.KS_CONTEXTMENU, (e)->{
 				if (!isSelectionEmpty()) {
 					showMenu(getSelectionPoint());
@@ -158,7 +158,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			}, SwingUtils.ACTION_CONTEXTMENU);
 			SwingUtils.assignActionKey(this, SwingUtils.KS_DELETE, (e)->{
 				if (!isSelectionEmpty()) {
-					project.getApplication().deleteItem();
+					viewer.getApplication().deleteItem();
 				}
 			}, SwingUtils.ACTION_DELETE);
 			addMouseListener(new MouseAdapter() {
@@ -303,6 +303,10 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 //	          this);
 //	    }	
     }
+	
+	public JPopupMenu getPopupMenu() {
+		return popup;
+	}
 	
 	public void refreshTree(final ProjectChangeEvent event) {
 		switch (event.getChangeType()) {

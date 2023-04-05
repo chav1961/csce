@@ -3,14 +3,10 @@ package chav1961.csce.project;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
 import chav1961.purelib.basic.Utils;
@@ -22,11 +18,10 @@ import chav1961.purelib.json.JsonNode;
 import chav1961.purelib.json.JsonUtils;
 import chav1961.purelib.json.interfaces.JsonNodeType;
 import chav1961.purelib.json.interfaces.JsonTreeWalkerCallback;
-import chav1961.purelib.model.ContentMetadataFilter;
 import chav1961.purelib.model.FieldFormat;
 import chav1961.purelib.model.MutableContentNodeMetadata;
-import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
+import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
 import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 
 /*

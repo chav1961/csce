@@ -14,11 +14,9 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -32,7 +30,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
-import chav1961.csce.Application;
 import chav1961.csce.project.ProjectChangeEvent.ProjectChangeType;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
@@ -51,7 +48,6 @@ import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.i18n.LocalizerFactory;
 import chav1961.purelib.i18n.MutableJsonLocalizer;
-import chav1961.purelib.i18n.XMLLocalizer;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
 import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
@@ -143,7 +139,7 @@ public class ProjectContainer implements LocalizerOwner {
 	private static final Pattern	IMAGE_PATTERN = Pattern.compile(ItemType.ImageRef.getPartNamePrefix()+"(\\d+)\\.png");
 	private static final Pattern[]	PATTERNS = {CREOLE_PATTERN, DOCUMENT_PATTERN, IMAGE_PATTERN};
 	
-	private final Application				app;
+	private final LocalizerOwner			app;
 	private final ContentMetadataInterface	mdi;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
@@ -151,8 +147,9 @@ public class ProjectContainer implements LocalizerOwner {
 	private MutableJsonLocalizer			localizer = null;
 	private ProjectNavigator				navigator = null;
 	private String							projectFileName = "";
+	private boolean							prepared = false;
 	
-	public ProjectContainer(final Application app, final ContentMetadataInterface mdi) {
+	public ProjectContainer(final LocalizerOwner app, final ContentMetadataInterface mdi) {
 		if (app == null) {
 			throw new NullPointerException("Application can't be null");
 		}
@@ -166,20 +163,19 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 	}
 
-	public Application getApplication() {
-		return app;
-	}
-	
 	@Override
 	public Localizer getLocalizer() {
+		ensurePrepared();
 		return localizer;
 	}
 	
 	public String getUniqueLocalizationKey() {
+		ensurePrepared();
 		return "localizer."+UUID.randomUUID().toString();
 	}
 	
 	public String createUniqueLocalizationString() {
+		ensurePrepared();
 		return localizer.createLocalValue(getUniqueLocalizationKey()).getId();
 	}
 	
@@ -188,6 +184,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("String id can't be null or empty"); 
 		}
 		else {
+			ensurePrepared();
 			return (MutableLocalizedString) localizer.getLocalizedString(id);
 		}
 	}
@@ -227,6 +224,7 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 	
 	public ProjectNavigator getProjectNavigator() {
+		ensurePrepared();
 		return navigator;
 	}
 
@@ -235,6 +233,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name can't be null or empty"); 
 		}
 		else {
+			ensurePrepared();
 			return content.containsKey(partName);
 		}
 	}
@@ -247,6 +246,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
 		}
 		else {
+			ensurePrepared();
 			return (T)content.get(partName);
 		}
 	}
@@ -259,6 +259,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name ["+partName+"] already existst in the project"); 
 		}
 		else {
+			ensurePrepared();
 			content.put(partName, data);
 			notifyContentChanges(partName);
 		}
@@ -278,6 +279,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("File content can't be null"); 
 		}
 		else {
+			ensurePrepared();
 			try(final InputStream	is = new FileInputStream(content)) {
 				return addProjectPart(navigatorNodeId, type, content.getName(), is);
 			}
@@ -298,6 +300,8 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("File content can't be null"); 
 		}
 		else {
+			ensurePrepared();
+			
 			final long					unique = getProjectNavigator().getUniqueId();
 			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 													, navigatorNodeId
@@ -344,6 +348,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
 		}
 		else {
+			ensurePrepared();
 			content.put(partName, data);
 			notifyContentChanges(partName);
 		}
@@ -357,12 +362,15 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name ["+partName+"] is missing in the project"); 
 		}
 		else {
+			ensurePrepared();
 			content.remove(partName);
 			notifyContentChanges(partName);
 		}
 	}
 	
 	public String getPartNameById(final long id) {
+		ensurePrepared();
+
 		final ProjectNavigatorItem	item = getProjectNavigator().getItem(id);
 		
 		switch (item.type) {
@@ -384,6 +392,7 @@ public class ProjectContainer implements LocalizerOwner {
 			throw new IllegalArgumentException("Part name can't be null or empty"); 
 		}
 		else {
+			ensurePrepared();
 			for (Pattern item : PATTERNS) {
 				final Matcher	m = item.matcher(partName); 
 				
@@ -396,24 +405,42 @@ public class ProjectContainer implements LocalizerOwner {
 	}
 
 	public SubstitutableProperties getProperties() {
+		ensurePrepared();
 		return props;
 	}
 	
 	public String[] getPartNames() {
-		final String[]	result = new String[content.size()];
+		ensurePrepared();
+
+		final String[]	result = new String[content.size() - PARTS.length];
 		int	index = 0;
 		
-		for(Entry<String, Object> item : content.entrySet()) {
-			result[index++] = item.getKey();
+loop:	for(Entry<String, Object> item : content.entrySet()) {
+			final String	name = item.getKey(); 
+			
+			for(String exclude : PARTS) {
+				if (exclude.equals(name)) {
+					continue loop;
+				}
+			}
+			result[index++] = name;
 		}
 		return result;
 	}
 	
 	public boolean validateProject(final LoggerFacade logger) {
+		ensurePrepared();
+
 		return validateProject(logger, props, content);
 	}
 
+	/**
+	 * <p>Get stream to unload project content. Content must be used to load project by {@linkplain #fromOutputStream()} method</p> 
+	 * @return String to unload project content. Can't be null
+	 * @see #fromOutputStream()
+	 */
 	public InputStream toInputStream() {
+		ensurePrepared();
 		try(final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final ZipOutputStream		zos = new ZipOutputStream(baos)) {
 			
@@ -438,6 +465,12 @@ public class ProjectContainer implements LocalizerOwner {
 		}
 	}
 
+	/**
+	 * <p>Get stream to load or create new project. New project will be created when loaded content length is equals 0, otherwise content must be
+	 * well-formed project descriptor, created by {@linkplain #toInputStream()} method</p>   
+	 * @return stream to load project content to. Can't be null
+	 * @see #toInputStream() 
+	 */
 	public OutputStream fromOutputStream() {
 		return new ByteArrayOutputStream() {
 			public void close() throws java.io.IOException {
@@ -446,9 +479,11 @@ public class ProjectContainer implements LocalizerOwner {
 				
 				if (content.length == 0) {
 					createNewProject();
+					prepared = true;
 				}
 				else {
 					loadProject(content);
+					prepared = true;
 				}
 			};
 		};
@@ -457,6 +492,13 @@ public class ProjectContainer implements LocalizerOwner {
 	protected void fireProjectChangeEvent(final ProjectChangeEvent event) {
 		listeners.fireEvent((l)->l.processEvent(event));
 	}
+
+	private void ensurePrepared() {
+		if (!prepared) {
+			throw new IllegalStateException("Project is not prepared yet. Load existent or empty project by calling fromOutputStream() method"); 
+		}
+	}
+
 	
 	private void createNewProject() throws IOException {
 		final SubstitutableProperties	projectProps = new SubstitutableProperties();
