@@ -101,7 +101,7 @@ public class ProjectFileSystem extends AbstractFileSystem {
 		
 		private ProjectDataWrapper(final URI rootPath, final URI actualPath) throws IOException {
 			ProjectNavigatorItem	currentItem = getContainer().getProjectNavigator().getRoot();
-			final String			totalPath = rootPath.getPath()+actualPath.getPath(); 
+			final String			totalPath = (rootPath.getPath() != null ? rootPath.getPath() : "") + (actualPath.getPath() != null ? actualPath.getPath() : ""); 
 			
 loop:		for(String item : totalPath.split("/")) {
 				if (!item.isEmpty()) {
@@ -381,31 +381,66 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 				switch (node.type) {
 					case CreoleRef		:
 						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, getContentLength(node),
-								DataWrapperInterface.ATTR_NAME, node.name, DataWrapperInterface.ATTR_LASTMODIFIED, 0L, DataWrapperInterface.ATTR_DIR, false, 
-								DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
+								DataWrapperInterface.ATTR_NAME, node.name, 
+								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
+								DataWrapperInterface.ATTR_DIR, false, 
+								DataWrapperInterface.ATTR_EXIST, true, 
+								DataWrapperInterface.ATTR_CANREAD, true, 
+								DataWrapperInterface.ATTR_CANWRITE, true, 
+								NAVIGATION_NODE, node);						
 					case DocumentRef	:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, getContentLength(node), DataWrapperInterface.ATTR_NAME, node.name, 
-								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, DataWrapperInterface.ATTR_DIR, false, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, 
-								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, getContentLength(node), 
+								DataWrapperInterface.ATTR_NAME, node.name, 
+								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
+								DataWrapperInterface.ATTR_DIR, false, 
+								DataWrapperInterface.ATTR_EXIST, true, 
+								DataWrapperInterface.ATTR_CANREAD, true, 
+								DataWrapperInterface.ATTR_CANWRITE, true, 
+								NAVIGATION_NODE, node);						
 					case ImageRef		:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, DataWrapperInterface.ATTR_NAME, node.name, DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
-								DataWrapperInterface.ATTR_DIR, false, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, 
-								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, 
+								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
+								DataWrapperInterface.ATTR_ALIAS, node.name, 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
+								DataWrapperInterface.ATTR_DIR, false, 
+								DataWrapperInterface.ATTR_EXIST, true, 
+								DataWrapperInterface.ATTR_CANREAD, true, 
+								DataWrapperInterface.ATTR_CANWRITE, true, 
+								NAVIGATION_NODE, node);						
 					case Root			:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, DataWrapperInterface.ATTR_NAME, "/", DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
-								DataWrapperInterface.ATTR_DIR, true, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true, 
-								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, 
+								DataWrapperInterface.ATTR_NAME, "/", 
+								DataWrapperInterface.ATTR_ALIAS, "/", 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
+								DataWrapperInterface.ATTR_DIR, true, 
+								DataWrapperInterface.ATTR_EXIST, true, 
+								DataWrapperInterface.ATTR_CANREAD, true, 
+								DataWrapperInterface.ATTR_CANWRITE, true, 
+								NAVIGATION_NODE, node);						
 					case Subtree		:
-						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, DataWrapperInterface.ATTR_NAME, node.name, DataWrapperInterface.ATTR_LASTMODIFIED, 0L,
-								DataWrapperInterface.ATTR_DIR, true, DataWrapperInterface.ATTR_EXIST, true, DataWrapperInterface.ATTR_CANREAD, true,
-								DataWrapperInterface.ATTR_CANWRITE, true, NAVIGATION_NODE, node);						
+						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, 
+								DataWrapperInterface.ATTR_NAME, node.name, 
+								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L,
+								DataWrapperInterface.ATTR_DIR, true, 
+								DataWrapperInterface.ATTR_EXIST, true, 
+								DataWrapperInterface.ATTR_CANREAD, true,
+								DataWrapperInterface.ATTR_CANWRITE, true, 
+								NAVIGATION_NODE, node);						
 					default	:
 						throw new UnsupportedOperationException("Node type ["+node.type+"] is not supported yet");
 				}
 			}
 			else {
-				return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, DataWrapperInterface.ATTR_NAME, lastName, DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
-								DataWrapperInterface.ATTR_DIR, false, DataWrapperInterface.ATTR_EXIST, false, DataWrapperInterface.ATTR_CANREAD, false, 
+				return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, 
+								DataWrapperInterface.ATTR_NAME, lastName, 
+								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
+								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
+								DataWrapperInterface.ATTR_DIR, false, 
+								DataWrapperInterface.ATTR_EXIST, false, 
+								DataWrapperInterface.ATTR_CANREAD, false, 
 								DataWrapperInterface.ATTR_CANWRITE, false);						
 			}
 		}

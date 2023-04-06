@@ -393,7 +393,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@OnAction("action:/pasteImage")
 		public void pasteImage() {
-			try{for(String item : JFileSelectionDialog.select(parent, localizer, parent.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {
+			try{for(String item : JFileSelectionDialog.select(parent, localizer, project.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {
 					final String	lastComponent = item.substring(item.lastIndexOf('/')+1);
 					
 					editor.replaceSelection(" {{file:"+item+"|"+lastComponent+"}} ");

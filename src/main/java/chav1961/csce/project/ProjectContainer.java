@@ -46,6 +46,7 @@ import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.concurrent.LightWeightListenerList;
+import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.LocalizerFactory;
 import chav1961.purelib.i18n.MutableJsonLocalizer;
 import chav1961.purelib.i18n.interfaces.Localizer;
@@ -143,7 +144,8 @@ public class ProjectContainer implements LocalizerOwner {
 	private final ContentMetadataInterface	mdi;
 	private final SubstitutableProperties	props = new SubstitutableProperties();
 	private final Map<String, Object>		content = new HashMap<>();
-	private final LightWeightListenerList<ProjectChangeListener>	listeners = new LightWeightListenerList<>(ProjectChangeListener.class);  
+	private final LightWeightListenerList<ProjectChangeListener>	listeners = new LightWeightListenerList<>(ProjectChangeListener.class);
+	private final ProjectFileSystem			pfs = new ProjectFileSystem(this);
 	private MutableJsonLocalizer			localizer = null;
 	private ProjectNavigator				navigator = null;
 	private String							projectFileName = "";
@@ -167,6 +169,10 @@ public class ProjectContainer implements LocalizerOwner {
 	public Localizer getLocalizer() {
 		ensurePrepared();
 		return localizer;
+	}
+
+	public FileSystemInterface getFileSystem() {
+		return pfs;
 	}
 	
 	public String getUniqueLocalizationKey() {

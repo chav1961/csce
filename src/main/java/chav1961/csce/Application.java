@@ -478,7 +478,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			final long					unique = project.getProjectNavigator().getUniqueId();
 			final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 																	, pni.id
-																	, "CreoleContent"+unique
+																	, ItemType.CreoleRef.getPartNamePrefix()+unique+".cre"
 																	, ItemType.CreoleRef
 																	, "Creole content"
 																	, project.createUniqueLocalizationString()
@@ -519,7 +519,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				final long					unique = project.getProjectNavigator().getUniqueId();
 				final ProjectNavigatorItem	toAdd = new ProjectNavigatorItem(unique
 																	, pni.id
-																	, "ImageContent"+unique
+																	, ItemType.ImageRef.getPartNamePrefix()+unique+".png"
 																	, ItemType.ImageRef
 																	, "Image content"
 																	, project.createUniqueLocalizationString()
