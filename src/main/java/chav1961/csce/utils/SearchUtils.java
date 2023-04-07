@@ -40,7 +40,7 @@ public class SearchUtils {
 				final String	line = item.trim();
 				
 				if (line.startsWith("=")) {
-					anchors.add(line);
+					anchors.add(line.replace("=", ""));
 				}
 			}
 			return anchors.toArray(new String[anchors.size()]);

@@ -126,6 +126,10 @@
 		<key name="menu.main.edit.findreplace.tt">Find and replace string</key>
 		<key name="menu.main.edit.pasteLink">Insert link</key>
 		<key name="menu.main.edit.pasteLink.tt">Insert link</key>
+		<key name="menu.main.edit.pasteLink.inner">Inside the project</key>
+		<key name="menu.main.edit.pasteLink.inner.tt">Inside the project</key>
+		<key name="menu.main.edit.pasteLink.ext">External</key>
+		<key name="menu.main.edit.pasteLink.ext.tt">External</key>
 		<key name="menu.main.edit.pasteImage">Insert image</key>
 		<key name="menu.main.edit.pasteImage.tt">Insert image</key>
 		<key name="menu.main.edit.captionUp">Caption up</key>
@@ -220,6 +224,7 @@
 <!-- ProjectTabbedPane class localization -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Save changes</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">File %1$s was modified. Save changes?</key>
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.selectLink.title">Select link</key>
 
 <!-- ProjectVariablesEditor class localization -->
 		<key name="ProjectVariablesEditor.tooltip">Use INSERT key to add new variables and DELEET key to remove existent one</key>
@@ -260,6 +265,15 @@
 		<key name="ReplacePanel.replaceAll.tt">Replace all</key>
 		<key name="ReplacePanel.replaceAll.tt">Replace all found</key>
 		<key name="ReplacePanel.close">Close replace panel</key>
+
+<!-- ExternalLinkEditor class localization -->
+		<key name="ExternalLinkEditor.caption">External link</key>
+		<key name="ExternalLinkEditor.caption.tt">External link</key>
+		<key name="ExternalLinkEditor.caption.help">External link</key>
+		<key name="ExternalLinkEditor.ref">Reference</key>
+		<key name="ExternalLinkEditor.ref.tt">Reference</key>
+		<key name="ExternalLinkEditor.caption">Caption</key>
+		<key name="ExternalLinkEditor.caption.tt">Caption</key>
 		
  	</lang>
 	<lang name="ru">
@@ -388,6 +402,10 @@
 		<key name="menu.main.edit.findreplace.tt">Найти и заменить строки</key>
 		<key name="menu.main.edit.pasteLink">Вставить ссылку</key>
 		<key name="menu.main.edit.pasteLink.tt">Вставить ссылку</key>
+		<key name="menu.main.edit.pasteLink.inner">Внутри проекта</key>
+		<key name="menu.main.edit.pasteLink.inner.tt">Внутри проекта</key>
+		<key name="menu.main.edit.pasteLink.ext">Внешнюю</key>
+		<key name="menu.main.edit.pasteLink.ext.tt">Внешнюю</key>
 		<key name="menu.main.edit.pasteImage">Вставить изображение</key>
 		<key name="menu.main.edit.pasteImage.tt">Вставить изображение</key>
 		<key name="menu.main.edit.captionUp">Повысить заголовок</key>
@@ -482,6 +500,7 @@
 <!-- Локализация класса ProjectTabbedPane -->
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title">Сохранить изменения</key>
 		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message">Файл %1$s содержит несохраненные изменения. Сохранить их?</key>
+		<key name="chav1961.csce.swing.ProjectTabbedPane.CreoleTab.selectLink.title">Выберите ссылку</key>
 
 <!-- Локализация класса ProjectVariablesEditor -->
 		<key name="ProjectVariablesEditor.tooltip">Используйте клавишу INSERT для добавления новых переменных и DELETE для удаления существующих</key>
@@ -489,6 +508,7 @@
 <!-- Локализация класса ProjectVariablesTableEditor.InnerTableModel -->
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.name">Имя переменной</key>
 		<key name="ProjectVariablesTableEditor.InnerTableModel.column.value">Значение</key>
+
 		
 <!-- Локализация класса FindPanel -->
 		<key name="FindPanel.find.caption">Найти: </key>
@@ -522,6 +542,15 @@
 		<key name="ReplacePanel.replaceAll.tt">Заменить все</key>
 		<key name="ReplacePanel.replaceAll.tt">Заменить все найденные</key>
 		<key name="ReplacePanel.close">Закрыть окно замены</key>
+		
+<!-- Локализация класса ExternalLinkEditor -->
+		<key name="ExternalLinkEditor.caption">Внешняя ссылка</key>
+		<key name="ExternalLinkEditor.caption.tt">Внешняя ссылка</key>
+		<key name="ExternalLinkEditor.caption.help">Внешняя ссылка</key>
+		<key name="ExternalLinkEditor.ref">Ссылка</key>
+		<key name="ExternalLinkEditor.ref.tt">Ссылка</key>
+		<key name="ExternalLinkEditor.caption">Название</key>
+		<key name="ExternalLinkEditor.caption.tt">Название</key>
 		
 	</lang>	
 </localization>

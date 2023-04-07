@@ -56,7 +56,7 @@ public class SettingsEditor implements FormManager<Object, SettingsEditor>, Modu
 	}
 
 	@Override
-	public void allowUnnamedModuleAccess(Module... unnamedModules) {
+	public void allowUnnamedModuleAccess(final Module... unnamedModules) {
 		for (Module item : unnamedModules) {
 			this.getClass().getModule().addExports(this.getClass().getPackageName(),item);
 		}

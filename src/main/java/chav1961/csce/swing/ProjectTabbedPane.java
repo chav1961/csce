@@ -7,6 +7,9 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -15,6 +18,7 @@ import javax.swing.GrayFilter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -30,10 +34,14 @@ import chav1961.csce.Application;
 import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
+import chav1961.csce.utils.SearchUtils;
 import chav1961.purelib.basic.SimpleTimerTask;
+import chav1961.purelib.basic.Utils;
+import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.basic.interfaces.ModuleAccessor;
+import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.ui.swing.JToolBarWithMeta;
@@ -52,6 +60,7 @@ import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
 public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListener {
 	private static final long 		serialVersionUID = 1L;
 
+	
 	private static final Icon		SAVE_ICON = new ImageIcon(ProjectTabbedPane.class.getResource("icon_save_16.png"));
 	private static final Icon		GRAY_SAVE_ICON = new ImageIcon(GrayFilter.createDisabledImage(((ImageIcon)SAVE_ICON).getImage()));
 	private static final String		MENU_EDIT_UNDO = "menu.main.edit.undo";
@@ -116,6 +125,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private static final long 		TOTAL_EDIT_SELECTION = EDIT_CUT | EDIT_COPY | EDIT_CAPTION_UP | EDIT_CAPTION_DOWN | EDIT_LIST_UP | EDIT_LIST_DOWN | EDIT_ORDERED_LIST_UP | EDIT_ORDERED_LIST_DOWN | EDIT_ORDERED_BOLD | EDIT_ORDERED_ITALIC;	
 	
 	private static final FilterCallback	IMAGE_FILTER = FilterCallback.of("Image files", "*.png", "*.jpg");
+	private static final FilterCallback	CREOLE_FILTER = FilterCallback.of("Creole files", "*.cre");
+	private static final FilterCallback	DOCUMENT_FILTER = FilterCallback.of("Documents", "*.pdf");
 	
 	private final Application		parent;
 	private final ProjectContainer	project;
@@ -217,8 +228,9 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private abstract class JPanelWithLabel extends JPanel implements LocaleChangeListener {
 		private static final long serialVersionUID = 8580069110763696367L;
 
-		private static final String	KEY_ASK_SAVE_TITLE = "chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title";
-		private static final String	KEY_ASK_SAVE_MESSAGE = "chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message";	
+		static final String	KEY_ASK_SAVE_TITLE = "chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.title";
+		static final String	KEY_ASK_SAVE_MESSAGE = "chav1961.csce.swing.ProjectTabbedPane.CreoleTab.save.message";	
+		static final String	KEY_SELECT_LINK = "chav1961.csce.swing.ProjectTabbedPane.CreoleTab.selectLink.title";
 		
 		protected final String		partName;
 		protected final Localizer	localizer;
@@ -387,10 +399,56 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			editor.paste();
 		}
 
-		@OnAction("action:/pasteLink")
-		public void pasteLink() {
+		@OnAction("action:/pasteLinkInner")
+		public void pasteLinkInner() {
+			try{for(String item : JFileSelectionDialog.select(parent, localizer, project.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, CREOLE_FILTER, DOCUMENT_FILTER)) {
+					if (item.endsWith(".cre")) {
+						final String	content;
+						
+						try(final FileSystemInterface	fsi = project.getFileSystem().clone().open(item);
+							final Reader				rdr = fsi.charRead();
+							final Writer				wr = new StringWriter()) {
+							
+							Utils.copyStream(rdr, wr);
+							content = wr.toString();
+						}
+						
+						if (!Utils.checkEmptyOrNullString(content)) {
+							final String[]		refs = SearchUtils.extractCreoleAnchors(content);
+							final JList<String>	listRefs = new JList<>(refs);
+							
+							if (new JLocalizedOptionPane(parent.getLocalizer()).confirm(this, new JScrollPane(listRefs), KEY_SELECT_LINK, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION && listRefs.getSelectedIndex() >= 0) {
+								editor.replaceSelection(" [["+item+"#"+listRefs.getSelectedValue()+"|здесь]] ");
+							}
+							else {
+								editor.replaceSelection(" [["+item+"|здесь]] ");
+							}
+						}
+						else {
+							editor.replaceSelection(" [["+item+"|здесь]] ");
+						}
+					}
+					else {
+						editor.replaceSelection(" [["+item+"|здесь]] ");
+					}
+				}
+			} catch (IOException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
+			}		
 		}
 		
+		@OnAction("action:/pasteLinkExt")
+		public void pasteLinkExt() {
+			try{final ExternalLinkEditor	ele = new ExternalLinkEditor(SwingUtils.getNearestLogger(this));
+			
+				if (parent.ask(ele, parent.getLocalizer(), 400, 180)) {
+					editor.replaceSelection(" [["+ele.ref+"|"+ele.caption+"]] ");
+				}
+			} catch (ContentException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+
 		@OnAction("action:/pasteImage")
 		public void pasteImage() {
 			try{for(String item : JFileSelectionDialog.select(parent, localizer, project.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, IMAGE_FILTER)) {

@@ -89,7 +89,10 @@
 		<app:item name="menu.main.edit.cut" caption="menu.main.edit.cut" tooltip="menu.main.edit.cut.tt" icon="root://chav1961.csce.Application/chav1961/csce/cut.png" action="cut"/>
 		<app:item name="menu.main.edit.copy" caption="menu.main.edit.copy" tooltip="menu.main.edit.copy.tt" icon="root://chav1961.csce.Application/chav1961/csce/copy.png" action="copy"/>
 		<app:item name="menu.main.edit.paste" caption="menu.main.edit.paste" tooltip="menu.main.edit.paste.tt" icon="root://chav1961.csce.Application/chav1961/csce/paste.png" action="paste"/>
-		<app:item name="menu.main.edit.pasteLink" caption="menu.main.edit.pasteLink" tooltip="menu.main.edit.pasteLink.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertLink.png" action="pasteLink"/>
+		<app:submenu name="menu.main.edit.pasteLink" caption="menu.main.edit.pasteLink" tooltip="menu.main.edit.pasteLink.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertLink.png">
+			<app:item name="menu.main.edit.pasteLinkInner" caption="menu.main.edit.pasteLink.inner" tooltip="menu.main.edit.pasteLink.inner.tt" action="pasteLinkInner"/>
+			<app:item name="menu.main.edit.pasteLinkExt" caption="menu.main.edit.pasteLink.ext" tooltip="menu.main.edit.pasteLink.ext.tt" action="pasteLinkExt"/>
+		</app:submenu>
 		<app:item name="menu.main.edit.pasteImage" caption="menu.main.edit.pasteImage" tooltip="menu.main.edit.pasteImage.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertImage.png" action="pasteImage"/>
 		<app:separator/>
 		<app:item name="menu.main.edit.find" caption="menu.main.edit.find" tooltip="menu.main.edit.find.tt" icon="root://chav1961.csce.Application/chav1961/csce/find.png" action="find"/>
