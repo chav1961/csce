@@ -540,7 +540,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 		final Clipboard 	clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		final String		trimmedLink = link.replace('=', ' ').trim(); 
 		
-		clipboard.setContents(new StringSelection("[["+partName+"#"+trimmedLink+"|"+trimmedLink+"]]"), null);
+		clipboard.setContents(new StringSelection(" [["+partName+"#"+trimmedLink+"|"+trimmedLink+"]] "), null);
 	}	
 
 	@OnAction("action:/copyLink")
@@ -551,10 +551,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			
 			switch (pni.type) {
 				case ImageRef		:
-					clipboard.setContents(new StringSelection("{{"+project.getPartNameById(pni.id)+"|"+pni.name+"}}"), null);
+					clipboard.setContents(new StringSelection(" {{"+project.getPartNameById(pni.id)+"|"+pni.name+"}} "), null);
 					break;
 				case DocumentRef	:
-					clipboard.setContents(new StringSelection("[["+project.getPartNameById(pni.id)+"|"+pni.name+"]]"), null);
+					clipboard.setContents(new StringSelection(" [["+project.getPartNameById(pni.id)+"|"+pni.name+"]] "), null);
 					break;
 				default:
 					throw new UnsupportedOperationException("Item type ["+pni.type+"] is not supported yet"); 
