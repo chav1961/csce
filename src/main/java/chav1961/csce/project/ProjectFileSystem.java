@@ -401,8 +401,8 @@ loop:			for(int index = 0; index < pathParts.length - 1; index++) {
 								NAVIGATION_NODE, node);						
 					case ImageRef		:
 						return Utils.mkMap(DataWrapperInterface.ATTR_SIZE, 0L, 
+								DataWrapperInterface.ATTR_NAME, node.name, 
 								DataWrapperInterface.ATTR_ALIAS, getContainer().getLocalizationString(node.titleId).getValue(), 
-								DataWrapperInterface.ATTR_ALIAS, node.name, 
 								DataWrapperInterface.ATTR_LASTMODIFIED, 0L, 
 								DataWrapperInterface.ATTR_DIR, false, 
 								DataWrapperInterface.ATTR_EXIST, true, 

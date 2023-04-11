@@ -568,7 +568,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			try{final ProjectNavigatorItem	pni = viewer.getProjectNavigatorItemSelected();
 				
 				switch (pni.type) {
-					case CreoleRef	:
+					case CreoleRef : case ImageRef : case DocumentRef :
 						final ProjectItemEditor	pie = new ProjectItemEditor(getLogger(), project, pni);
 						
 						if (ask(pie, getLocalizer(), 400, 180)) {

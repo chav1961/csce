@@ -1,11 +1,17 @@
 package chav1961.csce.swing;
 
+
+
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.FlavorListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -17,6 +23,7 @@ import java.util.Locale;
 import javax.swing.GrayFilter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -35,15 +42,18 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.utils.SearchUtils;
+import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.basic.interfaces.ModuleAccessor;
+import chav1961.purelib.enumerations.MarkupOutputFormat;
 import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
+import chav1961.purelib.streams.char2char.CreoleWriter;
 import chav1961.purelib.ui.swing.JToolBarWithMeta;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
@@ -314,16 +324,23 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	
 	private class CreoleTab extends JPanelWithLabel implements ModuleAccessor {
 		private static final long 		serialVersionUID = 7675426768332709976L;
+		private static final String		CARD_EDIT = "edit";
+		private static final String		CARD_PREVIEW = "preview";
 		
-		private final JCreoleEditor	editor = new JCreoleEditor();
-		private final UndoManager	undoMgr = new UndoManager();
-		private final JToolBar		toolbar;
-		private final String		projectPartName;
+		private final JCreoleEditor		editor = new JCreoleEditor();
+		private final JEditorPane		pane = new JEditorPane(PureLibSettings.MIME_HTML_TEXT.toString(),"");
+		private final CardLayout		card = new CardLayout();
+		private final JPanel			inside = new JPanel(card);
+		private final UndoManager		undoMgr = new UndoManager();
+		private final JToolBar			toolbar;
+		private final String			projectPartName;
 		private final JEnableMaskManipulator	emm;
-		private final FindPanel		findPanel;
-		private final ReplacePanel	replacePanel;
+		private final FindPanel			findPanel;
+		private final ReplacePanel		replacePanel;
+		private final FlavorListener	fl = (e)->clipboardChanged();
 		
-		private CreoleSouthPanel	southPanel = CreoleSouthPanel.NONE;  
+		private CreoleSouthPanel		southPanel = CreoleSouthPanel.NONE;
+		private boolean					inPreview = false;
 		
 		private CreoleTab(final Localizer localizer, final String partName, final String projectPartName, final String titleId) {
 			super(localizer, partName, titleId);
@@ -338,6 +355,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			
 			this.toolbar.setFloatable(false);
 			SwingUtils.assignActionKey(editor, SwingUtils.KS_SAVE, (e)->saveContent(), SwingUtils.ACTION_SAVE);
+			SwingUtils.assignActionKey(pane, SwingUtils.KS_EXIT, (e)->previewOff(), SwingUtils.ACTION_EXIT);
 			SwingUtils.assignActionKey(this, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, SwingUtils.KS_FORWARD, (e)->searchForward(), SwingUtils.ACTION_FORWARD);
 			SwingUtils.assignActionKey(this, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, SwingUtils.KS_BACKWARD, (e)->searchBackward(), SwingUtils.ACTION_BACKWARD);
 			
@@ -351,15 +369,40 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			SwingUtils.assignActionListeners(toolbar, this);
 			((JToolBarWithMeta)toolbar).assignAccelerators(editor);
 
-			add(toolbar, BorderLayout.NORTH);
-			add(new JScrollPane(editor), BorderLayout.CENTER);
-			emm.setEnableMaskOn(TOTAL_EDIT);
-			refreshUndoMenu();
-			
 			editor.addCaretListener((e)->refreshSelection());
 			editor.getDocument().addUndoableEditListener((e)->processUndo(e));
+			pane.setEditable(false);
+			addComponentListener(new ComponentListener() {
+				@Override public void componentResized(ComponentEvent e) {}
+				@Override public void componentMoved(ComponentEvent e) {}
+				
+				@Override
+				public void componentShown(final ComponentEvent e) {
+					Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener(fl);
+				}
+				
+				@Override
+				public void componentHidden(final ComponentEvent e) {
+					Toolkit.getDefaultToolkit().getSystemClipboard().removeFlavorListener(fl);
+				}
+			});
+
+			
+			inside.add(new JScrollPane(editor), CARD_EDIT);
+			inside.add(new JScrollPane(pane), CARD_PREVIEW);
+			
+			add(toolbar, BorderLayout.NORTH);
+			add(inside, BorderLayout.CENTER);
+			emm.setEnableMaskOn(TOTAL_EDIT);
+			refreshUndoMenu();
+			clipboardChanged();
+			card.show(inside, CARD_EDIT);
 		}
 		
+		private void clipboardChanged() {
+			emm.setEnableMaskTo(EDIT_PASTE, Toolkit.getDefaultToolkit().getSystemClipboard().isDataFlavorAvailable(DataFlavor.stringFlavor));
+		}
+
 		@Override
 		public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
 			super.localeChanged(oldLocale, newLocale);
@@ -646,6 +689,12 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		
 		@OnAction("action:/previewProject")
 		public void previewProject(final Hashtable<String,String[]> modes) {
+			if (!inPreview) {
+				previewOn();
+			}
+			else {
+				previewOff();
+			}
 		}
 
 		public String getText() {
@@ -664,6 +713,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		@Override
 		public void saveContent() {
 			project.setProjectPartContent(projectPartName, getText());
+			undoMgr.discardAllEdits();
+			refreshUndoMenu();
 			setModified(false);
 		}
 
@@ -704,7 +755,29 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			}
 		}
 		
-		
+		private void previewOn() {
+			try(final Writer			wr = new StringWriter()) {
+				
+				try(final CreoleWriter	cwr = new CreoleWriter(wr, MarkupOutputFormat.XML2HTML)) {
+					cwr.write(editor.getText());
+				}
+				
+				pane.setText(wr.toString());
+				inPreview = true;
+				emm.setCheckMaskOn(TOOLS_PREVIEW);
+				card.show(inside, CARD_PREVIEW);
+				pane.requestFocusInWindow();
+			} catch (IOException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+
+		private void previewOff() {
+			inPreview = false;
+			emm.setCheckMaskOff(TOOLS_PREVIEW);
+			card.show(inside, CARD_EDIT);
+			editor.requestFocusInWindow();
+		}
 		
 		private void processUndo(final UndoableEditEvent e) {
 			if (!editor.isHighlightingLocked()) {
@@ -714,8 +787,8 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		}
 		
 		private void refreshUndoMenu() {
-			emm.setCheckMaskTo(EDIT_UNDO, undoMgr.canUndo());
-			emm.setCheckMaskTo(EDIT_REDO, undoMgr.canRedo());
+			emm.setEnableMaskTo(EDIT_UNDO, undoMgr.canUndo());
+			emm.setEnableMaskTo(EDIT_REDO, undoMgr.canRedo());
 		}
 		
 		private void refreshSelection() {

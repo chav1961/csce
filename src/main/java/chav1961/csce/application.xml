@@ -83,8 +83,8 @@
 		<app:item name="treemenu.delete" caption="treemenu.delete" tooltip="treemenu.delete.tt" action="deleteItem"/>
 	</app:menu>
  	<app:menu id="toolbarmenu">
-		<app:item name="menu.main.edit.undo" caption="menu.main.edit.undo" tooltip="menu.main.edit.undo.tt" action="undo"/>
-		<app:item name="menu.main.edit.redo" caption="menu.main.edit.redo" tooltip="menu.main.edit.redo.tt" action="redo"/>
+		<app:item name="menu.main.edit.undo" caption="menu.main.edit.undo" tooltip="menu.main.edit.undo.tt" icon="root://chav1961.csce.Application/chav1961/csce/undo.png" action="undo"/>
+		<app:item name="menu.main.edit.redo" caption="menu.main.edit.redo" tooltip="menu.main.edit.redo.tt" icon="root://chav1961.csce.Application/chav1961/csce/redo.png" action="redo"/>
 		<app:separator/>
 		<app:item name="menu.main.edit.cut" caption="menu.main.edit.cut" tooltip="menu.main.edit.cut.tt" icon="root://chav1961.csce.Application/chav1961/csce/cut.png" action="cut"/>
 		<app:item name="menu.main.edit.copy" caption="menu.main.edit.copy" tooltip="menu.main.edit.copy.tt" icon="root://chav1961.csce.Application/chav1961/csce/copy.png" action="copy"/>
@@ -110,6 +110,8 @@
 		<app:item name="menu.main.tools.preview" caption="menu.main.tools.preview" tooltip="menu.main.tools.preview.tt" checkable="true" icon="root://chav1961.csce.Application/chav1961/csce/preview.png" action="previewProject"/>
 	</app:menu>
 	<app:keyset id="toolbarmenu.keyset">
+		<app:key code="Z" ctrl="true" action="undo"/>
+		<app:key code="Y" ctrl="true" action="redo"/>
 		<app:key code="X" ctrl="true" action="cut"/>
 		<app:key code="C" ctrl="true" action="copy"/>
 		<app:key code="V" ctrl="true" action="paste"/>
