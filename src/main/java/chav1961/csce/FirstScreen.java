@@ -26,6 +26,7 @@ class FirstScreen extends JDropTargetPlaceholder {
 	@Override
 	protected boolean processDropOperation(final DataFlavor flavor, final Object content) throws ContentException, IOException {
 		if (DataFlavor.javaFileListFlavor.equals(flavor)) {
+			@SuppressWarnings("unchecked")
 			final List<File>	files = (List<File>)content;
 			final File			f = files.get(0);
 			
