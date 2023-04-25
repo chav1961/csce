@@ -113,11 +113,11 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public static final String		KEY_FILTER_IMAGE_FILE = "chav1961.csce.Application.filter.image.file";
 	public static final String		KEY_FILTER_ZIP_FILE = "chav1961.csce.Application.filter.zip.file";
 	
-	public static final FilterCallback	CREOLE_FILTER = FilterCallback.of(KEY_FILTER_CREOLE_FILE, "*.cre"); 	
-	public static final FilterCallback	PDF_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.pdf"); 	
-	public static final FilterCallback	DJVU_FILTER = FilterCallback.of(KEY_FILTER_DJVU_FILE, "*.djv", "*.djvu"); 	
-	public static final FilterCallback	IMAGE_FILTER = FilterCallback.of(KEY_FILTER_IMAGE_FILE, "*.png", "*.jpg"); 	
-	public static final FilterCallback	ZIP_FILTER = FilterCallback.of(KEY_FILTER_PDF_FILE, "*.zip"); 	
+	public static final FilterCallback	CREOLE_FILTER = FilterCallback.ofWithExtension(KEY_FILTER_CREOLE_FILE, "cre", "*.cre"); 	
+	public static final FilterCallback	PDF_FILTER = FilterCallback.ofWithExtension(KEY_FILTER_PDF_FILE, "pdf", "*.pdf"); 	
+	public static final FilterCallback	DJVU_FILTER = FilterCallback.ofWithExtension(KEY_FILTER_DJVU_FILE, "djvu", "*.djv", "*.djvu"); 	
+	public static final FilterCallback	IMAGE_FILTER = FilterCallback.ofWithExtension(KEY_FILTER_IMAGE_FILE, "png", "*.png", "*.jpg"); 	
+	public static final FilterCallback	ZIP_FILTER = FilterCallback.ofWithExtension(KEY_FILTER_ZIP_FILE, "zip", "*.zip"); 	
 	
 	static final String				PROJECT_SUFFIX = "csc";
 	
@@ -125,10 +125,10 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private static final String		EXPORT_LRU_PREFIX = "export_lru";
 	private static final String		PREVIEW_DIR = "preview";
 	
-	private static final FilterCallback	FILE_FILTER = FilterCallback.of("CSC project", "*."+PROJECT_SUFFIX);
-	private static final FilterCallback	EXPORT_WAR_FILTER = FilterCallback.of("WAR plugin", "*.war");
-	private static final FilterCallback	EXPORT_SCORM2004_FILTER = FilterCallback.of("Scorm 2004 plugin", "*.scorm");
-	private static final FilterCallback	EXPORT_DIRECTORY_FILTER = FilterCallback.of("Packed directory content", "*.zip");
+	private static final FilterCallback	FILE_FILTER = FilterCallback.ofWithExtension("CSC project", PROJECT_SUFFIX, "*."+PROJECT_SUFFIX);
+	private static final FilterCallback	EXPORT_WAR_FILTER = FilterCallback.ofWithExtension("WAR plugin", "war", "*.war");
+	private static final FilterCallback	EXPORT_SCORM2004_FILTER = FilterCallback.ofWithExtension("Scorm 2004 plugin", "scorm", "*.scorm");
+	private static final FilterCallback	EXPORT_DIRECTORY_FILTER = FilterCallback.ofWithExtension("Packed directory content", "zip", "*.zip");
 	
 	public static final String		KEY_APPLICATION_FRAME_TITLE = "chav1961.csce.Application.frame.title";
 	public static final String		KEY_APPLICATION_HELP_TITLE = "chav1961.csce.Application.help.title";
@@ -253,6 +253,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				()->project.toInputStream(), 
 				()->project.fromOutputStream(), 
 				lru);
+		this.fcm.appendNewFileSupport();
 		this.fcm.setFilters(FILE_FILTER);
 		this.fcm.addFileContentChangeListener((e)->processLRU(e));
 		this.exportLru = LRUPersistence.of(propFile, EXPORT_LRU_PREFIX); 
@@ -260,6 +261,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				()->toInputStream(exportFormat), 
 				()->new OutputStream() {@Override public void write(int b) throws IOException {}}, 
 				exportLru);
+		this.exportFcm.appendNewFileSupport();
 		this.exportFcm.setFilters(EXPORT_DIRECTORY_FILTER);
 		this.exportFcm.addFileContentChangeListener((e)->processExportLRU(e));
 		
