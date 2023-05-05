@@ -400,6 +400,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	public void exit() throws IOException {
 		if (fcm.commit()) {
 			exportFcm.close();
+			fcm.close();
 			latch.countDown();
 		}
 	}
@@ -988,8 +989,9 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 
 	public static <T> boolean ask(final T instance, final Localizer localizer, final int width, final int height) throws ContentException {
 		final ContentMetadataInterface	mdi = ContentModelFactory.forAnnotatedClass(instance.getClass());
+		final LoggerFacade				logger = (instance instanceof LoggerFacadeOwner) ? ((LoggerFacadeOwner)instance).getLogger() : PureLibSettings.CURRENT_LOGGER;
 		
-		try(final AutoBuiltForm<T,?>	abf = new AutoBuiltForm<>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, instance, (FormManager<?,T>)instance)) {
+		try(final AutoBuiltForm<T,?>	abf = new AutoBuiltForm<>(mdi, localizer, logger, PureLibSettings.INTERNAL_LOADER, instance, (FormManager<?,T>)instance)) {
 			
 			((ModuleAccessor)instance).allowUnnamedModuleAccess(abf.getUnnamedModules());
 			abf.setPreferredSize(new Dimension(width,height));

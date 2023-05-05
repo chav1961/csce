@@ -484,7 +484,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		public void pasteLinkExt() {
 			try{final ExternalLinkEditor	ele = new ExternalLinkEditor(SwingUtils.getNearestLogger(this));
 			
-				if (parent.ask(ele, parent.getLocalizer(), 400, 180)) {
+				if (Application.ask(ele, parent.getLocalizer(), 400, 180)) {
 					editor.replaceSelection(" [["+ele.ref+"|"+ele.caption+"]] ");
 				}
 			} catch (ContentException e) {
@@ -632,6 +632,33 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 				mark = pos + sb.length();
 				editor.setSelectionStart(pos);
 				editor.setSelectionEnd(mark);
+			}
+		}
+
+		@OnAction("action:/paragraphInsertTable")
+		public void paragraphInsertTable() {
+			try{final InsertTableDialog itd = new InsertTableDialog(SwingUtils.getNearestLogger(this));
+			
+				if (Application.ask(itd, parent.getLocalizer(), 400, 100)) {
+					final StringBuilder	sb = new StringBuilder("\n");
+					
+					if (itd.captionRequired) {
+						for (int col = 0; col < itd.numberOfColumns; col++) {
+							sb.append("|=caption").append(col+1);
+						}
+						sb.append("|\n");
+					}
+					for (int row = 0; row < itd.numberOfRows; row++) {
+						for (int col = 0; col < itd.numberOfColumns; col++) {
+							sb.append("|value").append(row+1).append("-").append(col+1);
+						}
+						sb.append("|\n");
+					}
+					sb.append('\n');
+					editor.replaceSelection(sb.toString());
+				}
+			} catch (ContentException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
 			}
 		}
 		

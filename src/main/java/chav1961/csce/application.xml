@@ -94,6 +94,7 @@
 			<app:item name="menu.main.edit.pasteLinkExt" caption="menu.main.edit.pasteLink.ext" tooltip="menu.main.edit.pasteLink.ext.tt" action="pasteLinkExt"/>
 		</app:submenu>
 		<app:item name="menu.main.edit.pasteImage" caption="menu.main.edit.pasteImage" tooltip="menu.main.edit.pasteImage.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertImage.png" action="pasteImage"/>
+		<app:item name="menu.main.edit.insertTable" caption="menu.main.edit.insertTable" tooltip="menu.main.edit.insertTable.tt" icon="root://chav1961.csce.Application/chav1961/csce/insertTable.png" action="paragraphInsertTable"/>
 		<app:separator/>
 		<app:item name="menu.main.edit.find" caption="menu.main.edit.find" tooltip="menu.main.edit.find.tt" icon="root://chav1961.csce.Application/chav1961/csce/find.png" action="find"/>
 		<app:item name="menu.main.edit.findreplace" caption="menu.main.edit.findreplace" tooltip="menu.main.edit.findreplace.tt" icon="root://chav1961.csce.Application/chav1961/csce/findreplace.png" action="findreplace"/>
@@ -104,6 +105,7 @@
 		<app:item name="menu.main.edit.listDown" caption="menu.main.edit.listDown" tooltip="menu.main.edit.listDown.tt" icon="root://chav1961.csce.Application/chav1961/csce/bulletList.png" action="paragraphListDown"/>
 		<app:item name="menu.main.edit.orderedListUp" caption="menu.main.edit.orderedListUp" tooltip="menu.main.edit.orderedListUp.tt" icon="root://chav1961.csce.Application/chav1961/csce/numberedList.png" action="paragraphOrderedListUp"/>
 		<app:item name="menu.main.edit.orderedListDown" caption="menu.main.edit.orderedListDown" tooltip="menu.main.edit.orderedListDown.tt" icon="root://chav1961.csce.Application/chav1961/csce/numberedList.png" action="paragraphOrderedListDown"/>
+		<app:separator/>
 		<app:item name="menu.main.edit.bold" caption="menu.main.edit.bold" tooltip="menu.main.edit.bold.tt" icon="root://chav1961.csce.Application/chav1961/csce/bold.png" action="fontBold"/>
 		<app:item name="menu.main.edit.italic" caption="menu.main.edit.italic" tooltip="menu.main.edit.italic.tt" icon="root://chav1961.csce.Application/chav1961/csce/italic.png" action="fontItalic"/>
 		<app:separator/>

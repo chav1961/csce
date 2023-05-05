@@ -28,7 +28,7 @@ public class ExternalLinkEditor implements FormManager<Object, ExternalLinkEdito
 	@Format("20m")
 	public String		caption = "";
 	
-	public ExternalLinkEditor(final LoggerFacade logger) throws SyntaxException {
+	public ExternalLinkEditor(final LoggerFacade logger) {
 		if (logger == null) {
 			throw new NullPointerException("Loccaeg can't be null");
 		}

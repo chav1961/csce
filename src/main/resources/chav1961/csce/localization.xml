@@ -144,6 +144,8 @@
 		<key name="menu.main.edit.orderedListUp.tt">Ordered list up</key>
 		<key name="menu.main.edit.orderedListDown">Ordered list down</key>
 		<key name="menu.main.edit.orderedListDown.tt">Ordered list down</key>
+		<key name="menu.main.edit.insertTable">Insert table</key>
+		<key name="menu.main.edit.insertTable.tt">Insert table</key>
 		<key name="menu.main.edit.bold">Bold</key>
 		<key name="menu.main.edit.bold.tt">Bold</key>
 		<key name="menu.main.edit.italic">Italic</key>
@@ -274,6 +276,17 @@
 		<key name="ExternalLinkEditor.ref.tt">Reference</key>
 		<key name="ExternalLinkEditor.caption">Caption</key>
 		<key name="ExternalLinkEditor.caption.tt">Caption</key>
+
+<!-- InsertTableDialog class localization -->
+		<key name="InsertTableDialog.caption">Insert table</key>
+		<key name="InsertTableDialog.caption.tt">Insert table</key>
+		<key name="InsertTableDialog.caption.help">Insert table</key>
+		<key name="InsertTableDialog.numberOfRows">Number of rows</key>
+		<key name="InsertTableDialog.numberOfRows.tt">Number of rows</key>
+		<key name="InsertTableDialog.numberOfColumns">Number of columns</key>
+		<key name="InsertTableDialog.numberOfColumns.tt">Number of columns</key>
+		<key name="InsertTableDialog.captionRequired">Caption required</key>
+		<key name="InsertTableDialog.captionRequired.tt">Caption required</key>
 		
  	</lang>
 	<lang name="ru">
@@ -420,11 +433,12 @@
 		<key name="menu.main.edit.orderedListUp.tt">Повысить список</key>
 		<key name="menu.main.edit.orderedListDown">Понизить список</key>
 		<key name="menu.main.edit.orderedListDown.tt">Понизить список</key>
+		<key name="menu.main.edit.insertTable">Вставить таблицу</key>
+		<key name="menu.main.edit.insertTable.tt">Вставить таблицу</key>
 		<key name="menu.main.edit.bold">Жирный шрифт</key>
 		<key name="menu.main.edit.bold.tt">Жирный шрифт</key>
 		<key name="menu.main.edit.italic">Наклонный шрифт</key>
 		<key name="menu.main.edit.italic.tt">Наклонный шрифт</key>
-
 
 <!-- Локализация класса FirstScreen -->
 		<key name="chav1961.csce.FirstScreen.title">Перетащите сюда файл проекта *.csc чтобы начать работу с ним</key>
@@ -551,6 +565,17 @@
 		<key name="ExternalLinkEditor.ref.tt">Ссылка</key>
 		<key name="ExternalLinkEditor.caption">Название</key>
 		<key name="ExternalLinkEditor.caption.tt">Название</key>
+
+<!-- Локализация класса InsertTableDialog -->
+		<key name="InsertTableDialog.caption">Вставить таблицу</key>
+		<key name="InsertTableDialog.caption.tt">Вставить таблицу</key>
+		<key name="InsertTableDialog.caption.help">Вставить таблицу</key>
+		<key name="InsertTableDialog.numberOfRows">Число строк</key>
+		<key name="InsertTableDialog.numberOfRows.tt">Число строк</key>
+		<key name="InsertTableDialog.numberOfColumns">Число столбцов</key>
+		<key name="InsertTableDialog.numberOfColumns.tt">Число столбцов</key>
+		<key name="InsertTableDialog.captionRequired">Добавить заголовок</key>
+		<key name="InsertTableDialog.captionRequired.tt">Добавить заголовок</key>
 		
 	</lang>	
 </localization>
