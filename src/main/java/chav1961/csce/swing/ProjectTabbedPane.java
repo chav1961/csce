@@ -639,7 +639,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		public void paragraphInsertTable() {
 			try{final InsertTableDialog itd = new InsertTableDialog(SwingUtils.getNearestLogger(this));
 			
-				if (Application.ask(itd, parent.getLocalizer(), 400, 100)) {
+				if (Application.ask(itd, parent.getLocalizer(), 300, 100)) {
 					final StringBuilder	sb = new StringBuilder("\n");
 					
 					if (itd.captionRequired) {
