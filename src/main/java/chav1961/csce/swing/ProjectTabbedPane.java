@@ -2,6 +2,7 @@ package chav1961.csce.swing;
 
 
 
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Image;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.GrayFilter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -66,6 +68,9 @@ import chav1961.purelib.ui.swing.useful.JEnableMaskManipulator;
 import chav1961.purelib.ui.swing.useful.JFileSelectionDialog;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.LocalizedFormatter;
+
+import chav1961.bt.paint.control.ImageEditPanel;
+import chav1961.bt.paint.interfaces.PaintScriptException;
 
 public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListener {
 	private static final long 		serialVersionUID = 1L;
@@ -866,7 +871,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private class ImageTab extends JPanelWithLabel {
 		private static final long 	serialVersionUID = 7675426768332709976L;
 
-		private final JBackgroundComponent	bc;
+		private final ImageEditPanel		bc;
 		private final String				projectPartName;
 		
 		private ImageTab(final Localizer localizer, final String partName, final String projectPartName, final String titleId) {
@@ -874,10 +879,9 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			setLayout(new BorderLayout());
 
 			this.projectPartName = projectPartName;
-			this.bc = new JBackgroundComponent(localizer);
+			this.bc = new ImageEditPanel(localizer);
 			this.bc.setFocusable(true);
-			this.bc.setFillMode(FillMode.ORIGINAL);
-			this.bc.setBackgroundImage((Image)project.getProjectPartContent(projectPartName));
+			this.bc.setImage((Image)project.getProjectPartContent(projectPartName));
 			SwingUtilities.invokeLater(()->bc.requestFocusInWindow());
 			SwingUtils.assignActionKey(bc, SwingUtils.KS_SAVE, (e)->saveContent(), SwingUtils.ACTION_SAVE);
 			SwingUtils.assignActionKey(bc, SwingUtils.KS_PASTE, (e)->paste(), SwingUtils.ACTION_PASTE);
@@ -886,7 +890,10 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		}
 		
 		public Image getImage() {
-			return bc.getBackgroundImage();
+			try{return bc.getImage().getImage();
+			} catch (PaintScriptException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		public void setImage(final Image image) {
@@ -894,7 +901,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 				throw new NullPointerException("Image to set can't be null"); 
 			}
 			else {
-				bc.setBackgroundImage(image);
+				bc.setImage(image);
 			}
 		}
 		

@@ -4,6 +4,7 @@ module chav1961.csce {
 	requires java.desktop;
 	requires java.datatransfer;
 	requires jdk.javadoc;
+	requires chav1961.bt.paint;
 	
 	exports chav1961.csce to chav1961.purelib; 
 	opens chav1961.csce.swing to chav1961.purelib; 

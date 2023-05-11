@@ -54,6 +54,11 @@
 		<artifactId>purelib</artifactId>
 		<version>0.0.7</version>
 	   </dependency>
+	   <dependency>
+		<groupId>com.github.chav1961</groupId>
+		<artifactId>bt.paint</artifactId>
+		<version>0.0.1</version>
+	   </dependency>
 		<dependency>
 		    <groupId>org.apache.lucene</groupId>
 		    <artifactId>lucene-core</artifactId>

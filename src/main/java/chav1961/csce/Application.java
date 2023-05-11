@@ -240,6 +240,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	        this.localizer.addLocaleChangeListener(this);
 			
 			PureLibSettings.PURELIB_LOCALIZER.push(localizer);
+			PureLibSettings.PURELIB_LOCALIZER.add(Localizer.Factory.newInstance(URI.create("i18n:xml:root://chav1961.bt.paint.control.ImageEditPanel/chav1961/bt/paint/i18n/localization.xml")));
 		}
 
 		this.propFile = propFile;
