@@ -232,15 +232,15 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	private ExportFormat					exportFormat = null;
 	
 	public Application(final File propFile, final URI helpServerURI) throws ContentException, IOException {
-		try(final InputStream		is = this.getClass().getResourceAsStream("application.xml");) {
+		try(final InputStream		is = this.getClass().getResourceAsStream("application.xml")) {
 			
 			this.mdi = ContentModelFactory.forXmlDescription(is);
 			this.project = new ProjectContainer(this, mdi);
+
 			this.localizer = Localizer.Factory.newInstance(mdi.getRoot().getLocalizerAssociated());
-	        this.localizer.addLocaleChangeListener(this);
-			
 			PureLibSettings.PURELIB_LOCALIZER.push(localizer);
 			PureLibSettings.PURELIB_LOCALIZER.add(Localizer.Factory.newInstance(URI.create("i18n:xml:root://chav1961.bt.paint.control.ImageEditPanel/chav1961/bt/paint/i18n/localization.xml")));
+	        this.localizer.addLocaleChangeListener(this);
 		}
 
 		this.propFile = propFile;
