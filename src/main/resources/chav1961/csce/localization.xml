@@ -126,6 +126,8 @@
 		<key name="menu.main.edit.findreplace.tt">Find and replace string</key>
 		<key name="menu.main.edit.pasteLink">Insert link</key>
 		<key name="menu.main.edit.pasteLink.tt">Insert link</key>
+		<key name="menu.main.edit.pasteLink.page">Inside current page</key>
+		<key name="menu.main.edit.pasteLink.page.tt">Inside current page</key>		
 		<key name="menu.main.edit.pasteLink.inner">Inside the project</key>
 		<key name="menu.main.edit.pasteLink.inner.tt">Inside the project</key>
 		<key name="menu.main.edit.pasteLink.ext">External</key>
@@ -267,6 +269,15 @@
 		<key name="ReplacePanel.replaceAll.tt">Replace all</key>
 		<key name="ReplacePanel.replaceAll.tt">Replace all found</key>
 		<key name="ReplacePanel.close">Close replace panel</key>
+
+<!-- PageLinkEditor class localization -->
+		<key name="PageLinkEditor.caption">Current page link</key>
+		<key name="PageLinkEditor.caption.tt">Current page link</key>
+		<key name="PageLinkEditor.caption.help">Current page link</key>
+		<key name="PageLinkEditor.ref">Reference</key>
+		<key name="PageLinkEditor.ref.tt">Reference</key>
+		<key name="PageLinkEditor.caption">Caption</key>
+		<key name="PageLinkEditor.caption.tt">Caption</key>
 
 <!-- ExternalLinkEditor class localization -->
 		<key name="ExternalLinkEditor.caption">External link</key>
@@ -415,6 +426,8 @@
 		<key name="menu.main.edit.findreplace.tt">Найти и заменить строки</key>
 		<key name="menu.main.edit.pasteLink">Вставить ссылку</key>
 		<key name="menu.main.edit.pasteLink.tt">Вставить ссылку</key>
+		<key name="menu.main.edit.pasteLink.page">Внутри текущей страницы</key>
+		<key name="menu.main.edit.pasteLink.page.tt">Внутри текущей страницы</key>		
 		<key name="menu.main.edit.pasteLink.inner">Внутри проекта</key>
 		<key name="menu.main.edit.pasteLink.inner.tt">Внутри проекта</key>
 		<key name="menu.main.edit.pasteLink.ext">Внешнюю</key>
@@ -556,6 +569,15 @@
 		<key name="ReplacePanel.replaceAll.tt">Заменить все</key>
 		<key name="ReplacePanel.replaceAll.tt">Заменить все найденные</key>
 		<key name="ReplacePanel.close">Закрыть окно замены</key>
+		
+<!-- Локализация класса PageLinkEditor -->
+		<key name="PageLinkEditor.caption">Ссылка внутри текущей страницы</key>
+		<key name="PageLinkEditor.caption.tt">Ссылка внутри текущей страницы</key>
+		<key name="PageLinkEditor.caption.help">Ссылка внутри текущей страницы</key>
+		<key name="PageLinkEditor.ref">Ссылка</key>
+		<key name="PageLinkEditor.ref.tt">Ссылка</key>
+		<key name="PageLinkEditor.caption">Название</key>
+		<key name="PageLinkEditor.caption.tt">Название</key>
 		
 <!-- Локализация класса ExternalLinkEditor -->
 		<key name="ExternalLinkEditor.caption">Внешняя ссылка</key>

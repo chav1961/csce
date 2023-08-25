@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -20,6 +21,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.RuntimeErrorException;
 import javax.swing.GrayFilter;
@@ -142,6 +145,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private static final FilterCallback	IMAGE_FILTER = FilterCallback.of("Image files", "*.png", "*.jpg");
 	private static final FilterCallback	CREOLE_FILTER = FilterCallback.of("Creole files", "*.cre");
 	private static final FilterCallback	DOCUMENT_FILTER = FilterCallback.of("Documents", "*.pdf");
+	private static Pattern			CLIPBOARD_REF = Pattern.compile("\\[\\[.*\\#(.*)\\|(.*)\\]\\]");
 	
 	private final Application		parent;
 	private final ProjectContainer	project;
@@ -447,6 +451,31 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 			editor.paste();
 		}
 
+		@OnAction("action:/pasteLinkPage")
+		public void pasteLinkPage() {
+			try{final PageLinkEditor	ple = new PageLinkEditor(SwingUtils.getNearestLogger(this));
+				final Clipboard			cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+				final String			cbString = cb.isDataFlavorAvailable(DataFlavor.stringFlavor) ? cb.getData(DataFlavor.stringFlavor).toString() : "";
+				final Matcher			m = CLIPBOARD_REF.matcher(cbString);
+				final String			caption = editor.getSelectedText(); 
+			
+				if (m.find()) {
+					ple.ref = m.group(1);
+					ple.caption = caption.isEmpty() ? m.group(2) : caption; 
+				}
+				else {
+					ple.ref = "";
+					ple.caption = caption; 
+				}
+			
+				if (Application.ask(ple, parent.getLocalizer(), 400, 100)) {
+					editor.replaceSelection(" [[#"+ple.ref.replace(' ', '_')+'|'+ple.caption+"]] ");
+				}
+			} catch (ContentException | UnsupportedFlavorException | IOException e) {
+				SwingUtils.getNearestLogger(this).message(Severity.error, e, e.getLocalizedMessage());
+			}
+		}
+		
 		@OnAction("action:/pasteLinkInner")
 		public void pasteLinkInner() {
 			try{for(String item : JFileSelectionDialog.select(parent, localizer, project.getFileSystem(), JFileSelectionDialog.OPTIONS_FOR_OPEN | JFileSelectionDialog.OPTIONS_CAN_SELECT_FILE | JFileSelectionDialog.OPTIONS_FILE_MUST_EXISTS, CREOLE_FILTER, DOCUMENT_FILTER)) {
@@ -489,7 +518,10 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		public void pasteLinkExt() {
 			try{final ExternalLinkEditor	ele = new ExternalLinkEditor(SwingUtils.getNearestLogger(this));
 			
-				if (Application.ask(ele, parent.getLocalizer(), 400, 180)) {
+				ele.caption = editor.getSelectedText();
+				ele.ref = URI.create("https://./");
+			
+				if (Application.ask(ele, parent.getLocalizer(), 400, 100)) {
 					editor.replaceSelection(" [["+ele.ref+"|"+ele.caption+"]] ");
 				}
 			} catch (ContentException e) {
