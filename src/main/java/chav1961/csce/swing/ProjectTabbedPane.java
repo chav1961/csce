@@ -47,6 +47,7 @@ import chav1961.csce.project.ProjectContainer;
 import chav1961.csce.project.ProjectNavigator.ItemType;
 import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.utils.SearchUtils;
+import chav1961.purelib.basic.MimeType;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.Utils;
@@ -337,7 +338,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 		private static final String		CARD_PREVIEW = "preview";
 		
 		private final JCreoleEditor		editor = new JCreoleEditor();
-		private final JEditorPane		pane = new JEditorPane(PureLibSettings.MIME_HTML_TEXT.toString(),"");
+		private final JEditorPane		pane = new JEditorPane(MimeType.MIME_HTML_TEXT.toString(),"");
 		private final CardLayout		card = new CardLayout();
 		private final JPanel			inside = new JPanel(card);
 		private final UndoManager		undoMgr = new UndoManager();
