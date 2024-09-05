@@ -74,8 +74,6 @@ import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
 import chav1961.purelib.model.interfaces.NodeMetadataOwner;
-import chav1961.purelib.nanoservice.NanoServiceFactory;
-import chav1961.purelib.nanoservice.StaticHelp;
 import chav1961.purelib.ui.interfaces.FormManager;
 import chav1961.purelib.ui.interfaces.LRUPersistence;
 import chav1961.purelib.ui.swing.AutoBuiltForm;
@@ -952,36 +950,24 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 			
 			jss.start("Loading...", 4);
 		
-			try(final StaticHelp	help = new StaticHelp(PureLibSettings.CURRENT_LOGGER, new URI("root://"+Application.class.getCanonicalName()+"/chav1961/csce/static.zip"), "csce.helpcontent")) {
-				final ArgParser		parsed = parser.parse(args);
-				final SubstitutableProperties	nanoServerProps = new SubstitutableProperties(Utils.mkProps(
-													 NanoServiceFactory.NANOSERVICE_PORT, parsed.getValue(ARG_HELP_PORT, String.class)
-													,NanoServiceFactory.NANOSERVICE_ROOT, FileSystemInterface.FILESYSTEM_URI_SCHEME+":xmlReadOnly:root://"+Application.class.getCanonicalName()+"/chav1961/csce/helptree.xml"
-													,NanoServiceFactory.NANOSERVICE_CREOLE_PROLOGUE_URI, Application.class.getResource("prolog.cre").toString() 
-													,NanoServiceFactory.NANOSERVICE_CREOLE_EPILOGUE_URI, Application.class.getResource("epilog.cre").toString() 
-												));
-	
-				jss.processed(1);
+			final ArgParser		parsed = parser.parse(args);
+
+			jss.processed(1);
+			
+			jss.processed(2);
+			jss.processed(3);
+			
+			try(final Application		app = new Application(parsed.getValue(ARG_PROPFILE_LOCATION, File.class), URI.create("http://localhost:1111"))) {
 				
-				try(final NanoServiceFactory	service = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, nanoServerProps)) {
-					jss.processed(2);
-					service.start();
-					jss.processed(3);
-					
-					try(final Application		app = new Application(parsed.getValue(ARG_PROPFILE_LOCATION, File.class), URI.create("http://localhost:"+service.getServerAddress().getPort()))) {
-						
-						jss.processed(4);
-						app.setVisible(true);
-						app.getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
-					}
-					service.stop();
-				}
+				jss.processed(4);
+				app.setVisible(true);
+				app.getLogger().message(Severity.info, KEY_APPLICATION_MESSAGE_READY);
 			}
 		} catch (CommandLineParametersException exc) {
 			System.err.println(exc.getLocalizedMessage());
 			System.err.println(parser.getUsage("csce"));
 			retcode = 128;
-		} catch (URISyntaxException | EnvironmentException | ContentException | IOException exc) {
+		} catch (EnvironmentException | ContentException | IOException exc) {
 			exc.printStackTrace();
 			retcode = 129;
 		}
