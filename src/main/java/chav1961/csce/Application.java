@@ -322,7 +322,7 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 				getLocalizer().removeLocaleChangeListener(this);
 			}
 		} catch (InterruptedException | IOException e) {
-			throw new ThreadDeath();
+			throw new EnvironmentException();
 		} finally {
 			dispose();
 		}
@@ -700,17 +700,13 @@ public class Application  extends JFrame implements AutoCloseable, NodeMetadataO
 	}
 	
 	void loadLRU(final String path) {
-		final File	f = new File(path);
-		
-		if (f.exists() && f.isFile() && f.canRead()) {
-			try{fcm.openFile(path);
-			} catch (IOException e) {
-				getLogger().message(Severity.error, e, e.getLocalizedMessage());
+		try{
+			if (!fcm.openFile(path)) {
+				fcm.removeFileNameFromLRU(path);
+				getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
 			}
-		}
-		else {
-			fcm.removeFileNameFromLRU(path);
-			getLogger().message(Severity.warning, KEY_APPLICATION_MESSAGE_FILE_NOT_EXISTS, path);
+		} catch (IOException e) {
+			getLogger().message(Severity.error, e, e.getLocalizedMessage());
 		}
 	}
 

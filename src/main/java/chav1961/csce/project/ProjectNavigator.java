@@ -493,15 +493,15 @@ loop:			for (ProjectNavigatorItem item : getChildren(node.id)) {
 		public final long		subtreeRef;
 		private final ContentNodeMetadata	meta;
 
-		public ProjectNavigatorItem(long id, long parent, String name, ItemType type, String desc, String titleId, long subtreeRef) {
+		public ProjectNavigatorItem(final long id, final long parent, final String name, final ItemType type, final String desc, final String titleId, final long subtreeRef) {
 			this(id, parent, name, type, desc, titleId, subtreeRef, "");
 		}		
 
-		public ProjectNavigatorItem(long id, long parent, String name, ItemType type, String desc, String titleId, String partRef) {
+		public ProjectNavigatorItem(final long id, final long parent, final String name, final ItemType type, final String desc, final String titleId, final String partRef) {
 			this(id, parent, name, type, desc, titleId, -1, partRef);
 		}
 		
-		public ProjectNavigatorItem(long id, long parent, String name, ItemType type, String desc, String titleId, long subtreeRef, String partRef) {
+		public ProjectNavigatorItem(final long id, final long parent, final String name, final ItemType type, final String desc, final String titleId, final long subtreeRef, final String partRef) {
 			this.id = id;
 			this.parent = parent;
 			this.name = name;

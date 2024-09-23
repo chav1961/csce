@@ -37,6 +37,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -165,6 +166,11 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON3) {
+						final TreePath	path = getPathForLocation(e.getX(), e.getY());
+						
+						if (path != null) {
+							setSelectionPath(path);
+						}
 						showMenu(e.getPoint());
 					}
 					else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() >= 2) {
@@ -181,6 +187,7 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 			
 			setCellRenderer(SwingUtils.getCellRenderer(ProjectNavigatorItem.class, new FieldFormat(ProjectNavigatorItem.class), TreeCellRenderer.class));
 		}
+		ToolTipManager.sharedInstance().registerComponent(this);
 	}
 
 	@Override
@@ -345,6 +352,17 @@ public class ProjectTree extends JTree implements LocalizerOwner, LocaleChangeLi
 		}
 	}	
 
+	@Override
+	public String getToolTipText(final MouseEvent event) {
+		final TreePath	item = this.getPathForLocation(event.getX(), event.getY());
+		
+		if (item == null) {
+			return super.getToolTipText(event);
+		}
+		else {
+			return "<html><body>"+((ProjectItemTreeNode)item.getLastPathComponent()).getUserObject().desc+"</body></html>";
+		}
+	}
 	
 	private TreePath long2TreePath(final long id) {
 		final TreePath[]	path = new TreePath[] {null};
