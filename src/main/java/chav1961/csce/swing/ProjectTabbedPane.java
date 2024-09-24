@@ -146,7 +146,7 @@ public class ProjectTabbedPane extends JTabbedPane implements LocaleChangeListen
 	private static final FilterCallback	IMAGE_FILTER = FilterCallback.of("Image files", "*.png", "*.jpg");
 	private static final FilterCallback	CREOLE_FILTER = FilterCallback.of("Creole files", "*.cre");
 	private static final FilterCallback	DOCUMENT_FILTER = FilterCallback.of("Documents", "*.pdf");
-	private static Pattern			CLIPBOARD_REF = Pattern.compile("\\[\\[.*\\#(.*)\\|(.*)\\]\\]");
+	private static final Pattern	CLIPBOARD_REF = Pattern.compile("\\[\\[.*\\#(.*)\\|(.*)\\]\\]");
 	
 	private final Application		parent;
 	private final ProjectContainer	project;
