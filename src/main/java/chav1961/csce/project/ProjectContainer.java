@@ -36,7 +36,6 @@ import chav1961.csce.project.ProjectNavigator.ProjectNavigatorItem;
 import chav1961.csce.utils.SearchUtils;
 import chav1961.csce.utils.SearchUtils.CreoleLink;
 import chav1961.purelib.basic.PureLibSettings;
-import chav1961.purelib.basic.StringLoggerFacade;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.URIUtils;
 import chav1961.purelib.basic.Utils;
@@ -554,7 +553,8 @@ loop:	for(Entry<String, Object> item : content.entrySet()) {
 				loadPart(item, is, projectProps, projectParts);
 			}
 		}
-		try(final LoggerFacade	logger = new StringLoggerFacade()) {
+		
+		try(final LoggerFacade	logger = LoggerFacade.Factory.newInstance(URI.create(LoggerFacade.LOGGER_SCHEME+":string:/"))) {
 			if (validateProject(logger, projectProps, projectParts)) {
 				props.clear();
 				props.putAll(projectProps);
