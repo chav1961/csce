@@ -47,7 +47,6 @@ import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.concurrent.LightWeightListenerList;
 import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.LocalizerFactory;
-import chav1961.purelib.i18n.MutableJsonLocalizer;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.LocalizerOwner;
 import chav1961.purelib.i18n.interfaces.MutableLocalizedString;
@@ -145,7 +144,7 @@ public class ProjectContainer implements LocalizerOwner {
 	private final Map<String, Object>		content = new HashMap<>();
 	private final LightWeightListenerList<ProjectChangeListener>	listeners = new LightWeightListenerList<>(ProjectChangeListener.class);
 	private final ProjectFileSystem			pfs = new ProjectFileSystem(this);
-	private MutableJsonLocalizer			localizer = null;
+	private Localizer						localizer = null;
 	private ProjectNavigator				navigator = null;
 	private String							projectFileName = "";
 	private boolean							prepared = false;
@@ -181,7 +180,8 @@ public class ProjectContainer implements LocalizerOwner {
 	
 	public String createUniqueLocalizationString() {
 		ensurePrepared();
-		return localizer.createLocalValue(getUniqueLocalizationKey()).getId();
+		return "";
+//		return localizer.createLocalValue(getUniqueLocalizationKey()).getId();
 	}
 	
 	public MutableLocalizedString getLocalizationString(final String id) {
@@ -576,8 +576,8 @@ loop:	for(Entry<String, Object> item : content.entrySet()) {
 		}
 	}
 
-	private MutableJsonLocalizer prepareLocalizer(final byte[] content) {
-		final MutableJsonLocalizer	newlocalizer = (MutableJsonLocalizer)LocalizerFactory.getLocalizer(
+	private Localizer prepareLocalizer(final byte[] content) {
+		final Localizer	newlocalizer = LocalizerFactory.getLocalizer(
 										URI.create(Localizer.LOCALIZER_SCHEME+":mutablejson:"+URIUtils.convert2selfURI(content).toString())
 									);
 
@@ -708,12 +708,12 @@ loop:	for(Entry<String, Object> item : content.entrySet()) {
 			final Writer			wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
 			final JsonStaxPrinter	prn = new JsonStaxPrinter(wr);
 			
-			try{
-				localizer.saveContent(prn);
-				prn.flush();
-			} catch (PrintingException e) {
-				throw new IOException(e);
-			}
+//			try{
+//				localizer.saveContent(prn);
+//				prn.flush();
+//			} catch (PrintingException e) {
+//				throw new IOException(e);
+//			}
 		}
 		else if (name.equals(JSON_TREE_PART)) {
 			final Writer			wr = new OutputStreamWriter(os, PureLibSettings.DEFAULT_CONTENT_ENCODING);
